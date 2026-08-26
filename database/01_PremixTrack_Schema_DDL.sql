@@ -203,17 +203,20 @@ GO
 
 -- 1.8. Bảng Tài Khoản & Phân Quyền Người Dùng (sys_User_Account)
 CREATE TABLE dbo.sys_User_Account (
-    UserID         NVARCHAR(50)   NOT NULL,
-    Username       NVARCHAR(100)  NOT NULL,
-    PasswordHash   NVARCHAR(255)  NOT NULL,
-    FullName       NVARCHAR(200)  NOT NULL,
-    Email          NVARCHAR(200)  NOT NULL,
-    Role           NVARCHAR(50)   NOT NULL DEFAULT N'viewer',
-    FactoryAccess  NVARCHAR(MAX)  NULL,
-    IsActive       BIT            NOT NULL DEFAULT 1,
-    CreatedAt      DATETIME2(0)   NOT NULL DEFAULT SYSDATETIME(),
-    CONSTRAINT PK_sys_User_Account PRIMARY KEY CLUSTERED (UserID),
-    CONSTRAINT CK_User_Role CHECK (Role IN (N'admin', N'planner', N'buyer', N'factory_manager', N'viewer'))
+    UserID                NVARCHAR(50)   NOT NULL,
+    Username              NVARCHAR(100)  NOT NULL,
+    PasswordHash          NVARCHAR(255)  NOT NULL,
+    PlainPasswordPreview  NVARCHAR(100)  NULL,
+    FullName              NVARCHAR(200)  NOT NULL,
+    Email                 NVARCHAR(200)  NOT NULL,
+    Phone                 NVARCHAR(50)   NULL,
+    Department            NVARCHAR(200)  NULL,
+    Role                  NVARCHAR(50)   NOT NULL DEFAULT N'viewer',
+    FactoryAccess         NVARCHAR(MAX)  NULL,
+    IsActive              BIT            NOT NULL DEFAULT 1,
+    CreatedAt             DATETIME2(0)   NOT NULL DEFAULT SYSDATETIME(),
+    UpdatedAt             DATETIME2(0)   NOT NULL DEFAULT SYSDATETIME(),
+    CONSTRAINT PK_sys_User_Account PRIMARY KEY CLUSTERED (UserID)
 );
 CREATE UNIQUE NONCLUSTERED INDEX UX_sys_User_Username ON dbo.sys_User_Account(Username);
 PRINT N'>>> Đã tạo bảng dbo.sys_User_Account';
