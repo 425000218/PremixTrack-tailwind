@@ -205,68 +205,14 @@ export const LoginGate: React.FC<LoginGateProps> = ({ onLoginSuccess }) => {
             </button>
           </form>
 
-          {/* Quick Demo Accounts Selection */}
-          <div className="mt-6 pt-6 border-t border-slate-800/80">
-            <div className="flex items-center gap-1.5 text-xs text-slate-400 mb-3 font-semibold">
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span>Tài khoản kiểm thử nhanh (Demo RBAC):</span>
+          {/* Security & Support Notice */}
+          <div className="mt-8 pt-6 border-t border-slate-800/80 text-center space-y-2">
+            <div className="inline-flex items-center gap-1.5 text-[11px] text-slate-400 font-medium">
+              <Lock className="w-3.5 h-3.5 text-blue-400" />
+              <span>Kết nối bảo mật mã hóa đầu cuối (E2E Encrypted)</span>
             </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => handleQuickDemoSelect(mockUsers[0], 'admin@123')}
-                className="p-2 rounded-xl bg-slate-950/60 hover:bg-slate-800/80 border border-slate-800 text-left transition-colors cursor-pointer group"
-              >
-                <div className="text-[11px] font-bold text-rose-400 flex items-center justify-between">
-                  <span>admin</span>
-                  <span className="text-[9px] bg-rose-500/20 text-rose-300 px-1 rounded">Admin</span>
-                </div>
-                <div className="text-[10px] text-slate-400 font-mono mt-0.5">admin@123</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleQuickDemoSelect(mockUsers[1], 'scm@123')}
-                className="p-2 rounded-xl bg-slate-950/60 hover:bg-slate-800/80 border border-slate-800 text-left transition-colors cursor-pointer group"
-              >
-                <div className="text-[11px] font-bold text-blue-400 flex items-center justify-between">
-                  <span>scm_lead</span>
-                  <span className="text-[9px] bg-blue-500/20 text-blue-300 px-1 rounded">Planner</span>
-                </div>
-                <div className="text-[10px] text-slate-400 font-mono mt-0.5">scm@123</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleQuickDemoSelect(mockUsers[2], 'planner_dbd', 'planner@123')}
-                className="p-2 rounded-xl bg-slate-950/60 hover:bg-slate-800/80 border border-slate-800 text-left transition-colors cursor-pointer group"
-              >
-                <div className="text-[11px] font-bold text-amber-400 flex items-center justify-between">
-                  <span>planner_dbd</span>
-                  <span className="text-[9px] bg-amber-500/20 text-amber-300 px-1 rounded">Factory</span>
-                </div>
-                <div className="text-[10px] text-slate-400 font-mono mt-0.5">planner@123</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleQuickDemoSelect(mockUsers[3], 'logistics@123')}
-                className="p-2 rounded-xl bg-slate-950/60 hover:bg-slate-800/80 border border-slate-800 text-left transition-colors cursor-pointer group"
-              >
-                <div className="text-[11px] font-bold text-emerald-400 flex items-center justify-between">
-                  <span>logistics_lead</span>
-                  <span className="text-[9px] bg-emerald-500/20 text-emerald-300 px-1 rounded">Buyer</span>
-                </div>
-                <div className="text-[10px] text-slate-400 font-mono mt-0.5">logistics@123</div>
-              </button>
-            </div>
-          </div>
-
-          {/* Security Notice */}
-          <div className="mt-6 text-center">
             <p className="text-[10px] text-slate-400 leading-relaxed">
-              Hệ thống bảo mật nội bộ D365 FO & Chuỗi Cung Ứng. Mọi hành vi truy cập trái phép đều được ghi vết <code className="text-slate-400 font-mono">dbo.sys_Audit_Log</code>.
+              Cổng thông tin nội bộ D365 FO & Quản lý chuỗi cung ứng. Mọi hành vi truy cập trái phép đều được ghi vết <code className="text-slate-400 font-mono">dbo.sys_Audit_Log</code>.
             </p>
           </div>
         </div>

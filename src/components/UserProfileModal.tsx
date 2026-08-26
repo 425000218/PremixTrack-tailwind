@@ -52,6 +52,22 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   const [passwordSuccess, setPasswordSuccess] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
+  // Đồng bộ lại form khi user hoặc modal mở lên
+  useEffect(() => {
+    if (user) {
+      setFullName(user.fullName || '');
+      setEmail(user.email || '');
+      setPhone(user.phone || '');
+      setDepartment(user.department || '');
+      setEditSuccess(false);
+      setPasswordError(null);
+      setPasswordSuccess(false);
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    }
+  }, [user, isOpen]);
+
   if (!isOpen) return null;
 
   const handleSaveProfile = async (e: React.FormEvent) => {
