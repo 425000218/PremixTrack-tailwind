@@ -1,0 +1,32 @@
+# Git & Version Control
+.git
+.gitignore
+.gitattributes
+
+# Dependencies & Build Artifacts
+node_modules
+dist
+dist-ssr
+*.local
+
+# Environment & Secrets (Không bake mật khẩu vào Docker Image)
+.env
+.env.local
+.env.*.local
+
+# Antigravity & AI Brain Logs
+.gemini
+brain
+.system_generated
+scratch
+*.log
+
+# IDE & Editor Settings
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS Temporary Files
+.DS_Store
+Thumbs.db

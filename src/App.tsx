@@ -2,12 +2,17 @@ import React, { useState, useMemo } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { ExcelImportModal } from './components/ExcelImportModal';
+import { AuthModal } from './components/AuthModal';
+import { UserProfileModal } from './components/UserProfileModal';
+import { UserManagementModal } from './components/UserManagementModal';
+import { LoginGate } from './components/LoginGate';
 import { DashboardOverview } from './components/DashboardOverview';
 import { InventoryMatrix } from './components/InventoryMatrix';
 import { FormulaCalculator } from './components/FormulaCalculator';
 import { InterFactoryTransfers } from './components/InterFactoryTransfers';
 import { InboundLogistics } from './components/InboundLogistics';
 import { MasterDataManagement } from './components/MasterDataManagement';
+import { ForecastManagement } from './components/ForecastManagement';
 import { AiSupplyChainAdvisor } from './components/AiSupplyChainAdvisor';
 
 import {
@@ -15,6 +20,8 @@ import {
   mockMaterials,
   mockSuppliers,
   mockForecastDetails,
+  initialForecastVersions,
+  initialForecastCompareData,
   mockInventorySOH,
   mockPOHeaders,
   mockPODetails,
@@ -22,6 +29,8 @@ import {
   mockUsageLogs,
   mockFormulas,
   mockInitialMappings,
+  mockUsers,
+  mockSubstitutions,
 } from './data/mockData';
 
 import {
@@ -33,6 +42,9 @@ import {
   Dim_Factory,
   Dim_Material,
   Dim_Supplier,
+  Dim_Material_Substitution,
+  ForecastRunVersion,
+  ForecastCompareRow,
   Fact_Forecast_Detail,
   Fact_Inventory_SOH,
   Fact_PurchaseOrder,
@@ -41,6 +53,7 @@ import {
   Fact_Production_Usage,
   Formula_BOM,
   Sys_Import_Mapping,
+  AppUser,
   Language,
 } from './types';
 
@@ -50,15 +63,36 @@ export function App() {
   const [materials, setMaterials] = useState<Dim_Material[]>(mockMaterials);
   const [suppliers, setSuppliers] = useState<Dim_Supplier[]>(mockSuppliers);
   const [formulas, setFormulas] = useState<Formula_BOM[]>(mockFormulas);
+  const [substitutions, setSubstitutions] = useState<Dim_Material_Substitution[]>(mockSubstitutions);
   const [learnedMappings, setLearnedMappings] = useState<Sys_Import_Mapping[]>(mockInitialMappings);
 
-  // Operational Fact Data State
+  // Operational Fact Data & Forecast Run Versions State
+  const [forecastVersions, setForecastVersions] = useState<ForecastRunVersion[]>(initialForecastVersions);
+  const [forecastCompareData, setForecastCompareData] = useState<ForecastCompareRow[]>(initialForecastCompareData);
   const [forecastDetails, setForecastDetails] = useState<Fact_Forecast_Detail[]>(mockForecastDetails);
   const [inventorySOH, setInventorySOH] = useState<Fact_Inventory_SOH[]>(mockInventorySOH);
   const [poHeaders, setPOHeaders] = useState<Fact_PurchaseOrder[]>(mockPOHeaders);
   const [poDetails, setPODetails] = useState<Fact_PO_Detail[]>(mockPODetails);
   const [inboundSchedules, setInboundSchedules] = useState<Fact_Inbound_Schedule[]>(mockInboundSchedules);
   const [usageLogs, setUsageLogs] = useState<Fact_Production_Usage[]>(mockUsageLogs);
+
+  // User Authentication & RBAC State (Requires Login Gate)
+  const [currentUser, setCurrentUser] = useState<AppUser | null>(() => {
+    const saved = localStorage.getItem('premixtrack_user');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        return null;
+      }
+    }
+    return null; // By default require login gate for security!
+  });
+
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
+  const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState<boolean>(false);
+  const [isUserManagementOpen, setIsUserManagementOpen] = useState<boolean>(false);
 
   // UI State
   const [currentTab, setCurrentTab] = useState<string>('dashboard');
@@ -73,6 +107,37 @@ export function App() {
     setTimeout(() => setToastMessage(null), 3500);
   };
 
+  // Auth Handler Functions
+  const handleLoginSuccess = (user: AppUser) => {
+    setCurrentUser(user);
+    localStorage.setItem('premixtrack_user', JSON.stringify(user));
+    if (user.assignedFactoryId && user.assignedFactoryId !== 'ALL') {
+      setSelectedFactoryId(user.assignedFactoryId);
+    }
+    showToast(`Xin chào ${user.fullName} (${user.roleNameVN})!`);
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    localStorage.removeItem('premixtrack_user');
+    showToast('Đã đăng xuất khỏi hệ thống.');
+  };
+
+  const handleUpdateUser = (updated: AppUser) => {
+    setCurrentUser(updated);
+    localStorage.setItem('premixtrack_user', JSON.stringify(updated));
+    showToast('Đã cập nhật thông tin hồ sơ cá nhân!');
+  };
+
+  const handleQuickSwitchUser = (user: AppUser) => {
+    handleLoginSuccess(user);
+  };
+
+  const handleOpenAuthModal = (mode: 'login' | 'register' = 'login') => {
+    setAuthModalMode(mode);
+    setIsAuthModalOpen(true);
+  };
+
   // Real-time Calculation Engine computation
   const calculatedMetrics = useMemo(() => {
     return calculateAllMetrics(
@@ -81,9 +146,10 @@ export function App() {
       inventorySOH,
       forecastDetails,
       poDetails,
-      usageLogs
+      usageLogs,
+      substitutions
     );
-  }, [factories, materials, inventorySOH, forecastDetails, poDetails, usageLogs]);
+  }, [factories, materials, inventorySOH, forecastDetails, poDetails, usageLogs, substitutions]);
 
   // Inter-Factory Transfer Suggestions computation
   const transferSuggestions = useMemo(() => {
@@ -156,6 +222,11 @@ export function App() {
   };
 
   const handleReceiveShipment = (scheduleId: string, receivedQty: number) => {
+    if (currentUser && !currentUser.permissions.canReceiveShipment) {
+      alert(`Tài khoản "${currentUser.roleNameVN}" không có quyền tiếp nhận và nhập kho hàng Inbound.`);
+      return;
+    }
+
     const targetSchedule = inboundSchedules.find((s) => s.ScheduleID === scheduleId);
     if (!targetSchedule) return;
 
@@ -215,10 +286,61 @@ export function App() {
     }
   };
 
-  const handleDeleteMapping = (mappingId: string) => {
-    setLearnedMappings((prev) => prev.filter((m) => m.MappingID !== mappingId));
-    showToast('Đã xóa quy tắc ánh xạ!');
+  const handleSaveMapping = (mapping: Sys_Import_Mapping) => {
+    if (currentUser && !currentUser.permissions.canEditMasterData) {
+      alert(`Tài khoản "${currentUser.roleNameVN}" không có quyền chỉnh sửa cấu hình Master Data & Mapping.`);
+      return;
+    }
+    setLearnedMappings((prev) => {
+      const exists = prev.some((m) => m.MappingID === mapping.MappingID);
+      if (exists) {
+        return prev.map((m) => (m.MappingID === mapping.MappingID ? mapping : m));
+      }
+      return [mapping, ...prev];
+    });
+    showToast('Đã lưu quy tắc ánh xạ vào từ điển hệ thống!');
   };
+
+  const handleDeleteMapping = (mappingId: string) => {
+    if (currentUser && !currentUser.permissions.canEditMasterData) {
+      alert(`Tài khoản "${currentUser.roleNameVN}" không có quyền chỉnh sửa cấu hình Master Data & Mapping.`);
+      return;
+    }
+    setLearnedMappings((prev) => prev.filter((m) => m.MappingID !== mappingId));
+    showToast('Đã xóa quy tắc ánh xạ khỏi từ điển.');
+  };
+
+  const handleDeleteFactory = (factoryId: string) => {
+    if (currentUser && !currentUser.permissions.canEditMasterData) {
+      alert(`Tài khoản "${currentUser.roleNameVN}" không có quyền xóa nhà máy khỏi Master Data.`);
+      return;
+    }
+    setFactories((prev) => prev.filter((f) => f.FactoryID !== factoryId && f.InternalCode !== factoryId));
+    showToast('Đã xóa nhà máy khỏi danh mục.');
+  };
+
+  const handleDeleteMaterial = (materialId: string) => {
+    if (currentUser && !currentUser.permissions.canEditMasterData) {
+      alert(`Tài khoản "${currentUser.roleNameVN}" không có quyền xóa nguyên liệu khỏi Master Data.`);
+      return;
+    }
+    setMaterials((prev) => prev.filter((m) => m.MaterialID !== materialId && m.MaterialCode !== materialId));
+    showToast('Đã xóa nguyên liệu khỏi danh mục Master Data.');
+  };
+
+  const handleDeleteSupplier = (supplierId: string) => {
+    if (currentUser && !currentUser.permissions.canEditMasterData) {
+      alert(`Tài khoản "${currentUser.roleNameVN}" không có quyền xóa nhà cung cấp khỏi Master Data.`);
+      return;
+    }
+    setSuppliers((prev) => prev.filter((s) => s.SupplierID !== supplierId && s.SupplierCode !== supplierId));
+    showToast('Đã xóa nhà cung cấp khỏi danh mục Master Data.');
+  };
+
+  // Fullscreen Login Gate if not authenticated
+  if (!currentUser) {
+    return <LoginGate onLoginSuccess={handleLoginSuccess} />;
+  }
 
   return (
     <div className="flex h-screen w-full bg-slate-50 font-sans text-slate-800 overflow-hidden">
@@ -247,6 +369,12 @@ export function App() {
           onNavigateTab={(tab) => setCurrentTab(tab)}
           language={language}
           onToggleMobileSidebar={() => setIsMobileSidebarOpen((prev) => !prev)}
+          currentUser={currentUser}
+          onOpenAuthModal={handleOpenAuthModal}
+          onOpenProfileModal={() => setIsProfileModalOpen(true)}
+          onOpenUserManagement={() => setIsUserManagementOpen(true)}
+          onLogout={handleLogout}
+          onQuickSwitchUser={handleQuickSwitchUser}
         />
 
         {/* Scrollable View Area */}
@@ -262,6 +390,18 @@ export function App() {
                 selectedFactoryId={selectedFactoryId}
                 onSelectFactory={(id) => setSelectedFactoryId(id)}
                 onNavigateTab={(tab) => setCurrentTab(tab)}
+                language={language}
+              />
+            )}
+
+            {currentTab === 'forecast' && (
+              <ForecastManagement
+                forecastVersions={forecastVersions}
+                compareData={forecastCompareData}
+                materials={materials}
+                factories={factories}
+                onUpdateVersions={(updated) => setForecastVersions(updated)}
+                onUpdateCompareData={(updated) => setForecastCompareData(updated)}
                 language={language}
               />
             )}
@@ -314,11 +454,27 @@ export function App() {
 
             {currentTab === 'masterdata' && (
               <MasterDataManagement
+                initialSubTab="materials"
                 factories={factories}
                 materials={materials}
                 suppliers={suppliers}
+                formulas={formulas}
+                substitutions={substitutions}
                 learnedMappings={learnedMappings}
+                inventorySOH={inventorySOH}
+                forecastDetails={forecastDetails}
+                usageLogs={usageLogs}
+                inboundSchedules={inboundSchedules}
+                poHeaders={poHeaders}
+                poDetails={poDetails}
                 onUpdateMaterials={(updated) => setMaterials(updated)}
+                onDeleteMaterial={handleDeleteMaterial}
+                onUpdateFactories={(updated) => setFactories(updated)}
+                onDeleteFactory={handleDeleteFactory}
+                onUpdateSuppliers={(updated) => setSuppliers(updated)}
+                onDeleteSupplier={handleDeleteSupplier}
+                onUpdateSubstitutions={(updated) => setSubstitutions(updated)}
+                onSaveMapping={handleSaveMapping}
                 onDeleteMapping={handleDeleteMapping}
                 language={language}
               />
@@ -354,6 +510,38 @@ export function App() {
         onSaveNewMappings={handleSaveNewMappings}
         onCommitImport={handleCommitImport}
         language={language}
+      />
+
+      {/* User Authentication Modal (Login / Register) */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onLoginSuccess={handleLoginSuccess}
+        factories={factories}
+        initialMode={authModalMode}
+      />
+
+      {/* User Profile & Permissions Modal */}
+      {currentUser && (
+        <UserProfileModal
+          isOpen={isProfileModalOpen}
+          onClose={() => setIsProfileModalOpen(false)}
+          user={currentUser}
+          onUpdateUser={handleUpdateUser}
+          onLogout={handleLogout}
+          factories={factories}
+        />
+      )}
+
+      {/* Admin User & Permissions Management Modal (MS SQL Server direct) */}
+      <UserManagementModal
+        isOpen={isUserManagementOpen}
+        onClose={() => setIsUserManagementOpen(false)}
+        currentUser={currentUser}
+        factories={factories}
+        onUserListChanged={() => {
+          showToast('Đã đồng bộ cơ sở dữ liệu tài khoản người dùng!');
+        }}
       />
     </div>
   );

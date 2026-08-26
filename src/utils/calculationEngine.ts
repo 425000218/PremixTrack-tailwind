@@ -1,6 +1,7 @@
 import {
   Dim_Factory,
   Dim_Material,
+  Dim_Material_Substitution,
   Fact_Forecast_Detail,
   Fact_Forecast_Header,
   Fact_Inventory_SOH,
@@ -20,6 +21,7 @@ export function calculateMetrics(
   inventorySOH: Fact_Inventory_SOH[],
   poDetails: Fact_PO_Detail[],
   productionUsages: Fact_Production_Usage[],
+  substitutions: Dim_Material_Substitution[] = [],
   currentDateStr: string = '2026-08-15'
 ): CalculatedMaterialMetric[] {
   const workingDays = forecastHeader.WorkingDaysInMonth || 28;
@@ -44,37 +46,30 @@ export function calculateMetrics(
       );
       const sohQty = sohRecords.reduce((sum, item) => sum + item.Quantity, 0);
 
-      // 3. Open POs (Inbound / Remain)
-      const poRecords = poDetails.filter(
-        (p) => p.FactoryID === factory.FactoryID && p.MaterialID === material.MaterialID
+      // 3. Open POs
+      const relatedPODetails = poDetails.filter(
+        (p) => p.MaterialID === material.MaterialID
       );
-      const openPOQty = poRecords.reduce((sum, item) => sum + (item.RemainQty || 0), 0);
+      const openPOQty = relatedPODetails.reduce((sum, item) => sum + (item.RemainQty || 0), 0);
 
+      // 4. Total Available
       const totalAvailable = sohQty + openPOQty;
 
-      // 4. DOI calculations
-      let doiSOH = 0;
-      let doiTotal = 0;
+      // 5. DOI calculations
+      const doiSOH = dailyUsage > 0 ? Math.round((sohQty / dailyUsage) * 10) / 10 : 999;
+      const doiTotal = dailyUsage > 0 ? Math.round((totalAvailable / dailyUsage) * 10) / 10 : 999;
 
-      if (dailyUsage > 0) {
-        doiSOH = sohQty / dailyUsage;
-        doiTotal = totalAvailable / dailyUsage;
-      } else if (sohQty > 0) {
-        // Has stock but 0 forecast
-        doiSOH = 999;
-        doiTotal = 999;
-      }
-
-      // 5. Dates
+      const coverageDays = doiTotal === 999 ? 90 : Math.min(doiTotal, 180);
       const coverageDate = new Date(today);
-      coverageDate.setDate(coverageDate.getDate() + Math.min(Math.round(doiTotal), 365));
-      const coverageTillDateStr = doiTotal >= 999 ? 'Không giới hạn (>1 năm)' : coverageDate.toISOString().split('T')[0];
+      coverageDate.setDate(today.getDate() + Math.round(coverageDays));
+      const coverageTillDateStr = coverageDate.toISOString().split('T')[0];
 
+      const stockoutDays = doiSOH === 999 ? 90 : Math.min(doiSOH, 180);
       const stockoutDate = new Date(today);
-      stockoutDate.setDate(stockoutDate.getDate() + Math.min(Math.round(doiSOH), 365));
-      const stockoutDateStr = doiSOH >= 999 ? 'An toàn' : stockoutDate.toISOString().split('T')[0];
+      stockoutDate.setDate(today.getDate() + Math.round(stockoutDays));
+      const stockoutDateStr = stockoutDate.toISOString().split('T')[0];
 
-      // 6. MTD Actual Usage
+      // 6. Actual MTD usage
       const usageRecords = productionUsages.filter(
         (u) => u.FactoryID === factory.FactoryID && u.MaterialID === material.MaterialID
       );
@@ -82,9 +77,54 @@ export function calculateMetrics(
       const expectedMTD = dailyUsage * elapsedWorkingDays;
       const mtdPerformancePercent = expectedMTD > 0 ? (mtdActualUsage / expectedMTD) * 100 : 0;
 
-      // 7. Replacement Material info
+      // 7. Multi-source Substitutions & Virtual Combined Stock computation
+      const relevantSubstitutions = substitutions
+        .filter(
+          (sub) =>
+            sub.Status === 'Active' &&
+            (sub.OriginalMaterialCode === material.MaterialCode ||
+              (sub.IsBiDirectional && sub.SubstituteMaterialCode === material.MaterialCode)) &&
+            (sub.DivisionScope === 'ALL' || sub.DivisionScope === factory.Division)
+        )
+        .sort((a, b) => a.Priority - b.Priority);
+
+      // Calculate Virtual Available Stock equivalent from substitute items in this factory
+      let substituteEquivalentQty = 0;
+      relevantSubstitutions.forEach((sub) => {
+        const subMatCode =
+          sub.OriginalMaterialCode === material.MaterialCode
+            ? sub.SubstituteMaterialCode
+            : sub.OriginalMaterialCode;
+        const subRatio =
+          sub.OriginalMaterialCode === material.MaterialCode
+            ? sub.ConversionRatio
+            : 1 / sub.ConversionRatio;
+
+        const subMat = materials.find((m) => m.MaterialCode === subMatCode);
+        if (subMat) {
+          const subSOHRecords = inventorySOH.filter(
+            (s) => s.FactoryID === factory.FactoryID && s.MaterialID === subMat.MaterialID
+          );
+          const subSOH = subSOHRecords.reduce((sum, item) => sum + item.Quantity, 0);
+          if (subRatio > 0) {
+            substituteEquivalentQty += subSOH / subRatio;
+          }
+        }
+      });
+
+      const virtualAvailableQty = Math.round(sohQty + substituteEquivalentQty);
+      const virtualDOI =
+        dailyUsage > 0 ? Math.round((virtualAvailableQty / dailyUsage) * 10) / 10 : 999;
+
       let repMaterial: Dim_Material | undefined;
-      if (material.ReplacementMaterialID) {
+      if (relevantSubstitutions.length > 0) {
+        const topSub = relevantSubstitutions[0];
+        const targetCode =
+          topSub.OriginalMaterialCode === material.MaterialCode
+            ? topSub.SubstituteMaterialCode
+            : topSub.OriginalMaterialCode;
+        repMaterial = materials.find((m) => m.MaterialCode === targetCode);
+      } else if (material.ReplacementMaterialID) {
         repMaterial = materials.find((m) => m.MaterialID === material.ReplacementMaterialID);
       }
 
@@ -137,9 +177,12 @@ export function calculateMetrics(
           MTDPerformancePercent: Math.round(mtdPerformancePercent),
           Severity: severity,
           SuggestedReorderQty: suggestedReorderQty,
-          ReplacementMaterialID: material.ReplacementMaterialID,
+          ReplacementMaterialID: repMaterial?.MaterialID || material.ReplacementMaterialID,
           ReplacementMaterialCode: repMaterial?.MaterialCode,
           ReplacementMaterialName: repMaterial?.Name_VN,
+          Substitutions: relevantSubstitutions,
+          VirtualAvailableQty: virtualAvailableQty,
+          VirtualDOI: virtualDOI,
           Status: material.Status,
         });
       }
@@ -342,6 +385,7 @@ export function calculateAllMetrics(
   forecastDetails: Fact_Forecast_Detail[],
   poDetails: Fact_PO_Detail[],
   usageLogs: Fact_Production_Usage[],
+  substitutions: Dim_Material_Substitution[] = [],
   currentDateStr: string = '2026-08-15'
 ): CalculatedMaterialMetric[] {
   const defaultHeader: Fact_Forecast_Header = {
@@ -359,6 +403,7 @@ export function calculateAllMetrics(
     inventorySOH,
     poDetails,
     usageLogs,
+    substitutions,
     currentDateStr
   );
 }

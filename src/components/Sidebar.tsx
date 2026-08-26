@@ -10,7 +10,7 @@ import {
   RefreshCw,
   Globe,
   Radio,
-  X
+  X,
 } from 'lucide-react';
 import { Language } from '../types';
 
@@ -45,6 +45,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: TrendingUp,
       badge: criticalAlertsCount > 0 ? criticalAlertsCount : undefined,
       badgeColor: 'bg-red-500 text-white',
+    },
+    {
+      id: 'forecast',
+      label_VN: 'Dự Báo Forecast (RD)',
+      label_EN: 'RD Forecast Matrix',
+      icon: TrendingUp,
     },
     {
       id: 'matrix',

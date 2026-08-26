@@ -2,7 +2,10 @@ import * as XLSX from 'xlsx';
 import {
   Dim_Factory,
   Dim_Material,
+  Dim_Supplier,
+  Dim_Material_Substitution,
   Sys_Import_Mapping,
+  ImportDataType,
   ValidationErrorItem,
   ImportPreviewResult
 } from '../types';
@@ -12,11 +15,348 @@ export interface SystemFieldDefinition {
   label_VN: string;
   label_EN: string;
   required: boolean;
-  type: 'string' | 'number' | 'date';
+  type: 'string' | 'number' | 'date' | 'boolean';
   aliases: string[];
 }
 
-export const systemFieldsByType: Record<string, SystemFieldDefinition[]> = {
+export const systemFieldsByType: Record<ImportDataType, SystemFieldDefinition[]> = {
+  // ── Master Data: tblITEM ──────────────────────────────────────────────────
+  Material: [
+    {
+      field: 'MaterialCode',
+      label_VN: 'Mã Nguyên Liệu / CODE',
+      label_EN: 'Material Code / Item Number',
+      required: true,
+      type: 'string',
+      aliases: ['code', 'mã vật tư', 'mã nguyên liệu', 'item number', 'item id', 'mã sku', 'mã sp', 'sku', 'materialcode', 'itemid']
+    },
+    {
+      field: 'Name_VN',
+      label_VN: 'Tên Nguyên Liệu / DESC',
+      label_EN: 'Material Name (VN)',
+      required: true,
+      type: 'string',
+      aliases: ['desc', 'tên nguyên liệu', 'tên vật tư', 'mô tả', 'description', 'material name', 'tên hàng', 'item name', 'name_vn', 'item description']
+    },
+    {
+      field: 'PIC',
+      label_VN: 'Chuyên Viên Mua Hàng / PIC',
+      label_EN: 'Person In Charge (PIC)',
+      required: false,
+      type: 'string',
+      aliases: ['pic', 'người phụ trách', 'purchaser', 'buyer', 'chuyên viên mua hàng', 'chuyên viên', 'pic_id']
+    },
+    {
+      field: 'TaxGroup',
+      label_VN: 'Nhóm Thuế / Item sales tax group',
+      label_EN: 'Item Sales Tax Group',
+      required: false,
+      type: 'string',
+      aliases: ['item sales tax group', 'tax group', 'thuế', 'nhóm thuế', 'tax', 'sales tax group', 'taxgroup']
+    },
+    {
+      field: 'OverdeliveryPct',
+      label_VN: 'Dung Sai Giao Hàng (%) / Overdelivery (%)',
+      label_EN: 'Overdelivery Percentage (%)',
+      required: false,
+      type: 'number',
+      aliases: ['overdelivery (%)', 'overdelivery', 'dung sai', 'dung sai giao hàng', 'dung sai (%)', 'overdeliverypct']
+    },
+    {
+      field: 'PackingGroup',
+      label_VN: 'Quy Cách Đóng Gói / Packing group',
+      label_EN: 'Packing Group',
+      required: false,
+      type: 'string',
+      aliases: ['packing group', 'packing', 'quy cách', 'đóng gói', 'bao bì', 'quy cách đóng gói', 'packinggroup']
+    },
+    {
+      field: 'CountryOfOrigin',
+      label_VN: 'Xuất Xứ / CountryOfOrigin',
+      label_EN: 'Country of Origin',
+      required: false,
+      type: 'string',
+      aliases: ['countryoforigin', 'origin', 'xuất xứ', 'nước xuất xứ', 'quốc gia', 'country']
+    },
+    {
+      field: 'Category',
+      label_VN: 'Phân Nhóm Nguyên Liệu / Category',
+      label_EN: 'Material Category',
+      required: false,
+      type: 'string',
+      aliases: ['category', 'phân nhóm', 'nhóm vật tư', 'nhóm hàng', 'chủng loại']
+    },
+    {
+      field: 'Unit',
+      label_VN: 'Đơn Vị Tính / Unit',
+      label_EN: 'Unit of Measure',
+      required: false,
+      type: 'string',
+      aliases: ['unit', 'đvt', 'đơn vị tính', 'đơn vị', 'uom']
+    },
+    {
+      field: 'SafetyStockDays',
+      label_VN: 'Định Mức Tồn An Toàn (Ngày)',
+      label_EN: 'Safety Stock Days',
+      required: false,
+      type: 'number',
+      aliases: ['safetystockdays', 'định mức an toàn', 'tồn an toàn (ngày)', 'safety days', 'định mức at', 'min stock days']
+    },
+    {
+      field: 'UnitPriceUSD',
+      label_VN: 'Đơn Giá Mua (USD/kg)',
+      label_EN: 'Unit Price (USD)',
+      required: false,
+      type: 'number',
+      aliases: ['unitpriceusd', 'đơn giá', 'giá usd', 'unit price', 'giá mua', 'price usd', 'đơn giá ($)']
+    },
+    {
+      field: 'Status',
+      label_VN: 'Trạng Thái / Status',
+      label_EN: 'Status (Active/Stop_Usage)',
+      required: false,
+      type: 'string',
+      aliases: ['status', 'trạng thái', 'tình trạng', 'trạng thái d365']
+    }
+  ],
+
+  // ── Master Data: tblFACTORY ───────────────────────────────────────────────
+  Factory: [
+    {
+      field: 'InternalCode',
+      label_VN: 'Mã Nhà Máy / FACTORY',
+      label_EN: 'Factory Code / Internal Code',
+      required: true,
+      type: 'string',
+      aliases: ['factory', 'mã nhà máy', 'mã nm', 'plant', 'internalcode', 'site', 'factory code', 'mã cơ sở']
+    },
+    {
+      field: 'FactoryName_VN',
+      label_VN: 'Tên Nhà Máy / DESC',
+      label_EN: 'Factory Name (VN)',
+      required: true,
+      type: 'string',
+      aliases: ['desc', 'tên nhà máy', 'tên cơ sở', 'mô tả', 'factory name', 'plant name', 'factoryname_vn']
+    },
+    {
+      field: 'RegionID',
+      label_VN: 'Vùng Miền / REGION',
+      label_EN: 'Region (SOUTH/NORTH/CENTRAL)',
+      required: false,
+      type: 'string',
+      aliases: ['region', 'vùng miền', 'vùng', 'khu vực', 'regionid', 'region id']
+    },
+    {
+      field: 'Division',
+      label_VN: 'Ngành Sản Xuất / Division',
+      label_EN: 'Division (Livestock/Aqua)',
+      required: false,
+      type: 'string',
+      aliases: ['division', 'phân nhánh', 'ngành', 'ngành hàng', 'mảng sản xuất', 'ngành sản xuất']
+    },
+    {
+      field: 'WarehouseCode',
+      label_VN: 'Mã Điểm Kho / WAREHOUSE',
+      label_EN: 'Warehouse Code',
+      required: false,
+      type: 'string',
+      aliases: ['warehouse', 'mã kho', 'kho', 'điểm kho', 'warehousecode', 'inventlocationid']
+    },
+    {
+      field: 'CustomerVendorRef',
+      label_VN: 'Mã Tham Chiếu Đối Tác / Ref',
+      label_EN: 'Customer or Vendor Reference',
+      required: false,
+      type: 'string',
+      aliases: ['customer or vendor reference', 'customer/vendor ref', 'mã tham chiếu', 'customer reference', 'vendor reference', 'customervendorref', 'mã khách hàng/ncc']
+    },
+    {
+      field: 'SiteCode',
+      label_VN: 'Mã Site D365 / Site',
+      label_EN: 'Site Code (dhv/pbh/php)',
+      required: false,
+      type: 'string',
+      aliases: ['site', 'mã site', 'pháp nhân', 'sitecode', 'dataareaid']
+    },
+    {
+      field: 'CapacityTonsPerMonth',
+      label_VN: 'Công Suất (Tấn/Tháng)',
+      label_EN: 'Capacity (Tons/Month)',
+      required: false,
+      type: 'number',
+      aliases: ['capacitytonspermonth', 'công suất', 'công suất tháng', 'capacity', 'tấn/tháng']
+    },
+    {
+      field: 'Address',
+      label_VN: 'Địa Chỉ Nhà Máy',
+      label_EN: 'Factory Address',
+      required: false,
+      type: 'string',
+      aliases: ['address', 'địa chỉ', 'vị trí', 'địa chỉ nhà máy']
+    }
+  ],
+
+  // ── Master Data: tblNCC / tblVendor ───────────────────────────────────────
+  Supplier: [
+    {
+      field: 'ShortName',
+      label_VN: 'Tên Ngắn / NCC (short name)',
+      label_EN: 'Supplier Short Name',
+      required: true,
+      type: 'string',
+      aliases: ['ncc (short name)', 'ncc', 'tên ngắn', 'short name', 'tên viết tắt', 'nhà cung cấp (tên ngắn)', 'shortname']
+    },
+    {
+      field: 'SupplierCode',
+      label_VN: 'Mã Nhà Cung Cấp / CODE',
+      label_EN: 'Supplier Code / Vendor Account',
+      required: true,
+      type: 'string',
+      aliases: ['code', 'mã ncc', 'mã nhà cung cấp', 'vendor code', 'vendor id', 'supplier code', 'suppliercode', 'accountnum']
+    },
+    {
+      field: 'SupplierName',
+      label_VN: 'Tên Đầy Đủ Công Ty / DESC',
+      label_EN: 'Supplier Full Name / Company Name',
+      required: true,
+      type: 'string',
+      aliases: ['desc', 'tên nhà cung cấp', 'tên công ty', 'tên đầy đủ', 'supplier name', 'vendor name', 'suppliername', 'mô tả']
+    },
+    {
+      field: 'ContractNo',
+      label_VN: 'Số Hợp Đồng / HĐNT',
+      label_EN: 'Principle Contract No (HĐNT)',
+      required: false,
+      type: 'string',
+      aliases: ['hđnt', 'số hợp đồng', 'hợp đồng', 'số hđ', 'contract no', 'contract', 'contractno', 'hđmh']
+    },
+    {
+      field: 'Incoterm',
+      label_VN: 'Điều Kiện Incoterm',
+      label_EN: 'Incoterm (DDP/CIF/FOB)',
+      required: false,
+      type: 'string',
+      aliases: ['incoterm', 'điều kiện giao hàng', 'incoterms', 'delivery terms']
+    },
+    {
+      field: 'PaymentTerms',
+      label_VN: 'Điều Khoản Thanh Toán / Terms of payment',
+      label_EN: 'Payment Terms (Net 30/Net 60)',
+      required: false,
+      type: 'string',
+      aliases: ['terms of payment', 'điều khoản thanh toán', 'payment terms', 'thanh toán', 'terms', 'paymentterms']
+    },
+    {
+      field: 'Email',
+      label_VN: 'Email Liên Hệ / MAIL',
+      label_EN: 'Contact / Accounting Email',
+      required: false,
+      type: 'string',
+      aliases: ['mail', 'email', 'thư điện tử', 'email liên hệ', 'contact email']
+    },
+    {
+      field: 'Note_0',
+      label_VN: 'Ghi Chú 1 (Note_0)',
+      label_EN: 'Note 0',
+      required: false,
+      type: 'string',
+      aliases: ['note_0', 'ghi chú 1', 'ghi chú', 'note 0', 'note']
+    },
+    {
+      field: 'Note_1',
+      label_VN: 'Ghi Chú 2 (Note_1)',
+      label_EN: 'Note 1',
+      required: false,
+      type: 'string',
+      aliases: ['note_1', 'ghi chú 2', 'note 1', 'ghi chú thêm']
+    },
+    {
+      field: 'SupplierType',
+      label_VN: 'Phân Loại Nguồn (IMPORT/LOCAL)',
+      label_EN: 'Supplier Type',
+      required: false,
+      type: 'string',
+      aliases: ['suppliertype', 'loại ncc', 'nguồn', 'phân loại', 'loại nguồn', 'nguồn cung ứng']
+    }
+  ],
+
+  // ── Master Data: tblItemSubstitution ──────────────────────────────────────
+  Substitution: [
+    {
+      field: 'OriginalMaterialCode',
+      label_VN: 'Mã Nguyên Liệu Gốc',
+      label_EN: 'Original Material Code',
+      required: true,
+      type: 'string',
+      aliases: ['originalmaterialcode', 'mã gốc', 'mã nguyên liệu gốc', 'mã sku gốc', 'original code', 'mã ban đầu']
+    },
+    {
+      field: 'SubstituteMaterialCode',
+      label_VN: 'Mã Nguyên Liệu Thay Thế',
+      label_EN: 'Substitute Material Code',
+      required: true,
+      type: 'string',
+      aliases: ['substitutematerialcode', 'mã thay thế', 'mã tương đương', 'mã vật tư thay thế', 'substitute code', 'mã thay']
+    },
+    {
+      field: 'ConversionRatio',
+      label_VN: 'Hệ Số Quy Đổi (Ratio)',
+      label_EN: 'Conversion Ratio',
+      required: true,
+      type: 'number',
+      aliases: ['conversionratio', 'hệ số quy đổi', 'hệ số', 'tỉ lệ', 'tỉ lệ chuyển đổi', 'ratio']
+    },
+    {
+      field: 'SubstitutionType',
+      label_VN: 'Loại Thay Thế (Direct/Ratio/Rework)',
+      label_EN: 'Substitution Type',
+      required: false,
+      type: 'string',
+      aliases: ['substitutiontype', 'loại thay thế', 'loại chuyển đổi', 'hình thức thay thế', 'type']
+    },
+    {
+      field: 'Priority',
+      label_VN: 'Thứ Tự Ưu Tiên (1, 2, 3...)',
+      label_EN: 'Priority Level',
+      required: false,
+      type: 'number',
+      aliases: ['priority', 'độ ưu tiên', 'thứ tự ưu tiên', 'ưu tiên', 'level']
+    },
+    {
+      field: 'DivisionScope',
+      label_VN: 'Phạm Vi Ngành (ALL/Livestock/Aqua)',
+      label_EN: 'Division Scope',
+      required: false,
+      type: 'string',
+      aliases: ['divisionscope', 'phạm vi', 'ngành áp dụng', 'scope', 'phạm vi ngành']
+    },
+    {
+      field: 'IsBiDirectional',
+      label_VN: 'Chuyển Đổi 2 Chiều (True/False)',
+      label_EN: 'Is Bi-Directional',
+      required: false,
+      type: 'boolean',
+      aliases: ['isbidirectional', 'chuyển đổi 2 chiều', '2 chiều', 'hai chiều', 'bidirectional']
+    },
+    {
+      field: 'ApprovedBy',
+      label_VN: 'Người Duyệt (Formulator/QC)',
+      label_EN: 'Approved By',
+      required: false,
+      type: 'string',
+      aliases: ['approvedby', 'người duyệt', 'chuyên viên duyệt', 'approver', 'formulator']
+    },
+    {
+      field: 'Note',
+      label_VN: 'Ghi Chú Kỹ Thuật Dinh Dưỡng',
+      label_EN: 'Technical Note',
+      required: false,
+      type: 'string',
+      aliases: ['note', 'ghi chú', 'ghi chú kỹ thuật', 'ràng buộc', 'lưu ý']
+    }
+  ],
+
+  // ── Operational Fact: Forecast ────────────────────────────────────────────
   Forecast: [
     {
       field: 'FactoryCode',
@@ -51,6 +391,8 @@ export const systemFieldsByType: Record<string, SystemFieldDefinition[]> = {
       aliases: ['version', 'phiên bản', 'versionid', 'version name', 'đợt forecast', 'tuần', 'week']
     }
   ],
+
+  // ── Operational Fact: SOH ─────────────────────────────────────────────────
   SOH: [
     {
       field: 'FactoryCode',
@@ -93,6 +435,8 @@ export const systemFieldsByType: Record<string, SystemFieldDefinition[]> = {
       aliases: ['expiry', 'hạn dùng', 'hsd', 'exp date', 'expirydate', 'hạn sử dụng', 'ngày hết hạn']
     }
   ],
+
+  // ── Operational Fact: Usage ───────────────────────────────────────────────
   Usage: [
     {
       field: 'FactoryCode',
@@ -127,6 +471,8 @@ export const systemFieldsByType: Record<string, SystemFieldDefinition[]> = {
       aliases: ['transdate', 'ngày', 'logdate', 'date', 'ngày xuất', 'posting date']
     }
   ],
+
+  // ── Operational Fact: PO_Inbound ──────────────────────────────────────────
   PO_Inbound: [
     {
       field: 'PONumber',
@@ -180,7 +526,7 @@ export const systemFieldsByType: Record<string, SystemFieldDefinition[]> = {
 };
 
 // Normalize string for fuzzy matching
-function normalizeHeader(str: string): string {
+export function normalizeHeader(str: string): string {
   return str
     .toLowerCase()
     .trim()
@@ -196,7 +542,7 @@ function normalizeHeader(str: string): string {
 
 export function autoMapHeaders(
   excelHeaders: string[],
-  importType: 'Forecast' | 'SOH' | 'Usage' | 'PO_Inbound',
+  importType: ImportDataType,
   learnedMappings: Sys_Import_Mapping[]
 ): {
   mapped: Record<string, string>; // ExcelHeader -> SystemField
@@ -212,7 +558,7 @@ export function autoMapHeaders(
     const norm = normalizeHeader(rawHeader);
 
     // 1. Check learned mappings first
-    const learned = learnedMappings.find(
+    const learned = (learnedMappings || []).find(
       (m) =>
         m.ImportType === importType &&
         normalizeHeader(m.ExcelHeaderName) === norm
@@ -257,6 +603,73 @@ export function autoMapHeaders(
 
   return { mapped, unmapped };
 }
+
+/**
+ * Extracts and maps raw Excel row object to typed system fields.
+ * - Position-independent: matches columns by mapped header name/alias.
+ * - Strict filtering: completely ignores unmapped columns/fields to optimize data size & prevent garbage injection.
+ */
+export function extractMappedRowData<T = Record<string, any>>(
+  rawRow: Record<string, any>,
+  importType: ImportDataType,
+  learnedMappings: Sys_Import_Mapping[]
+): {
+  mappedData: T;
+  mappedFieldCount: number;
+  ignoredColumns: string[];
+} {
+  const fields = systemFieldsByType[importType] || [];
+  const rawHeaders = Object.keys(rawRow);
+  const { mapped } = autoMapHeaders(rawHeaders, importType, learnedMappings);
+
+  const mappedData: any = {};
+  const ignoredColumns: string[] = [];
+  let mappedFieldCount = 0;
+
+  // Invert mapped: SystemField -> rawHeader
+  const sysToRaw: Record<string, string> = {};
+  Object.entries(mapped).forEach(([rawH, sysF]) => {
+    if (sysF && sysF !== '__IGNORE__') {
+      sysToRaw[sysF] = rawH;
+    }
+  });
+
+  // Track which raw headers were mapped
+  const mappedRawHeaders = new Set(Object.keys(mapped));
+  rawHeaders.forEach((h) => {
+    if (!mappedRawHeaders.has(h) || mapped[h] === '__IGNORE__') {
+      ignoredColumns.push(h);
+    }
+  });
+
+  // Populate only registered system fields with type conversion
+  fields.forEach((fDef) => {
+    const rawH = sysToRaw[fDef.field];
+    if (!rawH || rawRow[rawH] === undefined || rawRow[rawH] === null || String(rawRow[rawH]).trim() === '') {
+      return;
+    }
+    const val = rawRow[rawH];
+    mappedFieldCount++;
+
+    if (fDef.type === 'number') {
+      const num = Number(String(val).replace(/,/g, '').trim());
+      mappedData[fDef.field] = isNaN(num) ? 0 : num;
+    } else if (fDef.type === 'boolean') {
+      const str = String(val).trim().toLowerCase();
+      mappedData[fDef.field] =
+        str === 'true' || str === '1' || str === 'yes' || str === 'có' || str === 'y' || str === '2 chiều';
+    } else {
+      mappedData[fDef.field] = String(val).trim();
+    }
+  });
+
+  return {
+    mappedData: mappedData as T,
+    mappedFieldCount,
+    ignoredColumns,
+  };
+}
+
 
 // 3-Layer Validation function
 export function validateImportData(
