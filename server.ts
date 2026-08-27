@@ -275,17 +275,35 @@ Yêu cầu phân tích:
 Chế độ: ${mode || 'GENERAL_ANALYSIS'}
 Câu hỏi / Yêu cầu cụ thể: ${prompt || 'Hãy thực hiện đánh giá toàn diện chuỗi cung ứng nguyên liệu premix cho các nhà máy.'}`;
 
-      const response = await client.models.generateContent({
-        model: 'gemini-3.7-flash',
-        contents: userContent,
-        config: {
-          systemInstruction,
-          temperature: 0.7,
-        },
-      });
+      let responseText = '';
+      const candidateModels = ['gemini-3.6-flash', 'gemini-flash-latest', 'gemini-3.5-flash', 'gemini-3.7-flash'];
+      let lastErr: any = null;
 
-      const text = response.text || 'Không nhận được phản hồi từ mô hình AI.';
-      res.json({ success: true, text });
+      for (const m of candidateModels) {
+        try {
+          const response = await client.models.generateContent({
+            model: m,
+            contents: userContent,
+            config: {
+              systemInstruction,
+              temperature: 0.7,
+            },
+          });
+          if (response.text) {
+            responseText = response.text;
+            break;
+          }
+        } catch (err: any) {
+          lastErr = err;
+          console.warn(`Model ${m} failed, trying next candidate...`, err.message || err);
+        }
+      }
+
+      if (!responseText) {
+        throw lastErr || new Error('Không nhận được phản hồi từ mô hình AI.');
+      }
+
+      res.json({ success: true, text: responseText });
     } catch (error: any) {
       console.error('Error in /api/ai/advisor:', error);
       res.status(500).json({
