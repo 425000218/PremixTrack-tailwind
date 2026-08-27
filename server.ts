@@ -77,6 +77,16 @@ async function startServer() {
     res.json({ success: true, source: 'FALLBACK_LOCAL', data: [] });
   });
 
+  // Inventory: SOH (fact_Inventory_SOH)
+  app.get('/api/inventory/soh', async (req, res) => {
+    const { executeQuery } = await import('./server/db/queryHelper');
+    const result = await executeQuery('SELECT * FROM dbo.fact_Inventory_SOH ORDER BY SnapshotDate DESC, WarehouseCode, MaterialCode');
+    if (result.success && result.data.length > 0) {
+      return res.json({ success: true, source: 'MSSQL', data: result.data });
+    }
+    res.json({ success: true, source: 'FALLBACK_LOCAL', data: [] });
+  });
+
   // ── USER AUTHENTICATION & LOGIN GATE (dbo.sys_User_Account) ──────────────────
   app.post('/api/auth/login', async (req, res) => {
     try {

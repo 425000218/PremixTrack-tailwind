@@ -55,12 +55,13 @@ export const InventoryMatrix: React.FC<InventoryMatrixProps> = ({
 
   const categories = [
     { id: 'ALL', label: 'Tất cả nhóm nguyên liệu' },
-    { id: 'Amino_Acids', label: 'Amino Acids' },
-    { id: 'Vitamins', label: 'Vitamins' },
-    { id: 'Trace_Minerals', label: 'Khoáng vi lượng (Minerals)' },
-    { id: 'Enzymes', label: 'Enzymes sinh học' },
-    { id: 'Toxin_Binders', label: 'Hút độc tố (Toxin Binders)' },
-    { id: 'Carriers_Minerals', label: 'Chất mang & Khoáng đa lượng' },
+    { id: 'Grain', label: '🌾 Nguyên Liệu Thô / Grain (Bắp, Mì, Đại mạch, Cám)' },
+    { id: 'Protein', label: '🌱 Đạm Thực Vật & Men (Khô đậu, DDGS, Gluten)' },
+    { id: 'Amino_Acids', label: '🧪 Axit Amin (Lysine, Threonine, Methionine)' },
+    { id: 'Vitamins', label: '💊 Vitamins & Sắc tố' },
+    { id: 'Trace_Minerals', label: '💎 Khoáng vi lượng (Minerals)' },
+    { id: 'Carriers_Minerals', label: '🪨 Khoáng đa lượng & Chất mang (DCP, Muối, Đá)' },
+    { id: 'Enzymes', label: '🧬 Enzymes sinh học & Phụ gia' },
   ];
 
   const filteredMaterials = materials.filter((mat) => {

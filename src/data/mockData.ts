@@ -635,6 +635,314 @@ export const initialSuppliers: Dim_Supplier[] = [
 ];
 
 export const initialMaterials: Dim_Material[] = [
+  // ── 18 SKUs from D365 FO On Hand Cut-off 25/08/2026 ────────────────────────
+  {
+    MaterialID: 'MAT-1001010',
+    MaterialCode: '1001010',
+    Name_VN: 'BARLEY',
+    Name_EN: 'Barley Feed Grain',
+    PIC: 'Austin',
+    TaxGroup: 'NonVAT',
+    OverdeliveryPct: 10,
+    PackingGroup: 'Bulk/Bags',
+    CountryOfOrigin: 'Australia / France',
+    Category: 'Grain',
+    Unit: 'kg',
+    SafetyStockDays: 14,
+    UnitPriceUSD: 0.34, // ~8,450 VND/kg
+    Status: 'Active',
+    SpecDescription: 'Đại mạch hạt nguyên chất cung cấp năng lượng và xơ tiêu hóa'
+  },
+  {
+    MaterialID: 'MAT-1002010',
+    MaterialCode: '1002010',
+    Name_VN: 'CORN',
+    Name_EN: 'Yellow Corn Grain',
+    PIC: 'Austin',
+    TaxGroup: 'NonVAT',
+    OverdeliveryPct: 10,
+    PackingGroup: 'Bulk/Silo',
+    CountryOfOrigin: 'USA / South America',
+    Category: 'Grain',
+    Unit: 'kg',
+    SafetyStockDays: 10,
+    UnitPriceUSD: 0.29, // ~7,181 VND/kg
+    Status: 'Active',
+    SpecDescription: 'Bắp / Ngô hạt vàng nguyên chất nguồn năng lượng chính thức ăn chăn nuôi'
+  },
+  {
+    MaterialID: 'MAT-1002101',
+    MaterialCode: '1002101',
+    Name_VN: 'CORN GLUTENFEED >20%CP',
+    Name_EN: 'Corn Gluten Feed >20% CP',
+    PIC: 'Austin',
+    TaxGroup: 'NonVAT',
+    OverdeliveryPct: 10,
+    PackingGroup: 'Bags',
+    CountryOfOrigin: 'USA',
+    Category: 'Protein',
+    Unit: 'kg',
+    SafetyStockDays: 14,
+    UnitPriceUSD: 0.27, // ~6,799 VND/kg
+    Status: 'Active',
+    SpecDescription: 'Cám ngô lên men giàu đạm >20% CP'
+  },
+  {
+    MaterialID: 'MAT-1002150',
+    MaterialCode: '1002150',
+    Name_VN: 'CORN GLUTEN MEAL 60%',
+    Name_EN: 'Corn Gluten Meal 60% CP',
+    PIC: 'Fiona',
+    TaxGroup: 'NonVAT',
+    OverdeliveryPct: 5,
+    PackingGroup: 'Bags',
+    CountryOfOrigin: 'USA / China',
+    Category: 'Protein',
+    Unit: 'kg',
+    SafetyStockDays: 14,
+    UnitPriceUSD: 0.73, // ~18,265 VND/kg
+    Status: 'Active',
+    SpecDescription: 'Đạm bắp đậm đặc 60% CP và sắc tố tự nhiên'
+  },
+  {
+    MaterialID: 'MAT-1002500',
+    MaterialCode: '1002500',
+    Name_VN: 'CORN STARCH',
+    Name_EN: 'Corn Starch Food/Feed Grade',
+    PIC: 'Austin',
+    TaxGroup: 'NonVAT',
+    OverdeliveryPct: 10,
+    PackingGroup: 'Bags',
+    CountryOfOrigin: 'Việt Nam / China',
+    Category: 'Grain',
+    Unit: 'kg',
+    SafetyStockDays: 10,
+    UnitPriceUSD: 0.48, // ~11,988 VND/kg
+    Status: 'Active',
+    SpecDescription: 'Tinh bột ngô mịn chất kết dính và tạo năng lượng'
+  },
+  {
+    MaterialID: 'MAT-1003010',
+    MaterialCode: '1003010',
+    Name_VN: 'Wheat',
+    Name_EN: 'Feed Wheat Grain',
+    PIC: 'Austin',
+    TaxGroup: 'NonVAT',
+    OverdeliveryPct: 10,
+    PackingGroup: 'Bulk/Silo',
+    CountryOfOrigin: 'Australia / Canada',
+    Category: 'Grain',
+    Unit: 'kg',
+    SafetyStockDays: 10,
+    UnitPriceUSD: 0.30, // ~7,447 VND/kg
+    Status: 'Active',
+    SpecDescription: 'Lúa mì hạt thức ăn chăn nuôi'
+  },
+  {
+    MaterialID: 'MAT-1003100',
+    MaterialCode: '1003100',
+    Name_VN: 'Vital Wheat Gluten',
+    Name_EN: 'Vital Wheat Gluten 75-80% CP',
+    PIC: 'Fiona',
+    TaxGroup: 'NonVAT',
+    OverdeliveryPct: 5,
+    PackingGroup: 'Bags',
+    CountryOfOrigin: 'EU / China',
+    Category: 'Protein',
+    Unit: 'kg',
+    SafetyStockDays: 14,
+    UnitPriceUSD: 1.55, // ~38,800 VND/kg
+    Status: 'Active',
+    SpecDescription: 'Đạm lúa mì Vital Wheat Gluten độ dẻo cao chuyên dùng thủy sản và heo con'
+  },
+  {
+    MaterialID: 'MAT-1003356',
+    MaterialCode: '1003356',
+    Name_VN: 'WHEATBRAN MEAL coarse',
+    Name_EN: 'Coarse Wheat Bran Meal',
+    PIC: 'Austin',
+    TaxGroup: 'NonVAT',
+    OverdeliveryPct: 10,
+    PackingGroup: 'Bags/Bulk',
+    CountryOfOrigin: 'Việt Nam / Indonesia',
+    Category: 'Grain',
+    Unit: 'kg',
+    SafetyStockDays: 10,
+    UnitPriceUSD: 0.25, // ~6,372 VND/kg
+    Status: 'Active',
+    SpecDescription: 'Cám mì thô giàu chất xơ tiêu hóa'
+  },
+  {
+    MaterialID: 'MAT-1005010',
+    MaterialCode: '1005010',
+    Name_VN: 'RICEBRAN 12/12/12',
+    Name_EN: 'Defatted Rice Bran 12/12/12',
+    PIC: 'Austin',
+    TaxGroup: 'NonVAT',
+    OverdeliveryPct: 10,
+    PackingGroup: 'Bags/Bulk',
+    CountryOfOrigin: 'Việt Nam',
+    Category: 'Grain',
+    Unit: 'kg',
+    SafetyStockDays: 10,
+    UnitPriceUSD: 0.30, // ~7,600 VND/kg
+    Status: 'Active',
+    SpecDescription: 'Cám gạo trích ly tiêu chuẩn 12/12/12'
+  },
+  {
+    MaterialID: 'MAT-1005100',
+    MaterialCode: '1005100',
+    Name_VN: 'RICE HULLS',
+    Name_EN: 'Ground Rice Hulls / Carrier',
+    PIC: 'Austin',
+    TaxGroup: 'NonVAT',
+    OverdeliveryPct: 10,
+    PackingGroup: 'Bags',
+    CountryOfOrigin: 'Việt Nam',
+    Category: 'Carriers_Minerals',
+    Unit: 'kg',
+    SafetyStockDays: 7,
+    UnitPriceUSD: 0.18, // ~4,400 VND/kg
+    Status: 'Active',
+    SpecDescription: 'Vỏ trấu nghiền làm chất mang và bổ sung xơ thô'
+  },
+  {
+    MaterialID: 'MAT-1005150',
+    MaterialCode: '1005150',
+    Name_VN: 'RICE BROKEN',
+    Name_EN: 'Broken Rice Grain',
+    PIC: 'Austin',
+    TaxGroup: 'NonVAT',
+    OverdeliveryPct: 10,
+    PackingGroup: 'Bulk/Bags',
+    CountryOfOrigin: 'Việt Nam',
+    Category: 'Grain',
+    Unit: 'kg',
+    SafetyStockDays: 10,
+    UnitPriceUSD: 0.33, // ~8,350 VND/kg
+    Status: 'Active',
+    SpecDescription: 'Tấm gạo nguyên chất bổ sung năng lượng cao'
+  },
+  {
+    MaterialID: 'MAT-1012106',
+    MaterialCode: '1012106',
+    Name_VN: 'DDGS CORN STANDARD QUALITY US',
+    Name_EN: 'Corn Distillers Dried Grains with Solubles US',
+    PIC: 'Austin',
+    TaxGroup: 'NonVAT',
+    OverdeliveryPct: 10,
+    PackingGroup: 'Bulk/Bags',
+    CountryOfOrigin: 'USA',
+    Category: 'Protein',
+    Unit: 'kg',
+    SafetyStockDays: 14,
+    UnitPriceUSD: 0.29, // ~7,200 VND/kg
+    Status: 'Active',
+    SpecDescription: 'Bã rượu ngô sấy khô tiêu chuẩn DDGS US'
+  },
+  {
+    MaterialID: 'MAT-1012160',
+    MaterialCode: '1012160',
+    Name_VN: 'DDG CORN/YEAST 40%CP',
+    Name_EN: 'Corn Yeast Distillers Grains 40% CP',
+    PIC: 'Fiona',
+    TaxGroup: 'NonVAT',
+    OverdeliveryPct: 5,
+    PackingGroup: 'Bags',
+    CountryOfOrigin: 'USA / China',
+    Category: 'Protein',
+    Unit: 'kg',
+    SafetyStockDays: 14,
+    UnitPriceUSD: 0.40, // ~9,954 VND/kg
+    Status: 'Active',
+    SpecDescription: 'Bã ngô lên men nấm men đạm cao 40% CP'
+  },
+  {
+    MaterialID: 'MAT-1012500',
+    MaterialCode: '1012500',
+    Name_VN: 'Rice DDGS',
+    Name_EN: 'Rice Distillers Dried Grains',
+    PIC: 'Austin',
+    TaxGroup: 'NonVAT',
+    OverdeliveryPct: 10,
+    PackingGroup: 'Bags',
+    CountryOfOrigin: 'Việt Nam / India',
+    Category: 'Protein',
+    Unit: 'kg',
+    SafetyStockDays: 14,
+    UnitPriceUSD: 0.30, // ~7,500 VND/kg
+    Status: 'Active',
+    SpecDescription: 'Bã rượu gạo sấy khô giàu đạm và xơ'
+  },
+  {
+    MaterialID: 'MAT-1101018',
+    MaterialCode: '1101018',
+    Name_VN: 'SOYABEANMEAL 48% CP',
+    Name_EN: 'Soybean Meal Dehulled 48% CP',
+    PIC: 'Austin',
+    TaxGroup: 'NonVAT',
+    OverdeliveryPct: 10,
+    PackingGroup: 'Bulk/Silo',
+    CountryOfOrigin: 'South America / USA',
+    Category: 'Protein',
+    Unit: 'kg',
+    SafetyStockDays: 10,
+    UnitPriceUSD: 0.46, // ~11,543 VND/kg
+    Status: 'Active',
+    SpecDescription: 'Khô dầu đậu nành tách vỏ đạm cao 48% CP'
+  },
+  {
+    MaterialID: 'MAT-1101107',
+    MaterialCode: '1101107',
+    Name_VN: 'SOY HULLS',
+    Name_EN: 'Pelleted Soybean Hulls',
+    PIC: 'Austin',
+    TaxGroup: 'NonVAT',
+    OverdeliveryPct: 10,
+    PackingGroup: 'Bags/Bulk',
+    CountryOfOrigin: 'South America / USA',
+    Category: 'Grain',
+    Unit: 'kg',
+    SafetyStockDays: 10,
+    UnitPriceUSD: 0.21, // ~5,365 VND/kg
+    Status: 'Active',
+    SpecDescription: 'Vỏ hạt đậu nành dạng viên nguồn xơ tiêu hóa cao'
+  },
+  {
+    MaterialID: 'MAT-1101330',
+    MaterialCode: '1101330',
+    Name_VN: 'SPC SOYTIDE 55%',
+    Name_EN: 'Fermented Soy Protein Concentrate SPC 55%',
+    PIC: 'Fiona',
+    TaxGroup: 'NonVAT',
+    OverdeliveryPct: 5,
+    PackingGroup: 'Bags',
+    CountryOfOrigin: 'Hàn Quốc / Việt Nam',
+    Category: 'Protein',
+    Unit: 'kg',
+    SafetyStockDays: 20,
+    UnitPriceUSD: 0.83, // ~20,866 VND/kg
+    Status: 'Active',
+    SpecDescription: 'Đạm tương đậu nành lên men SPC 55% giảm yếu tố kháng dinh dưỡng'
+  },
+  {
+    MaterialID: 'MAT-1102002',
+    MaterialCode: '1102002',
+    Name_VN: 'RSM 00 > 38%CP GMO',
+    Name_EN: 'Rapeseed Meal Canola 00 > 38% CP GMO',
+    PIC: 'Austin',
+    TaxGroup: 'NonVAT',
+    OverdeliveryPct: 10,
+    PackingGroup: 'Bulk/Bags',
+    CountryOfOrigin: 'India / Australia',
+    Category: 'Protein',
+    Unit: 'kg',
+    SafetyStockDays: 14,
+    UnitPriceUSD: 0.34, // ~8,390 VND/kg
+    Status: 'Active',
+    SpecDescription: 'Khô dầu hạt cải Canola RSM 00 đạm > 38% CP'
+  },
+  // ── Existing Premix & Additive Materials ───────────────────────────────────
   {
     MaterialID: 'MAT-01',
     MaterialCode: '2302020',
@@ -1506,18 +1814,37 @@ export const initialForecastDetails: Fact_Forecast_Detail[] = [
   { ID: 'FCD-037', VersionID: 'FC-W29-2026', FactoryID: 'FAC-DBN', MaterialID: 'MAT-06', ForecastQty: 4800 },
 ];
 
-// Current SOH inventory across factories (creating realistic shortages, surpluses, and transitions)
 export const initialInventorySOH: Fact_Inventory_SOH[] = [
-  // Factory DBD (Bình Dương) - Well stocked in Methionine, surplus in Threonine
+  // ── Factory DBD (Bình Dương) - Snapshot Cut-off 06h 25/08/2026 (D365 FO) ──
+  { SOH_ID: 'SOH-DBD-1001010', FactoryID: 'FAC-DBD', MaterialID: '1001010', Quantity: 223683, Region: 'SOUTH', WarehouseCode: 'DBD', OrgCode: 'DBD', SubInventory: 'RAW', AveragePrice: 8450, WarehouseLocation: 'KHO-RAW-A1', BatchNumber: 'LOT-BAR-2608', ExpiryDate: '2027-08-25', UpdateDate: '2026-08-25' },
+  { SOH_ID: 'SOH-DBD-1002010', FactoryID: 'FAC-DBD', MaterialID: '1002010', Quantity: 1110520, Region: 'SOUTH', WarehouseCode: 'DBD', OrgCode: 'DBD', SubInventory: 'RAW', AveragePrice: 7181, WarehouseLocation: 'SILO-CORN-01', BatchNumber: 'LOT-CRN-2608', ExpiryDate: '2027-08-25', UpdateDate: '2026-08-25' },
+  { SOH_ID: 'SOH-DBD-1002101', FactoryID: 'FAC-DBD', MaterialID: '1002101', Quantity: 210050, Region: 'SOUTH', WarehouseCode: 'DBD', OrgCode: 'DBD', SubInventory: 'RAW', AveragePrice: 6799, WarehouseLocation: 'KHO-RAW-B1', BatchNumber: 'LOT-CGF-2608', ExpiryDate: '2027-08-25', UpdateDate: '2026-08-25' },
+  { SOH_ID: 'SOH-DBD-1002150', FactoryID: 'FAC-DBD', MaterialID: '1002150', Quantity: 64934, Region: 'SOUTH', WarehouseCode: 'DBD', OrgCode: 'DBD', SubInventory: 'RAW', AveragePrice: 18265, WarehouseLocation: 'KHO-RAW-B2', BatchNumber: 'LOT-CGM-2608', ExpiryDate: '2027-08-25', UpdateDate: '2026-08-25' },
+  { SOH_ID: 'SOH-DBD-1002500', FactoryID: 'FAC-DBD', MaterialID: '1002500', Quantity: 1996, Region: 'SOUTH', WarehouseCode: 'DBD', OrgCode: 'DBD', SubInventory: 'RAW', AveragePrice: 11988, WarehouseLocation: 'KHO-RAW-C1', BatchNumber: 'LOT-CST-2608', ExpiryDate: '2027-08-25', UpdateDate: '2026-08-25' },
+  { SOH_ID: 'SOH-DBD-1003010', FactoryID: 'FAC-DBD', MaterialID: '1003010', Quantity: 1062664, Region: 'SOUTH', WarehouseCode: 'DBD', OrgCode: 'DBD', SubInventory: 'RAW', AveragePrice: 7447, WarehouseLocation: 'SILO-WHT-01', BatchNumber: 'LOT-WHT-2608', ExpiryDate: '2027-08-25', UpdateDate: '2026-08-25' },
+  { SOH_ID: 'SOH-DBD-1003100', FactoryID: 'FAC-DBD', MaterialID: '1003100', Quantity: 375, Region: 'SOUTH', WarehouseCode: 'DBD', OrgCode: 'DBD', SubInventory: 'RAW', AveragePrice: 38800, WarehouseLocation: 'KHO-RAW-C2', BatchNumber: 'LOT-VWG-2608', ExpiryDate: '2027-08-25', UpdateDate: '2026-08-25' },
+  { SOH_ID: 'SOH-DBD-1003356', FactoryID: 'FAC-DBD', MaterialID: '1003356', Quantity: 345716, Region: 'SOUTH', WarehouseCode: 'DBD', OrgCode: 'DBD', SubInventory: 'RAW', AveragePrice: 6372, WarehouseLocation: 'KHO-RAW-D1', BatchNumber: 'LOT-WBM-2608', ExpiryDate: '2027-08-25', UpdateDate: '2026-08-25' },
+  { SOH_ID: 'SOH-DBD-1005010', FactoryID: 'FAC-DBD', MaterialID: '1005010', Quantity: 17047, Region: 'SOUTH', WarehouseCode: 'DBD', OrgCode: 'DBD', SubInventory: 'RAW', AveragePrice: 7600, WarehouseLocation: 'KHO-RAW-D2', BatchNumber: 'LOT-RBN-2608', ExpiryDate: '2027-08-25', UpdateDate: '2026-08-25' },
+  { SOH_ID: 'SOH-DBD-1005100', FactoryID: 'FAC-DBD', MaterialID: '1005100', Quantity: 5990, Region: 'SOUTH', WarehouseCode: 'DBD', OrgCode: 'DBD', SubInventory: 'RAW', AveragePrice: 4400, WarehouseLocation: 'KHO-RAW-D3', BatchNumber: 'LOT-RHL-2608', ExpiryDate: '2027-08-25', UpdateDate: '2026-08-25' },
+  { SOH_ID: 'SOH-DBD-1005150', FactoryID: 'FAC-DBD', MaterialID: '1005150', Quantity: 252039, Region: 'SOUTH', WarehouseCode: 'DBD', OrgCode: 'DBD', SubInventory: 'RAW', AveragePrice: 8350, WarehouseLocation: 'KHO-RAW-E1', BatchNumber: 'LOT-RBK-2608', ExpiryDate: '2027-08-25', UpdateDate: '2026-08-25' },
+  { SOH_ID: 'SOH-DBD-1012106', FactoryID: 'FAC-DBD', MaterialID: '1012106', Quantity: 207108, Region: 'SOUTH', WarehouseCode: 'DBD', OrgCode: 'DBD', SubInventory: 'RAW', AveragePrice: 7200, WarehouseLocation: 'KHO-RAW-E2', BatchNumber: 'LOT-DDG-2608', ExpiryDate: '2027-08-25', UpdateDate: '2026-08-25' },
+  { SOH_ID: 'SOH-DBD-1012160', FactoryID: 'FAC-DBD', MaterialID: '1012160', Quantity: 169819, Region: 'SOUTH', WarehouseCode: 'DBD', OrgCode: 'DBD', SubInventory: 'RAW', AveragePrice: 9954, WarehouseLocation: 'KHO-RAW-E3', BatchNumber: 'LOT-DCY-2608', ExpiryDate: '2027-08-25', UpdateDate: '2026-08-25' },
+  { SOH_ID: 'SOH-DBD-1012500', FactoryID: 'FAC-DBD', MaterialID: '1012500', Quantity: 6390, Region: 'SOUTH', WarehouseCode: 'DBD', OrgCode: 'DBD', SubInventory: 'RAW', AveragePrice: 7500, WarehouseLocation: 'KHO-RAW-E4', BatchNumber: 'LOT-RDD-2608', ExpiryDate: '2027-08-25', UpdateDate: '2026-08-25' },
+  { SOH_ID: 'SOH-DBD-1101018', FactoryID: 'FAC-DBD', MaterialID: '1101018', Quantity: 533170, Region: 'SOUTH', WarehouseCode: 'DBD', OrgCode: 'DBD', SubInventory: 'RAW', AveragePrice: 11543, WarehouseLocation: 'SILO-SBM-01', BatchNumber: 'LOT-SBM-2608', ExpiryDate: '2027-08-25', UpdateDate: '2026-08-25' },
+  { SOH_ID: 'SOH-DBD-1101107', FactoryID: 'FAC-DBD', MaterialID: '1101107', Quantity: 229883, Region: 'SOUTH', WarehouseCode: 'DBD', OrgCode: 'DBD', SubInventory: 'RAW', AveragePrice: 5365, WarehouseLocation: 'KHO-RAW-F1', BatchNumber: 'LOT-SHL-2608', ExpiryDate: '2027-08-25', UpdateDate: '2026-08-25' },
+  { SOH_ID: 'SOH-DBD-1101330', FactoryID: 'FAC-DBD', MaterialID: '1101330', Quantity: 48275, Region: 'SOUTH', WarehouseCode: 'DBD', OrgCode: 'DBD', SubInventory: 'RAW', AveragePrice: 20866, WarehouseLocation: 'KHO-RAW-F2', BatchNumber: 'LOT-SPC-2608', ExpiryDate: '2027-08-25', UpdateDate: '2026-08-25' },
+  { SOH_ID: 'SOH-DBD-1102002', FactoryID: 'FAC-DBD', MaterialID: '1102002', Quantity: 358441, Region: 'SOUTH', WarehouseCode: 'DBD', OrgCode: 'DBD', SubInventory: 'RAW', AveragePrice: 8390, WarehouseLocation: 'KHO-RAW-F3', BatchNumber: 'LOT-RSM-2608', ExpiryDate: '2027-08-25', UpdateDate: '2026-08-25' },
+
+  // ── Existing Premix Items for DBD ─────────────────────────────────────────
   { SOH_ID: 'SOH-001', FactoryID: 'FAC-DBD', MaterialID: 'MAT-01', Quantity: 58000, WarehouseLocation: 'KHO-PREMIX-A1', BatchNumber: 'LOT-MET-2607', ExpiryDate: '2027-06-30', UpdateDate: '2026-08-15' },
   { SOH_ID: 'SOH-002', FactoryID: 'FAC-DBD', MaterialID: 'MAT-02', Quantity: 110000, WarehouseLocation: 'KHO-AMINO-B2', BatchNumber: 'LOT-LYS-2608', ExpiryDate: '2027-08-15', UpdateDate: '2026-08-15' },
-  { SOH_ID: 'SOH-003', FactoryID: 'FAC-DBD', MaterialID: 'MAT-03', Quantity: 54000, WarehouseLocation: 'KHO-AMINO-B3', BatchNumber: 'LOT-THR-2605', ExpiryDate: '2027-05-20', UpdateDate: '2026-08-15' }, // SURPLUS DOI ~ 47 days!
+  { SOH_ID: 'SOH-003', FactoryID: 'FAC-DBD', MaterialID: 'MAT-03', Quantity: 54000, WarehouseLocation: 'KHO-AMINO-B3', BatchNumber: 'LOT-THR-2605', ExpiryDate: '2027-05-20', UpdateDate: '2026-08-15' },
   { SOH_ID: 'SOH-004', FactoryID: 'FAC-DBD', MaterialID: 'MAT-04', Quantity: 42000, WarehouseLocation: 'KHO-VIT-C1', BatchNumber: 'LOT-CHO-2607', ExpiryDate: '2027-01-10', UpdateDate: '2026-08-15' },
-  { SOH_ID: 'SOH-005', FactoryID: 'FAC-DBD', MaterialID: 'MAT-05', Quantity: 1200, WarehouseLocation: 'KHO-VIT-C2', BatchNumber: 'LOT-AD3E-OLD', ExpiryDate: '2026-10-30', UpdateDate: '2026-08-15' }, // Depleting stop usage
+  { SOH_ID: 'SOH-005', FactoryID: 'FAC-DBD', MaterialID: 'MAT-05', Quantity: 1200, WarehouseLocation: 'KHO-VIT-C2', BatchNumber: 'LOT-AD3E-OLD', ExpiryDate: '2026-10-30', UpdateDate: '2026-08-15' },
   { SOH_ID: 'SOH-006', FactoryID: 'FAC-DBD', MaterialID: 'MAT-06', Quantity: 9800, WarehouseLocation: 'KHO-VIT-C3', BatchNumber: 'LOT-AD3E-NEW', ExpiryDate: '2028-02-15', UpdateDate: '2026-08-15' },
   { SOH_ID: 'SOH-007', FactoryID: 'FAC-DBD', MaterialID: 'MAT-07', Quantity: 7500, WarehouseLocation: 'KHO-VIT-C4', BatchNumber: 'LOT-VITC-2606', ExpiryDate: '2027-11-20', UpdateDate: '2026-08-15' },
   { SOH_ID: 'SOH-008', FactoryID: 'FAC-DBD', MaterialID: 'MAT-08', Quantity: 5100, WarehouseLocation: 'KHO-ENZ-D1', BatchNumber: 'LOT-PHY-2604', ExpiryDate: '2027-04-15', UpdateDate: '2026-08-15' },
-  { SOH_ID: 'SOH-009', FactoryID: 'FAC-DBD', MaterialID: 'MAT-09', Quantity: 92000, WarehouseLocation: 'SILO-MCP-01', BatchNumber: 'LOT-MCP-2608', ExpiryDate: '2028-08-01', UpdateDate: '2026-08-15' }, // CRITICAL SHORTAGE in MCP! DOI ~ 14.3d
+  { SOH_ID: 'SOH-009', FactoryID: 'FAC-DBD', MaterialID: 'MAT-09', Quantity: 92000, WarehouseLocation: 'SILO-MCP-01', BatchNumber: 'LOT-MCP-2608', ExpiryDate: '2028-08-01', UpdateDate: '2026-08-15' },
   { SOH_ID: 'SOH-010', FactoryID: 'FAC-DBD', MaterialID: 'MAT-10', Quantity: 18500, WarehouseLocation: 'KHO-MIN-E1', BatchNumber: 'LOT-ZNO-2606', ExpiryDate: '2028-05-15', UpdateDate: '2026-08-15' },
 
   // Factory DDN (Đồng Nai) - CRITICAL SHORTAGE in Threonine and Phytase!

@@ -396,27 +396,59 @@ export const systemFieldsByType: Record<ImportDataType, SystemFieldDefinition[]>
   SOH: [
     {
       field: 'FactoryCode',
-      label_VN: 'Mã Nhà Máy / Kho D365',
+      label_VN: 'Mã Nhà Máy / Kho D365 / WAREHOUSE',
       label_EN: 'Factory / Warehouse Code',
       required: true,
       type: 'string',
-      aliases: ['inventlocationid', 'site', 'nm', 'nhà máy', 'kho', 'factory', 'plant', 'warehouse', 'mã kho']
+      aliases: ['warehouse', 'org code', 'inventlocationid', 'site', 'nm', 'nhà máy', 'kho', 'factory', 'plant', 'mã kho']
     },
     {
       field: 'MaterialCode',
-      label_VN: 'Mã Nguyên Liệu',
-      label_EN: 'Material Code',
+      label_VN: 'Mã Nguyên Liệu / ITEM CODE',
+      label_EN: 'Material Code / Item Code',
       required: true,
       type: 'string',
-      aliases: ['item number', 'mã hàng', 'mã nl', 'materialcode', 'itemid', 'item_id', 'vật tư', 'sku']
+      aliases: ['item code', 'item number', 'mã hàng', 'mã nl', 'materialcode', 'itemid', 'item_id', 'vật tư', 'sku', 'material code']
     },
     {
       field: 'Quantity',
-      label_VN: 'Tồn Kho Thực Tế (Kg)',
+      label_VN: 'Tồn Kho Thực Tế / SOH (Kg)',
       label_EN: 'Stock On Hand / Avail Physical (Kg)',
       required: true,
       type: 'number',
-      aliases: ['availphysical', 'soh', 'tồn kho', 'tồn thực tế', 'tồn kho (kg)', 'physical inventory', 'quantity', 'khả dụng', 'số lượng tồn', 'on hand']
+      aliases: ['soh', 'availphysical', 'tồn kho', 'tồn thực tế', 'tồn kho (kg)', 'physical inventory', 'quantity', 'khả dụng', 'số lượng tồn', 'on hand']
+    },
+    {
+      field: 'AveragePrice',
+      label_VN: 'Đơn Giá Bình Quân / Price Average (VNĐ/kg)',
+      label_EN: 'Average Price (VND/kg)',
+      required: false,
+      type: 'number',
+      aliases: ['price average', 'average price', 'đơn giá', 'giá bình quân', 'đơn giá bq', 'price', 'averageprice']
+    },
+    {
+      field: 'MaterialName',
+      label_VN: 'Tên Vật Tư / ITEM NAME',
+      label_EN: 'Material Name / Item Name',
+      required: false,
+      type: 'string',
+      aliases: ['item name', 'material name', 'tên hàng', 'tên nguyên liệu', 'item description', 'material description', 'tên vật tư']
+    },
+    {
+      field: 'Region',
+      label_VN: 'Khu Vực / REGION',
+      label_EN: 'Region (SOUTH/NORTH/CENTRAL)',
+      required: false,
+      type: 'string',
+      aliases: ['region', 'vùng', 'khu vực', 'vùng miền']
+    },
+    {
+      field: 'SubInventory',
+      label_VN: 'Kho Con / SUB INV',
+      label_EN: 'Sub Inventory',
+      required: false,
+      type: 'string',
+      aliases: ['sub inv', 'subinv', 'sub inventory', 'loại kho', 'kho con']
     },
     {
       field: 'BatchNumber',

@@ -268,22 +268,26 @@ GO
 
 -- 2.3. Bảng Tồn Kho Thực Tế Theo Snapshot Ngày (fact_Inventory_SOH)
 CREATE TABLE dbo.fact_Inventory_SOH (
-    SOH_ID         BIGINT IDENTITY(1,1) NOT NULL,
-    SnapshotDate   DATE                 NOT NULL,
-    FactoryCode    NVARCHAR(50)         NOT NULL,
-    MaterialCode   NVARCHAR(50)         NOT NULL,
-    OnHandKg       DECIMAL(18,2)        NOT NULL DEFAULT 0,
-    AllocatedKg    DECIMAL(18,2)        NOT NULL DEFAULT 0,
-    AvailableKg    AS (OnHandKg - AllocatedKg) PERSISTED,
-    LotNumber      NVARCHAR(100)        NOT NULL DEFAULT N'DEFAULT_LOT',
-    ExpiryDate     DATE                 NULL,
-    QualityStatus  NVARCHAR(50)         NOT NULL DEFAULT N'Available',
-    CreatedAt      DATETIME2(0)         NOT NULL DEFAULT SYSDATETIME(),
+    SOH_ID         NVARCHAR(100) NOT NULL,
+    FactoryID      NVARCHAR(50)  NULL,
+    MaterialCode   NVARCHAR(50)  NOT NULL,
+    SOHQtyKg       DECIMAL(18,2) NOT NULL DEFAULT 0,
+    Region         NVARCHAR(50)  NULL,
+    WarehouseCode  NVARCHAR(50)  NULL,
+    OrgCode        NVARCHAR(50)  NULL,
+    SubInventory   NVARCHAR(50)  NULL DEFAULT N'RAW',
+    AveragePrice   DECIMAL(18,2) NULL DEFAULT 0,
+    SnapshotDate   DATE          NOT NULL DEFAULT CAST(SYSDATETIME() AS DATE),
+    AllocatedKg    DECIMAL(18,2) NOT NULL DEFAULT 0,
+    AvailableKg    AS (SOHQtyKg - AllocatedKg),
+    LotNumber      NVARCHAR(100) NOT NULL DEFAULT N'DEFAULT_LOT',
+    ExpiryDate     DATE          NULL,
+    QualityStatus  NVARCHAR(50)  NOT NULL DEFAULT N'Available',
+    LastUpdated    DATETIME2(0)  NOT NULL DEFAULT SYSDATETIME(),
     CONSTRAINT PK_fact_Inventory_SOH PRIMARY KEY CLUSTERED (SOH_ID),
-    CONSTRAINT CK_Inventory_OnHand CHECK (OnHandKg >= 0)
+    CONSTRAINT CK_Inventory_OnHand CHECK (SOHQtyKg >= 0)
 );
-CREATE UNIQUE NONCLUSTERED INDEX UX_Inventory_Snapshot ON dbo.fact_Inventory_SOH(SnapshotDate, FactoryCode, MaterialCode, LotNumber);
-CREATE NONCLUSTERED INDEX IX_Inventory_Date_Factory ON dbo.fact_Inventory_SOH(SnapshotDate, FactoryCode, MaterialCode) INCLUDE (OnHandKg, AllocatedKg, AvailableKg);
+CREATE NONCLUSTERED INDEX IX_Inventory_Snapshot ON dbo.fact_Inventory_SOH(SnapshotDate, WarehouseCode, MaterialCode) INCLUDE (SOHQtyKg, AveragePrice);
 PRINT N'>>> Đã tạo bảng dbo.fact_Inventory_SOH';
 GO
 

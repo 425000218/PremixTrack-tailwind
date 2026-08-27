@@ -164,10 +164,16 @@ export interface Fact_Inventory_SOH {
   FactoryID: string;
   MaterialID: string;
   Quantity: number; // kg on hand
-  WarehouseLocation: string;
-  BatchNumber: string;
-  ExpiryDate: string;
-  UpdateDate: string;
+  WarehouseLocation?: string;
+  BatchNumber?: string;
+  ExpiryDate?: string;
+  UpdateDate?: string;
+  Region?: string;
+  WarehouseCode?: string;
+  OrgCode?: string;
+  SubInventory?: string;
+  AveragePrice?: number;
+  SnapshotDate?: string;
 }
 
 export interface Fact_Production_Usage {
