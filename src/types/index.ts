@@ -176,6 +176,21 @@ export interface Fact_Inventory_SOH {
   SnapshotDate?: string;
 }
 
+export interface Fact_Inventory_Movement {
+  MovementID: string;
+  FactoryCode: string;
+  OrgCode: string;
+  MaterialCode: string;
+  MaterialName: string;
+  UOM: string;
+  SubInventory: string;
+  BeginOnHandKg: number;
+  ReceivedQtyKg: number;
+  WipIssueQtyKg: number;
+  ClosedOnHandKg: number;
+  ReportDate: string;
+}
+
 export interface Fact_Production_Usage {
   UsageID: string;
   FactoryID: string;
@@ -189,9 +204,15 @@ export interface Fact_PurchaseOrder {
   POID: string;
   PONumber: string;
   SupplierID: string;
+  SupplierName?: string;
   OrderDate: string;
-  Status: 'Draft' | 'Confirmed' | 'Shipped' | 'Partially_Received' | 'Completed' | 'Cancelled';
-  TotalAmountUSD: number;
+  Status: 'Draft' | 'Confirmed' | 'Shipped' | 'Partially_Received' | 'Completed' | 'Cancelled' | 'Open';
+  TotalAmountUSD?: number;
+  TotalAmountVND?: number;
+  PaymentTerms?: string;
+  Incoterm?: string;
+  PurchaserName?: string;
+  ContractNumber?: string;
 }
 
 export interface Fact_PO_Detail {
@@ -199,10 +220,26 @@ export interface Fact_PO_Detail {
   POID: string;
   FactoryID: string;
   MaterialID: string;
+  MaterialCode?: string;
+  MaterialName?: string;
   OrderQty: number; // kg
   ReceivedQty: number; // kg
-  RemainQty: number; // OrderQty - ReceivedQty
-  UnitPriceUSD: number;
+  RemainQty: number; // OrderQty - ReceivedQty (Deliver remainder)
+  UnitPriceUSD?: number;
+  UnitPriceVND?: number;
+  LineAmountVND?: number;
+  AmountRemainderVND?: number;
+  DeliveryDate?: string;
+  PromisedDeliveryDate?: string;
+  LineStatus?: string;
+  TaxGroup?: string;
+  Incoterm?: string;
+  CountryOfOrigin?: string;
+  Notes?: string;
+  PAGNumber?: string;
+  SupplierName?: string;
+  CoverDays?: number;
+  CoverDate?: string;
 }
 
 export interface Fact_Inbound_Schedule {

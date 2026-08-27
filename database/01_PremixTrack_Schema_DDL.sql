@@ -291,6 +291,27 @@ CREATE NONCLUSTERED INDEX IX_Inventory_Snapshot ON dbo.fact_Inventory_SOH(Snapsh
 PRINT N'>>> Đã tạo bảng dbo.fact_Inventory_SOH';
 GO
 
+-- 2.3b. Bảng Biến Động Tồn Kho Xuất Nhập Tồn & Lượng Dùng Sản Xuất (fact_Inventory_Movement)
+CREATE TABLE dbo.fact_Inventory_Movement (
+    MovementID         NVARCHAR(100)  NOT NULL,
+    FactoryCode        NVARCHAR(50)   NOT NULL,
+    OrgCode            NVARCHAR(50)   NOT NULL,
+    MaterialCode       NVARCHAR(50)   NOT NULL,
+    MaterialName       NVARCHAR(250)  NOT NULL,
+    UOM                NVARCHAR(20)   NOT NULL DEFAULT N'KG',
+    SubInventory       NVARCHAR(50)   NOT NULL DEFAULT N'RAW',
+    BeginOnHandKg      DECIMAL(18,2)  NOT NULL DEFAULT 0,
+    ReceivedQtyKg      DECIMAL(18,2)  NOT NULL DEFAULT 0,
+    WipIssueQtyKg      DECIMAL(18,2)  NOT NULL DEFAULT 0,
+    ClosedOnHandKg     DECIMAL(18,2)  NOT NULL DEFAULT 0,
+    ReportDate         DATE           NOT NULL DEFAULT CAST(SYSDATETIME() AS DATE),
+    CreatedAt          DATETIME2(0)   NOT NULL DEFAULT SYSDATETIME(),
+    CONSTRAINT PK_fact_Inventory_Movement PRIMARY KEY CLUSTERED (MovementID)
+);
+CREATE NONCLUSTERED INDEX IX_InvMovement_Date_Factory ON dbo.fact_Inventory_Movement(ReportDate, FactoryCode, MaterialCode);
+PRINT N'>>> Đã tạo bảng dbo.fact_Inventory_Movement';
+GO
+
 -- 2.4. Bảng Đơn Hàng Mua Mở D365 FO (fact_Purchase_Order & fact_PO_Detail)
 CREATE TABLE dbo.fact_Purchase_Order (
     PO_Header_ID          NVARCHAR(50)   NOT NULL,

@@ -468,31 +468,63 @@ export const systemFieldsByType: Record<ImportDataType, SystemFieldDefinition[]>
     }
   ],
 
-  // ── Operational Fact: Usage ───────────────────────────────────────────────
+  // ── Operational Fact: Usage & Movement ───────────────────────────────────
   Usage: [
     {
       field: 'FactoryCode',
-      label_VN: 'Mã Nhà Máy',
-      label_EN: 'Factory Code',
+      label_VN: 'Mã Nhà Máy / OU / Site',
+      label_EN: 'Factory Code / OU',
       required: true,
       type: 'string',
-      aliases: ['site', 'nm', 'nhà máy', 'factory', 'plant']
+      aliases: ['ou', 'org code', 'site', 'nm', 'nhà máy', 'factory', 'plant', 'warehouse']
     },
     {
       field: 'MaterialCode',
-      label_VN: 'Mã Nguyên Liệu',
-      label_EN: 'Material Code',
+      label_VN: 'Mã Nguyên Liệu / ITEM CODE',
+      label_EN: 'Material Code / Item Code',
       required: true,
       type: 'string',
-      aliases: ['item number', 'mã hàng', 'mã nl', 'materialcode', 'itemid']
+      aliases: ['item code', 'item number', 'mã hàng', 'mã nl', 'materialcode', 'itemid']
+    },
+    {
+      field: 'MaterialName',
+      label_VN: 'Tên Nguyên Liệu / ITEM NAME',
+      label_EN: 'Material Name',
+      required: false,
+      type: 'string',
+      aliases: ['item name', 'tên hàng', 'tên nguyên liệu', 'item description']
     },
     {
       field: 'ActualQty',
-      label_VN: 'Số Lượng Tiêu Hao (Kg)',
-      label_EN: 'Actual Consumed Qty (Kg)',
+      label_VN: 'Lượng Dùng Sản Xuất (WIP Issue Qty)',
+      label_EN: 'WIP Issue Qty (Kg)',
       required: true,
       type: 'number',
-      aliases: ['actual consumption', 'thực xuất', 'tiêu hao (kg)', 'actualqty', 'actual qty', 'lượng dùng (kg)', 'consumed', 'xuất kho']
+      aliases: ['wip issue qty', 'wip issue', 'lượng dùng sx', 'actual consumption', 'thực xuất', 'tiêu hao (kg)', 'actualqty', 'actual qty', 'lượng dùng (kg)', 'consumed', 'xuất kho']
+    },
+    {
+      field: 'BeginOnHandKg',
+      label_VN: 'Tồn Đầu Kỳ (Begin Onhand Qty)',
+      label_EN: 'Begin Onhand Qty (Kg)',
+      required: false,
+      type: 'number',
+      aliases: ['begin onhand qty', 'tồn đầu', 'begin onhand', 'tồn đầu kỳ']
+    },
+    {
+      field: 'ReceivedQtyKg',
+      label_VN: 'Nhập Trong Kỳ (Qty Receive)',
+      label_EN: 'Qty Receive (Kg)',
+      required: false,
+      type: 'number',
+      aliases: ['qty receive', 'nhập kho', 'lượng nhập', 'qty received']
+    },
+    {
+      field: 'ClosedOnHandKg',
+      label_VN: 'Tồn Cuối Kỳ (Closed Onhand Qty)',
+      label_EN: 'Closed Onhand Qty (Kg)',
+      required: false,
+      type: 'number',
+      aliases: ['closed onhand qty', 'tồn cuối', 'closed onhand', 'tồn cuối kỳ']
     },
     {
       field: 'LogDate',
@@ -504,55 +536,135 @@ export const systemFieldsByType: Record<ImportDataType, SystemFieldDefinition[]>
     }
   ],
 
-  // ── Operational Fact: PO_Inbound ──────────────────────────────────────────
+  // ── Operational Fact: PO_Inbound & Pending ────────────────────────────────
   PO_Inbound: [
     {
       field: 'PONumber',
-      label_VN: 'Mã Đơn Mua Hàng (PO Number)',
-      label_EN: 'Purchase Order Number',
+      label_VN: 'Mã Đơn Mua Hàng / Purchase order/PAG',
+      label_EN: 'Purchase Order / PAG Number',
       required: true,
       type: 'string',
-      aliases: ['po number', 'ponumber', 'số po', 'mã po', 'purchid', 'đơn hàng']
+      aliases: ['purchase order/pag', 'purchase order', 'po number', 'ponumber', 'số po', 'mã po', 'purchid', 'đơn hàng']
     },
     {
       field: 'FactoryCode',
-      label_VN: 'Nhà Máy Nhận Hàng',
-      label_EN: 'Receiving Factory Code',
+      label_VN: 'Nhà Máy / Điểm Kho (Site / Warehouse)',
+      label_EN: 'Receiving Site / Warehouse',
       required: true,
       type: 'string',
-      aliases: ['site', 'nm', 'nhà máy', 'destination', 'receiving plant', 'kho đích']
+      aliases: ['site', 'warehouse', 'nm', 'nhà máy', 'destination', 'receiving plant', 'kho đích']
+    },
+    {
+      field: 'SupplierCode',
+      label_VN: 'Mã Nhà Cung Cấp / Vendor account',
+      label_EN: 'Vendor Account',
+      required: false,
+      type: 'string',
+      aliases: ['vendor account', 'mã ncc', 'vendor', 'mã nhà cung cấp', 'vendoraccount']
+    },
+    {
+      field: 'SupplierName',
+      label_VN: 'Tên Nhà Cung Cấp / VENDOR_NAME',
+      label_EN: 'Vendor Name',
+      required: false,
+      type: 'string',
+      aliases: ['vendor_name', 'vendor name', 'tên nhà cung cấp', 'tên ncc', 'supplier name']
+    },
+    {
+      field: 'PurchaserName',
+      label_VN: 'Người Tạo PO / Created by',
+      label_EN: 'Created By / Purchaser',
+      required: false,
+      type: 'string',
+      aliases: ['created by', 'pic', 'purchaser', 'người tạo', 'chuyên viên']
     },
     {
       field: 'MaterialCode',
-      label_VN: 'Mã Nguyên Liệu',
-      label_EN: 'Material Code',
+      label_VN: 'Mã Nguyên Liệu / Item number',
+      label_EN: 'Item Number / Material Code',
       required: true,
       type: 'string',
-      aliases: ['item number', 'mã hàng', 'mã nl', 'materialcode', 'itemid']
+      aliases: ['item number', 'item code', 'mã hàng', 'mã nl', 'materialcode', 'itemid']
+    },
+    {
+      field: 'MaterialName',
+      label_VN: 'Tên Nguyên Liệu / Item Name',
+      label_EN: 'Item Name',
+      required: false,
+      type: 'string',
+      aliases: ['item name', 'tên hàng', 'tên nguyên liệu']
+    },
+    {
+      field: 'UnitPriceVND',
+      label_VN: 'Đơn Giá Mua / Unit price (VNĐ)',
+      label_EN: 'Unit Price (VND)',
+      required: false,
+      type: 'number',
+      aliases: ['unit price', 'đơn giá', 'giá mua', 'đơn giá vnd', 'unitprice']
     },
     {
       field: 'OrderQty',
-      label_VN: 'Khối Lượng Đặt (Kg)',
-      label_EN: 'Order Qty (Kg)',
+      label_VN: 'Tổng Lượng Đặt / Quantity (Kg)',
+      label_EN: 'Order Quantity (Kg)',
       required: true,
       type: 'number',
-      aliases: ['order qty', 'số lượng đặt', 'orderqty', 'purchqty', 'khối lượng đặt (kg)']
+      aliases: ['quantity', 'order qty', 'số lượng đặt', 'orderqty', 'purchqty', 'khối lượng đặt (kg)']
+    },
+    {
+      field: 'ReceivedQty',
+      label_VN: 'Đã Giao / Received/Release (Kg)',
+      label_EN: 'Received / Released Qty (Kg)',
+      required: false,
+      type: 'number',
+      aliases: ['received/release', 'received', 'đã nhận', 'đã giao', 'received qty']
+    },
+    {
+      field: 'PendingQty',
+      label_VN: 'Lượng Pending Còn Lại (Deliver remainder)',
+      label_EN: 'Deliver Remainder / Pending Qty (Kg)',
+      required: false,
+      type: 'number',
+      aliases: ['deliver remainder', 'lượng pending', 'còn lại', 'pending qty', 'lượng chưa về', 'deliverremainder']
     },
     {
       field: 'ExpectedDate',
-      label_VN: 'Ngày Dự Kiến Về (ETA)',
-      label_EN: 'Expected Arrival Date (ETA)',
+      label_VN: 'Ngày Giao Dự Kiến / Delivery date',
+      label_EN: 'Delivery Date / ETA',
       required: true,
       type: 'date',
-      aliases: ['eta', 'expected date', 'ngày về dự kiến', 'deliverydate', 'hạn giao hàng', 'confirmeddate']
+      aliases: ['delivery date', 'deliverydate', 'eta', 'expected date', 'ngày về dự kiến', 'hạn giao hàng', 'confirmeddate']
     },
     {
-      field: 'TruckPlate',
-      label_VN: 'Biển Số Xe / Container',
-      label_EN: 'Truck Plate / Container No',
+      field: 'TermsOfPayment',
+      label_VN: 'Điều Khoản Thanh Toán / Terms of payment',
+      label_EN: 'Terms of Payment',
       required: false,
       type: 'string',
-      aliases: ['truck plate', 'biển số xe', 'xe tải', 'container', 'số xe', 'containerno']
+      aliases: ['terms of payment', 'điều khoản thanh toán', 'payment terms', 'terms']
+    },
+    {
+      field: 'Incoterm',
+      label_VN: 'Điều Kiện Thương Mại / Incoterm',
+      label_EN: 'Incoterm (DDP/EXW/FOB)',
+      required: false,
+      type: 'string',
+      aliases: ['incoterm', 'điều kiện giao hàng']
+    },
+    {
+      field: 'PAGNumber',
+      label_VN: 'Hợp Đồng Khung / Purchase agreement number',
+      label_EN: 'Purchase Agreement Number',
+      required: false,
+      type: 'string',
+      aliases: ['purchase agreement number', 'pag', 'số hợp đồng', 'hợp đồng khung']
+    },
+    {
+      field: 'Notes',
+      label_VN: 'Ghi Chú Đơn Hàng / Note(PO-HD)',
+      label_EN: 'PO Notes / Remarks',
+      required: false,
+      type: 'string',
+      aliases: ['note(po-hd)', 'po notes', 'ghi chú', 'notes', 'ghi chú po']
     }
   ]
 };
