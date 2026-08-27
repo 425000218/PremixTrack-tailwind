@@ -115,10 +115,20 @@ export const PositionMatrixView: React.FC<PositionMatrixViewProps> = ({
   };
 
   // Run AI Advisor Analysis specifically on Position Matrix
-  const handleRunAiAnalysis = async () => {
+  const handleRunAiAnalysis = async (style: string = 'CONCISE') => {
     setIsAiModalOpen(true);
     setAiLoading(true);
     setAiAnalysisText('');
+    
+    let styleInstruction = '';
+    if (style === 'CONCISE') {
+      styleInstruction = 'Yêu cầu: Trả lời SIÊU SÚC TÍCH theo định dạng 3 khối Bento (Điểm nóng cạn hàng, Sơ đồ điều chuyển có mũi tên ➔, Hành động mua hàng). Tối đa 15 dòng, không viết mở bài dài dòng.';
+    } else if (style === 'STANDARD') {
+      styleInstruction = 'Yêu cầu: Trả lời theo định dạng Tiêu chuẩn có bảng số liệu tóm tắt và 2 phương án điều chuyển cụ thể.';
+    } else {
+      styleInstruction = 'Yêu cầu: Trả lời dưới dạng Báo cáo chuyên sâu toàn diện 4 mục chi tiết.';
+    }
+
     try {
       const res = await fetch('/api/ai/advisor', {
         method: 'POST',
@@ -126,7 +136,7 @@ export const PositionMatrixView: React.FC<PositionMatrixViewProps> = ({
         body: JSON.stringify({
           snapshotDate,
           mode: 'POSITION_SCM_ANALYSIS',
-          prompt: `Hãy phân tích toàn diện Ma Trận Vị Thế Cung Ứng (Position Matrix Cut-off: ${snapshotDate}) cho 2 miền Nam - Bắc. Xác định các nhà máy có nguy cơ dừng chuyền trong 7 ngày tới và lập phương án điều chuyển nội bộ giữa các nhà máy có tồn kho cao sang các nhà máy thiếu hụt khẩn cấp.`
+          prompt: `Hãy phân tích Ma Trận Vị Thế Cung Ứng (Position Matrix Cut-off: ${snapshotDate}) cho 2 miền Nam - Bắc. ${styleInstruction}`
         })
       });
       const result = await res.json();
@@ -842,21 +852,78 @@ export const PositionMatrixView: React.FC<PositionMatrixViewProps> = ({
               </button>
             </div>
 
-            {/* Modal Body with formatted Markdown / Text */}
+            {/* AI Advisor Response Style Switcher */}
+            <div className="flex items-center justify-between bg-slate-950 p-2 rounded-xl border border-slate-800 text-xs">
+              <span className="text-slate-400 font-medium ml-2">Độ dài & Phong cách:</span>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleRunAiAnalysis('CONCISE');
+                  }}
+                  className="px-3 py-1 rounded-lg text-xs font-semibold bg-blue-600/20 text-blue-300 border border-blue-500/30 hover:bg-blue-600 hover:text-white transition-all flex items-center gap-1"
+                >
+                  ⚡ Siêu Súc Tích
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleRunAiAnalysis('STANDARD');
+                  }}
+                  className="px-3 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 transition-all flex items-center gap-1"
+                >
+                  📊 Tiêu Chuẩn
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleRunAiAnalysis('DETAILED');
+                  }}
+                  className="px-3 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 transition-all flex items-center gap-1"
+                >
+                  📑 Chi Tiết
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body with formatted Modern Bento Cards */}
             <div className="flex-1 overflow-y-auto space-y-4 pr-1 text-xs leading-relaxed text-slate-200">
               {aiLoading ? (
                 <div className="flex flex-col items-center justify-center py-16 space-y-3">
                   <RefreshCw className="w-8 h-8 text-blue-400 animate-spin" />
                   <p className="text-sm font-semibold text-slate-300">
-                    Gemini AI đang tổng hợp số liệu và lập phương án điều phối...
+                    Gemini AI đang tổng hợp số liệu và phân tích thẻ Bento...
                   </p>
                   <p className="text-xs text-slate-500">
                     Đang tính toán cự ly vận chuyển và đối chiếu ngày cạn hàng SOH...
                   </p>
                 </div>
               ) : (
-                <div className="bg-slate-950 p-5 rounded-xl border border-slate-800 space-y-4 whitespace-pre-wrap font-sans">
-                  {aiAnalysisText}
+                <div className="space-y-4">
+                  {/* Actionable Quick Shortcut Banner */}
+                  <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-emerald-300">
+                      <ArrowRightLeft className="w-4 h-4 text-emerald-400" />
+                      <span>Có đề xuất điều chuyển tối ưu cự ly giữa các nhà máy.</span>
+                    </div>
+                    {onNavigateTab && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsAiModalOpen(false);
+                          onNavigateTab('transfers');
+                        }}
+                        className="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-all shadow"
+                      >
+                        Tạo Lệnh Điều Xe Ngay ➔
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Render formatted AI response cleanly */}
+                  <div className="bg-slate-950 p-5 rounded-xl border border-slate-800 space-y-3 whitespace-pre-wrap font-sans text-slate-200 leading-relaxed text-[13px]">
+                    {aiAnalysisText}
+                  </div>
                 </div>
               )}
             </div>
@@ -865,12 +932,12 @@ export const PositionMatrixView: React.FC<PositionMatrixViewProps> = ({
             <div className="flex items-center justify-between pt-4 border-t border-slate-800">
               <div className="text-[11px] text-slate-500 flex items-center gap-1.5">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                Dữ liệu được nạp trực tiếp từ MS SQL Server 2022
+                Dữ liệu nạp từ MS SQL Server 2022 | Mô hình Google Gemini 3.6 Flash
               </div>
               <div className="flex items-center gap-3">
                 <button
                   type="button"
-                  onClick={handleRunAiAnalysis}
+                  onClick={() => handleRunAiAnalysis()}
                   disabled={aiLoading}
                   className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition-all border border-slate-700"
                 >
