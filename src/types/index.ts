@@ -242,18 +242,35 @@ export interface Fact_PO_Detail {
   CoverDate?: string;
 }
 
-export interface Fact_Inbound_Schedule {
-  ScheduleID: string;
-  PODetailID: string;
-  ExpectedDate: string; // ETA
-  PlannedQty: number;
-  TruckPlate: string;
-  DriverName: string;
-  DriverPhone: string;
-  Status: 'Scheduled' | 'In_Transit' | 'Arrived' | 'Delayed' | 'Unloaded';
-  ContainerNo?: string;
-  PortOfDischarge?: string;
+export interface Fact_Position_Snapshot {
+  PositionID: string;
+  SnapshotDate: string; // e.g. '2026-08-25'
+  CutoffWorkingDays: number; // e.g. 22
+  StandardMonthDays: number; // e.g. 28
+  Region: 'SOUTH' | 'NORTH' | 'CENTRAL';
+  RMGroup: string; // 'Macro' | 'Micro'
+  Division: 'Livestock' | 'AQUA';
+  FactoryCode: string;
+  MaterialCode: string;
+  MaterialName: string;
+  PIC: string;
+  SOHQtyKg: number;
+  MTD_Production_PrevMonth_Kg: number;
+  MTD_Production_CurrMonth_Kg: number;
+  MonthlyUsageForecastKg: number;
+  PctUsedUsage: number;
+  DailyStandardUsageKg: number;
+  DOI_Standard_Days: number;
+  DOI_Actual_MTD_Days: number;
+  StockoutDateSOH: string;
+  EmergencyBufferQtyKg: number;
+  DOI_AfterBuffer_Days: number;
+  PO_PendingInboundKg: number;
+  TotalPipeline_DOI_Days: number;
+  MaxProtectedDate: string;
 }
+
+export type PositionHeaderMode = 'Enterprise' | 'Legacy';
 
 export type ImportDataType =
   | 'Material'

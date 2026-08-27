@@ -423,6 +423,40 @@ CREATE TABLE dbo.sys_Audit_Log (
 PRINT N'>>> Đã tạo bảng dbo.sys_Audit_Log';
 GO
 
+-- 3.2. Bảng Ma Trận Position Toàn Diện Chuỗi Cung Ứng (fact_Position_Snapshot)
+CREATE TABLE dbo.fact_Position_Snapshot (
+    PositionID                    NVARCHAR(100)  NOT NULL,
+    SnapshotDate                  DATE           NOT NULL,
+    CutoffWorkingDays             INT            NOT NULL DEFAULT 22,
+    StandardMonthDays             INT            NOT NULL DEFAULT 28,
+    Region                        NVARCHAR(50)   NOT NULL,
+    RMGroup                       NVARCHAR(50)   NOT NULL DEFAULT N'Macro',
+    Division                      NVARCHAR(50)   NOT NULL DEFAULT N'Livestock',
+    FactoryCode                   NVARCHAR(50)   NOT NULL,
+    MaterialCode                  NVARCHAR(50)   NOT NULL,
+    MaterialName                  NVARCHAR(250)  NOT NULL,
+    PIC                           NVARCHAR(100)  NOT NULL DEFAULT N'Mina',
+    SOHQtyKg                      DECIMAL(18,2)  NOT NULL DEFAULT 0,
+    MTD_Production_PrevMonth_Kg   DECIMAL(18,2)  NOT NULL DEFAULT 0,
+    MTD_Production_CurrMonth_Kg   DECIMAL(18,2)  NOT NULL DEFAULT 0,
+    MonthlyUsageForecastKg        DECIMAL(18,2)  NOT NULL DEFAULT 0,
+    PctUsedUsage                  DECIMAL(18,4)  NULL,
+    DailyStandardUsageKg          DECIMAL(18,2)  NULL,
+    DOI_Standard_Days             DECIMAL(18,1)  NULL,
+    DOI_Actual_MTD_Days           DECIMAL(18,1)  NULL,
+    StockoutDateSOH               DATE           NULL,
+    EmergencyBufferQtyKg          DECIMAL(18,2)  NULL,
+    DOI_AfterBuffer_Days          DECIMAL(18,1)  NULL,
+    PO_PendingInboundKg           DECIMAL(18,2)  NOT NULL DEFAULT 0,
+    TotalPipeline_DOI_Days        DECIMAL(18,1)  NULL,
+    MaxProtectedDate              DATE           NULL,
+    CreatedAt                     DATETIME2(0)   NOT NULL DEFAULT SYSDATETIME(),
+    CONSTRAINT PK_fact_Position_Snapshot PRIMARY KEY CLUSTERED (PositionID)
+);
+CREATE NONCLUSTERED INDEX IX_Position_Date_Fac_Mat ON dbo.fact_Position_Snapshot(SnapshotDate, FactoryCode, MaterialCode);
+PRINT N'>>> Đã tạo bảng dbo.fact_Position_Snapshot';
+GO
+
 PRINT N'============================================================================';
 PRINT N'>>> TẤT CẢ CÁC BẢNG TRONG PREMIXTRACK DB ĐÃ ĐƯỢC TẠO HOÀN CHỈNH VÀ CHẶT CHẼ!';
 PRINT N'============================================================================';
