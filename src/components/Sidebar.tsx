@@ -11,6 +11,7 @@ import {
   Globe,
   Radio,
   X,
+  ShieldCheck,
 } from 'lucide-react';
 import { Language } from '../types';
 
@@ -57,6 +58,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
       label_VN: 'Tồn Kho & Chỉ Số DOI',
       label_EN: 'Stock & DOI Matrix',
       icon: Layers,
+    },
+    {
+      id: 'position-matrix',
+      label_VN: 'Vị Thế Cung Ứng (Position)',
+      label_EN: 'Supply Position Matrix',
+      icon: ShieldCheck,
+      badge: 'D365 Live',
+      badgeColor: 'bg-emerald-500 text-slate-950 font-bold',
     },
     {
       id: 'transfers',

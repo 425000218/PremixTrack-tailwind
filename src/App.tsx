@@ -13,6 +13,7 @@ import { InterFactoryTransfers } from './components/InterFactoryTransfers';
 import { InboundLogistics } from './components/InboundLogistics';
 import { MasterDataManagement } from './components/MasterDataManagement';
 import { ForecastManagement } from './components/ForecastManagement';
+import { PositionMatrixView } from './components/PositionMatrixView';
 import { AiSupplyChainAdvisor } from './components/AiSupplyChainAdvisor';
 
 import {
@@ -482,6 +483,13 @@ export function App() {
                 materials={materials}
                 inventorySOH={inventorySOH}
                 poDetails={poDetails}
+                language={language}
+                onNavigateTab={(tab) => setCurrentTab(tab)}
+              />
+            )}
+
+            {currentTab === 'position-matrix' && (
+              <PositionMatrixView
                 language={language}
                 onNavigateTab={(tab) => setCurrentTab(tab)}
               />
