@@ -534,7 +534,7 @@ async function startServer() {
   // AI Advisor Endpoint with Thinking Mode
   app.post('/api/ai/advisor', async (req, res) => {
     try {
-      const { prompt, contextData, mode } = req.body;
+      const { prompt, contextData, mode, snapshotDate = '2026-08-25' } = req.body;
       const client = getGeminiClient();
 
       if (!client) {
@@ -545,22 +545,35 @@ async function startServer() {
         });
       }
 
-      const systemInstruction = `Bạn là Chuyên gia Tư vấn Chuỗi Cung Ứng & Điều Phối Nguyên Liệu Premix Thức Ăn Chăn Nuôi Cao Cấp (Premix & Feed Mill Supply Chain AI Specialist) của PremixTrack.
-Nhiệm vụ của bạn là phân tích dữ liệu tồn kho thực tế, dự báo nhu cầu (Forecast D365 FO), đơn hàng đang về (Inbound PO), ngày che phủ (DOI - Days of Inventory), và quy trình chuyển đổi mã nguyên liệu (Planned Substitution).
+      // Automatically query latest Position Matrix from MS SQL Server if available
+      const { executeQuery } = await import('./server/db/queryHelper');
+      const posResult = await executeQuery(
+        'SELECT Region, FactoryCode, MaterialCode, MaterialName, PIC, SOHQtyKg, DailyStandardUsageKg, DOI_Standard_Days, DOI_Actual_MTD_Days, StockoutDateSOH, EmergencyBufferQtyKg, PO_PendingInboundKg, TotalPipeline_DOI_Days, MaxProtectedDate FROM dbo.fact_Position_Snapshot WHERE SnapshotDate = @SnapshotDate ORDER BY MaterialCode, FactoryCode',
+        { SnapshotDate: snapshotDate }
+      );
+      const positionSnapshotData = posResult.success && posResult.data.length > 0 ? posResult.data : null;
+
+      const systemInstruction = `Bạn là Chuyên gia Tư vấn Chuỗi Cung Ứng & Điều Phối Nguyên Liệu Premix & Thức Ăn Gia Súc Cao Cấp (Premix & Feed Mill Supply Chain AI Specialist) của PremixTrack.
+Nhiệm vụ của bạn là phân tích dữ liệu tồn kho thực tế, dự báo nhu cầu (Forecast D365 FO), Ma trận Vị thế Cung ứng (Position Matrix South & North), đơn hàng đang về (Inbound PO), ngày che phủ (DOI - Days of Inventory), và quy trình điều chuyển nội bộ.
 
 Quy tắc phân tích:
-1. Đánh giá tính cấp thiết dựa trên DOI (DOI < 7 ngày = CỰC KỲ NGUY CẤP, DOI < Safety Stock = CẢNH BÁO THIẾU, DOI > 35 ngày = DƯ THỪA TỒN KHO).
-2. Khi đề xuất điều chuyển nội bộ giữa các nhà máy, ưu tiên khoảng cách địa lý ngắn (ví dụ: Bình Dương DBD <-> Đồng Nai DDN chỉ 35km; Vĩnh Long DVL <-> Tiền Giang DTI chỉ 65km; Miền Bắc Hưng Yên DHY <-> Bắc Ninh DBN chỉ 45km).
-3. Đề xuất số lượng đặt hàng cụ thể (Reorder Qty) dựa trên Lead time nhà cung cấp và Safety Stock Days.
-4. Hướng dẫn lộ trình xả tồn và chuyển đổi công thức đối với các mã "Stop_Usage" (Ví dụ: Vitamin AD3E mã cũ sang mã mới).
-5. Trả lời bằng tiếng Việt chuyên nghiệp, súc tích, cấu trúc rõ ràng với các mục (Tình trạng báo động, Nguyên nhân gốc rễ, Giải pháp hành động ngay lập tức, Khuyến nghị dài hạn).`;
+1. Đánh giá tính cấp thiết dựa trên DOI (DOI < 7 ngày = 🚨 CỰC KỲ NGUY CẤP / CẠN HÀNG, 7 <= DOI <= 15 ngày = ⚠️ CẢNH BÁO, DOI > 35 ngày = 🟢 DƯ THỪA TỒN KHO).
+2. Khi phân tích Ma trận Vị thế Cung ứng (Position Matrix):
+   - Đánh giá Ngày Cạn Hàng SOH (Stockout Date SOH) và đối chiếu với Lượng Đề Xuất Bù Đắp (Arrange More).
+   - Đánh giá Lượng PO Pending đang về có kịp che phủ trước ngày cạn hàng không.
+   - Khi có nhà máy cạn hàng (ví dụ: Bắp 2579 tại DBD có 0.5 ngày DOI, DDN có 2.2 ngày DOI) và nhà máy khác có tồn an toàn, lập tức đề xuất phương án điều chuyển nội bộ hoặc đôn đốc giao gấp đơn PO.
+3. Khi đề xuất điều chuyển nội bộ giữa các nhà máy, ưu tiên khoảng cách địa lý ngắn (ví dụ: Bình Dương DBD <-> Đồng Nai DDN chỉ 35km; Vĩnh Long DVL <-> Tiền Giang DTI chỉ 65km; Hưng Yên <-> Bắc Ninh chỉ 45km; Miền Bắc Nghệ An DNA <-> Vĩnh Phúc DVP).
+4. Trả lời bằng tiếng Việt chuyên nghiệp, súc tích, cấu trúc rõ ràng với các mục (1. Tình trạng báo động cạn hàng, 2. Phân tích nguyên nhân & Ngày hết hàng, 3. Kế hoạch hành động điều phối ngay lập tức, 4. Khuyến nghị đơn hàng dài hạn).`;
 
-      const userContent = `Dữ liệu hệ thống PremixTrack hiện tại:
-${JSON.stringify(contextData, null, 2)}
+      const userContent = `Dữ liệu Ma Trận Vị Thế Cung Ứng Thực Tế (Position Matrix Cut-off: ${snapshotDate}):
+${positionSnapshotData ? JSON.stringify(positionSnapshotData, null, 2) : '(Sử dụng dữ liệu contextData)'}
+
+Dữ liệu bổ sung khác:
+${JSON.stringify(contextData || {}, null, 2)}
 
 Yêu cầu phân tích:
-Chế độ: ${mode || 'GENERAL_ANALYSIS'}
-Câu hỏi / Yêu cầu cụ thể: ${prompt || 'Hãy thực hiện đánh giá toàn diện chuỗi cung ứng nguyên liệu premix cho các nhà máy.'}`;
+Chế độ: ${mode || 'POSITION_SCM_ANALYSIS'}
+Câu hỏi / Yêu cầu cụ thể: ${prompt || 'Hãy phân tích chi tiết Ma trận Vị thế Cung ứng (Position Matrix) ngày 25/08/2026, chỉ rõ các nhà máy đang có nguy cơ cạn hàng khẩn cấp và đề xuất kế hoạch điều phối nội bộ cũng như xả tồn kho hiệu quả nhất.'}`;
 
       let responseText = '';
       const candidateModels = ['gemini-3.6-flash', 'gemini-flash-latest', 'gemini-3.5-flash', 'gemini-3.7-flash'];

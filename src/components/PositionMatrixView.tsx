@@ -54,6 +54,11 @@ export const PositionMatrixView: React.FC<PositionMatrixViewProps> = ({
   // Selected Item for Detail Modal
   const [selectedItem, setSelectedItem] = useState<Fact_Position_Snapshot | null>(null);
 
+  // AI Analysis State
+  const [isAiModalOpen, setIsAiModalOpen] = useState<boolean>(false);
+  const [aiLoading, setAiLoading] = useState<boolean>(false);
+  const [aiAnalysisText, setAiAnalysisText] = useState<string>('');
+
   // Fetch Position Matrix from API
   const fetchPositionData = async () => {
     setLoading(true);
@@ -106,6 +111,36 @@ export const PositionMatrixView: React.FC<PositionMatrixViewProps> = ({
       console.error('Error recalculating position:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Run AI Advisor Analysis specifically on Position Matrix
+  const handleRunAiAnalysis = async () => {
+    setIsAiModalOpen(true);
+    setAiLoading(true);
+    setAiAnalysisText('');
+    try {
+      const res = await fetch('/api/ai/advisor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          snapshotDate,
+          mode: 'POSITION_SCM_ANALYSIS',
+          prompt: `Hãy phân tích toàn diện Ma Trận Vị Thế Cung Ứng (Position Matrix Cut-off: ${snapshotDate}) cho 2 miền Nam - Bắc. Xác định các nhà máy có nguy cơ dừng chuyền trong 7 ngày tới và lập phương án điều chuyển nội bộ giữa các nhà máy có tồn kho cao sang các nhà máy thiếu hụt khẩn cấp.`
+        })
+      });
+      const result = await res.json();
+      if (result.success && result.text) {
+        setAiAnalysisText(result.text);
+      } else if (result.fallbackAnswer) {
+        setAiAnalysisText(result.fallbackAnswer);
+      } else {
+        setAiAnalysisText('Không thể kết nối đến Gemini AI. Vui lòng kiểm tra API Key trong cấu hình hệ thống.');
+      }
+    } catch (err: any) {
+      setAiAnalysisText('Lỗi kết nối AI Advisor: ' + err.message);
+    } finally {
+      setAiLoading(false);
     }
   };
 
@@ -214,6 +249,16 @@ export const PositionMatrixView: React.FC<PositionMatrixViewProps> = ({
                 Nguyên Bản D365 Legacy
               </button>
             </div>
+
+            {/* AI Advisor Button */}
+            <button
+              type="button"
+              onClick={handleRunAiAnalysis}
+              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-semibold shadow-lg shadow-blue-500/20 flex items-center gap-1.5 transition-all border border-blue-400/30 animate-pulse hover:animate-none"
+            >
+              <Sparkles className="w-4 h-4 text-amber-300" />
+              Phân Tích Bằng AI
+            </button>
 
             {/* Recalculate Parameter Settings Button */}
             <button
@@ -765,6 +810,81 @@ export const PositionMatrixView: React.FC<PositionMatrixViewProps> = ({
               >
                 Đóng
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* AI Advisor Full Analysis Modal */}
+      {isAiModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-3xl w-full p-6 shadow-2xl space-y-5 max-h-[85vh] flex flex-col">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400">
+                  <Sparkles className="w-5 h-5 text-amber-300" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-100 flex items-center gap-2">
+                    Báo Cáo Cố Vấn Chuỗi Cung Ứng Thông Minh (Gemini 3.6 Flash)
+                  </h3>
+                  <p className="text-xs text-slate-400">
+                    Phân tích toàn diện Ma trận Vị thế Cung ứng ngày {snapshotDate} cho 2 miền Nam - Bắc
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAiModalOpen(false)}
+                className="text-slate-400 hover:text-slate-200 text-2xl font-bold"
+              >
+                &times;
+              </button>
+            </div>
+
+            {/* Modal Body with formatted Markdown / Text */}
+            <div className="flex-1 overflow-y-auto space-y-4 pr-1 text-xs leading-relaxed text-slate-200">
+              {aiLoading ? (
+                <div className="flex flex-col items-center justify-center py-16 space-y-3">
+                  <RefreshCw className="w-8 h-8 text-blue-400 animate-spin" />
+                  <p className="text-sm font-semibold text-slate-300">
+                    Gemini AI đang tổng hợp số liệu và lập phương án điều phối...
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    Đang tính toán cự ly vận chuyển và đối chiếu ngày cạn hàng SOH...
+                  </p>
+                </div>
+              ) : (
+                <div className="bg-slate-950 p-5 rounded-xl border border-slate-800 space-y-4 whitespace-pre-wrap font-sans">
+                  {aiAnalysisText}
+                </div>
+              )}
+            </div>
+
+            {/* Footer Actions */}
+            <div className="flex items-center justify-between pt-4 border-t border-slate-800">
+              <div className="text-[11px] text-slate-500 flex items-center gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                Dữ liệu được nạp trực tiếp từ MS SQL Server 2022
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={handleRunAiAnalysis}
+                  disabled={aiLoading}
+                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition-all border border-slate-700"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${aiLoading ? 'animate-spin' : ''}`} />
+                  Phân Tích Lại
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsAiModalOpen(false)}
+                  className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-md"
+                >
+                  Hoàn Tất
+                </button>
+              </div>
             </div>
           </div>
         </div>
