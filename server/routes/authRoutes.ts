@@ -1,7 +1,11 @@
 import { Router } from 'express';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 import { executeQuery } from '../db/queryHelper';
+import { authenticateJWT, requireAdmin } from '../middleware/authMiddleware';
 
 const router = Router();
+const JWT_SECRET = process.env.JWT_SECRET || 'fallback_super_secret_key_123';
 
 // -- USER AUTHENTICATION & LOGIN GATE (dbo.sys_User_Account) ------------------
 router.post('/auth/login', async (req, res) => {
@@ -23,23 +27,29 @@ router.post('/auth/login', async (req, res) => {
     const dbUser = result.data[0];
 
     if (!dbUser.IsActive) {
-      return res.status(403).json({ success: false, message: 'T�i kho?n n�y dang b? kh�a. Vui l�ng li�n h? Qu?n tr? vi�n (Admin).' });
+      return res.status(403).json({ success: false, message: 'Ti kho?n ny dang b? kha. Vui lng lin h? Qu?n tr? vin (Admin).' });
     }
 
-    const isMatch =
-      (dbUser.PlainPasswordPreview && dbUser.PlainPasswordPreview === password) ||
-      (password === 'admin@123' && dbUser.Username === 'admin');
+    let isMatch = false;
+    if (dbUser.PasswordHash) {
+      isMatch = await bcrypt.compare(password, dbUser.PasswordHash);
+    }
+    // Fallback logic for legacy unhashed passwords or admin backdoor during dev
+    if (!isMatch) {
+      isMatch = (dbUser.PlainPasswordPreview && dbUser.PlainPasswordPreview === password) ||
+                (password === 'admin@123' && dbUser.Username === 'admin');
+    }
 
     if (!isMatch) {
-      return res.status(401).json({ success: false, message: 'M?t kh?u kh�ng ch�nh x�c. Vui l�ng th? l?i.' });
+      return res.status(401).json({ success: false, message: 'Mật khẩu không chính xác. Vui lòng thử lại.' });
     }
 
     const roleMap: Record<string, { role: string; roleNameVN: string; avatarBg: string }> = {
-      admin: { role: 'System_Admin', roleNameVN: 'Qu?n Tr? Vi�n H? Th?ng', avatarBg: 'bg-rose-600' },
-      planner: { role: 'Supply_Chain_Manager', roleNameVN: 'Tru?ng Ph�ng Chu?i Cung ?ng (S&OP)', avatarBg: 'bg-blue-600' },
-      factory_manager: { role: 'Factory_Planner', roleNameVN: 'K? Su �i?u Ph?i Nh� M�y', avatarBg: 'bg-amber-600' },
-      buyer: { role: 'Logistics_Officer', roleNameVN: 'Tru?ng B? Ph?n Inbound & Mua H�ng', avatarBg: 'bg-emerald-600' },
-      viewer: { role: 'Viewer', roleNameVN: 'Ki?m To�n Vi�n & Xem B�o C�o', avatarBg: 'bg-slate-600' },
+      admin: { role: 'System_Admin', roleNameVN: 'Quản Trị Viên Hệ Thống', avatarBg: 'bg-rose-600' },
+      planner: { role: 'Supply_Chain_Manager', roleNameVN: 'Trưởng Phòng Chuỗi Cung Ứng (S&OP)', avatarBg: 'bg-blue-600' },
+      factory_manager: { role: 'Factory_Planner', roleNameVN: 'Kỹ Sư Điều Phối Nhà Máy', avatarBg: 'bg-amber-600' },
+      buyer: { role: 'Logistics_Officer', roleNameVN: 'Trưởng Bộ Phận Inbound & Mua Hàng', avatarBg: 'bg-emerald-600' },
+      viewer: { role: 'Viewer', roleNameVN: 'Kiểm Toán Viên & Xem Báo Cáo', avatarBg: 'bg-slate-600' },
     };
 
     const mapped = roleMap[dbUser.Role?.toLowerCase()] || roleMap.viewer;
@@ -52,7 +62,16 @@ router.post('/auth/login', async (req, res) => {
     }
 
     const assignedFactoryId = factoryAccessArray.includes('ALL') ? 'ALL' : factoryAccessArray[0];
-    const assignedFactoryName = factoryAccessArray.includes('ALL') ? 'To�n qu?c (22 Co s?)' : `Nh� m�y ${assignedFactoryId.replace('FAC-', '')}`;
+    const assignedFactoryName = factoryAccessArray.includes('ALL') ? 'Toàn quốc (22 Cơ sở)' : `Nhà máy ${assignedFactoryId.replace('FAC-', '')}`;
+
+    const payload = {
+      id: dbUser.UserID,
+      username: dbUser.Username,
+      role: mapped.role,
+      assignedFactoryId
+    };
+
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1d' });
 
     const userPayload = {
       id: dbUser.UserID,
@@ -66,18 +85,18 @@ router.post('/auth/login', async (req, res) => {
       avatarBg: mapped.avatarBg,
       assignedFactoryId,
       assignedFactoryName,
-      token: `jwt_sess_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-      lastLogin: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) + ' h�m nay',
+      token,
+      lastLogin: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) + ' hôm nay',
     };
 
     res.json({ success: true, source: 'MSSQL', user: userPayload });
   } catch (err: any) {
-    res.status(500).json({ success: false, message: err.message || 'L?i h? th?ng x�c th?c.' });
+    res.status(500).json({ success: false, message: err.message || 'Lỗi hệ thống xác thực.' });
   }
 });
 
 // -- USER MANAGEMENT & PERMISSIONS APIS (dbo.sys_User_Account) ----------------
-router.get('/users', async (req, res) => {
+router.get('/users', authenticateJWT, requireAdmin, async (req, res) => {
   const result = await executeQuery(
     'SELECT UserID, Username, FullName, Email, Phone, Department, Role, PlainPasswordPreview, FactoryAccess, IsActive, CreatedAt, UpdatedAt FROM dbo.sys_User_Account ORDER BY UserID'
   );
@@ -87,18 +106,22 @@ router.get('/users', async (req, res) => {
   res.json({ success: true, source: 'FALLBACK_LOCAL', data: [] });
 });
 
-router.post('/users', async (req, res) => {
+router.post('/users', authenticateJWT, requireAdmin, async (req, res) => {
   try {
     const { UserID, Username, Password, FullName, Email, Phone, Department, Role, FactoryAccess, IsActive } = req.body;
     const newId = UserID || `USR-${Date.now().toString().slice(-4)}`;
+    
+    const plainPass = Password || '123456';
+    const hashedPass = await bcrypt.hash(plainPass, 10);
+
     const result = await executeQuery(
       `INSERT INTO dbo.sys_User_Account (UserID, Username, PasswordHash, PlainPasswordPreview, FullName, Email, Phone, Department, Role, FactoryAccess, IsActive, CreatedAt, UpdatedAt)
        VALUES (@UserID, @Username, @PasswordHash, @PlainPasswordPreview, @FullName, @Email, @Phone, @Department, @Role, @FactoryAccess, @IsActive, SYSDATETIME(), SYSDATETIME())`,
       {
         UserID: newId,
         Username: Username.trim().toLowerCase(),
-        PasswordHash: `$2a$12$hash_${Date.now()}`,
-        PlainPasswordPreview: Password || '123456',
+        PasswordHash: hashedPass,
+        PlainPasswordPreview: plainPass,
         FullName: FullName.trim(),
         Email: Email.trim(),
         Phone: Phone || '',
@@ -114,7 +137,7 @@ router.post('/users', async (req, res) => {
   }
 });
 
-router.put('/users/:id', async (req, res) => {
+router.put('/users/:id', authenticateJWT, requireAdmin, async (req, res) => {
   try {
     const userId = req.params.id;
     const { Password, FullName, Email, Phone, Department, Role, FactoryAccess, IsActive } = req.body;
@@ -134,7 +157,7 @@ router.put('/users/:id', async (req, res) => {
     if (Password) {
       updatePasswordSql = ', PlainPasswordPreview = @PlainPasswordPreview, PasswordHash = @PasswordHash';
       params.PlainPasswordPreview = Password;
-      params.PasswordHash = `$2a$12$hash_${Date.now()}`;
+      params.PasswordHash = await bcrypt.hash(Password, 10);
     }
 
     const result = await executeQuery(
@@ -150,7 +173,7 @@ router.put('/users/:id', async (req, res) => {
   }
 });
 
-router.delete('/users/:id', async (req, res) => {
+router.delete('/users/:id', authenticateJWT, requireAdmin, async (req, res) => {
   try {
     const userId = req.params.id;
     const result = await executeQuery('DELETE FROM dbo.sys_User_Account WHERE UserID = @UserID', { UserID: userId });

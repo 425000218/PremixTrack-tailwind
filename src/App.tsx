@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { fetchWithAuth } from './utils/apiClient';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { ExcelImportModal } from './components/ExcelImportModal';
@@ -127,7 +128,7 @@ export function App() {
     }
     if (!userToFind?.id && !userToFind?.username) return;
 
-    fetch('/api/users')
+    fetchWithAuth('/api/users')
       .then((res) => res.json())
       .then((data) => {
         if (data.success && Array.isArray(data.data)) {

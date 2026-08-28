@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { fetchWithAuth } from '../utils/apiClient';
 import {
   X,
   UserPlus,
@@ -75,11 +76,11 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-  // Fetch Users from MS SQL Server
+// Fetch Users from MS SQL Server
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/users');
+      const res = await fetchWithAuth('/api/users');
       const data = await res.json();
       if (data.success && data.data) {
         setUsers(data.data);
@@ -155,7 +156,7 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
       const url = isNew ? '/api/users' : `/api/users/${editingUser.UserID}`;
       const method = isNew ? 'POST' : 'PUT';
 
-      const res = await fetch(url, {
+      const res = await fetchWithAuth(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -169,7 +170,7 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
         if (onUserListChanged) onUserListChanged();
         setTimeout(() => setSuccessMsg(null), 3000);
       } else {
-        setErrorMsg(result.error || 'Có lỗi xảy ra khi lưu thông tin người dùng.');
+        setErrorMsg(result.error || result.message || 'Có lỗi xảy ra khi lưu thông tin người dùng.');
       }
     } catch (err: any) {
       setErrorMsg(err.message || 'Lỗi kết nối máy chủ SQL.');
@@ -186,13 +187,15 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
     if (!confirm(`Bạn có chắc chắn muốn xóa tài khoản "${username}" không?`)) return;
 
     try {
-      const res = await fetch(`/api/users/${userId}`, { method: 'DELETE' });
+      const res = await fetchWithAuth(`/api/users/${userId}`, { method: 'DELETE' });
       const result = await res.json();
       if (result.success) {
         setSuccessMsg(`Đã xóa tài khoản ${username} khỏi SQL Server.`);
         await fetchUsers();
         if (onUserListChanged) onUserListChanged();
         setTimeout(() => setSuccessMsg(null), 3000);
+      } else {
+        alert(result.message || 'Lỗi khi xóa tài khoản');
       }
     } catch (err) {
       alert('Lỗi khi xóa tài khoản');

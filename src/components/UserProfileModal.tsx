@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { fetchWithAuth } from '../utils/apiClient';
 import {
   X,
   User,
@@ -82,7 +83,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
     
     // Sync to MS SQL Server
     try {
-      await fetch(`/api/users/${user.id}`, {
+      await fetchWithAuth(`/api/users/${user.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -118,7 +119,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
     // Sync Password to MS SQL Server
     try {
-      const res = await fetch(`/api/users/${user.id}`, {
+      const res = await fetchWithAuth(`/api/users/${user.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
