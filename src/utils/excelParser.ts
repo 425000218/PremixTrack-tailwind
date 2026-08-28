@@ -1056,12 +1056,55 @@ export function generateSampleExcel(importType: 'Forecast' | 'SOH' | 'Usage' | '
       ['DVL', '2580007', 4800, '2026-08-15', 'PRM-AQU-051']
     ];
   } else {
-    headers = ['PO Number', 'Site', 'Item Number', 'Order Qty', 'Expected Date (ETA)', 'Truck Plate'];
+    headers = [
+      'Site',
+      'Warehouse',
+      'Vendor account',
+      'VENDOR_NAME',
+      'Group',
+      'Created by',
+      'Purchase order/PAG',
+      'Created date and time',
+      'Approval status',
+      'Purchase order status',
+      'Terms of payment',
+      'Currency',
+      'Item number',
+      'Item Name',
+      'Unit',
+      'Unit price',
+      'Quantity',
+      'Received/Release',
+      'Deliver remainder',
+      'Net amount',
+      'Received Amount',
+      'Amount Remainder',
+      'Delivery date',
+      ' Note(PO-HD) ',
+      ' PO Notes ',
+      'Purchase agreement number',
+      'Line status',
+      'Tax Group',
+      'POOL',
+      'Incoterm',
+      'Is sync',
+      'Charges group',
+      'Country of origin',
+      'Specification'
+    ];
     sampleRows = [
-      ['PO-D365-88910', 'DDN', '2580003', 20000, '2026-08-17', '51D-894.22'],
-      ['PO-D365-88911', 'DDN', '2580008', 5000, '2026-08-18', '60C-672.15'],
-      ['PO-D365-88912', 'DVL', '2580007', 8000, '2026-08-19', '64C-112.89'],
-      ['PO-D365-88913', 'DBD', '2580009', 50000, '2026-08-20', '61C-445.88']
+      ['DBD', 'DBD', '1026897', 'Công Ty TNHH Venamti', 'LOC_RM', 'Talena.Tien', 'DHV/PAG/00010895', '4/20/2026', 'Confirmed', 'Open', 'Net 60', 'VND', '3601010', 'Canthaxanthin 10%', 'Kg', 652080, 10000, 8000, 2000, 6520800000, 5216640000, 1304160000, '4/20/2026', '10mt-24.7$ Giao tháng 7 và 8', '', 'DHV/PAG/00010895', 'Effective', '', 'Feed Item', 'DDP', '0', '', 'China', ''],
+      ['DBD', 'DBD', '1035337', 'Công Ty TNHH MTV Nông Sản Ngọc Thùy', 'LOC_RM', 'Fanny.Phuong', 'DHV/PAG/00012177', '8/20/2026', 'Confirmed', 'Open', 'Net 60', 'VND', '6101603', 'CASSAVA BY-PRODUCT F>20%', 'Kg', 5200, 500000, 0, 500000, 2600000000, 0, 2600000000, '9/1/2026', 'DHV/PAG/00012177: 500mt Bã mì @5200 đ/kg ex DN/BD/LA approved 20/08/2026', '', 'DHV/PAG/00012177', 'On hold', '', 'Feed Item', 'DDP', '0', '', 'Việt Nam', ''],
+      ['DBD', 'DBD', '1030162', 'Công Ty TNHH Kinh Doanh Nông Sản Việt Nam', 'LOC_RM', 'Hebe.Quynh', 'DHV/PAG/00012203', '8/24/2026', 'Confirmed', 'Open', 'Net 30', 'VND', '1101018', 'SOYABEANMEAL 48% CP', 'Kg', 11270, 1075000, 0, 1075000, 12115250000, 0, 12115250000, '8/21/2026', '6.00289E+18', '', 'DHV/PAG/00012203', 'On hold', '', 'Feed Item', 'EXW', '0', 'A03.EXW-BULK', 'Việt Nam', ''],
+      ['DBD', 'DBD', '1026617', 'Công Ty TNHH Phát Triển Linh Long', 'LOC_RM', 'Oliver.Tuong', 'DBD/PO/000019632', '8/5/2025', 'Confirmed', 'Open', 'Net 60', 'VND', '1002101', 'CORN GLUTENFEED >20%CP', 'Kg', 4300, 280000, 180410, 99590, 1204000000, 775763000, 428237000, '8/5/2025', 'DHV/PAG/00005595', 'Delivery time in Aug', 'DHV/PAG/00005595', 'Open Order', 'NonVAT', 'Feed Item', 'DDP', 'No', '', 'China', ''],
+      ['DBD', 'DBD', '1035822', 'Công Ty TNHH Nhập Khẩu Và Phân Phối Hoa Lâm', 'LOC_RM', 'Argen.Nam', 'DBD/PO/000019788', '9/9/2025', 'Confirmed', 'Open', 'Net 60', 'VND', '3955010', 'Tilmicosin 20%', 'Kg', 276190, 260, 240, 20, 71809400, 66285600, 5523800, '9/9/2025', '15/HĐMH-2023__ giao tháng 9/2025', '', '', 'Open Order', 'VAT5-Non', 'Feed Item', 'DDP', 'No', '', '', ''],
+      ['DBD', 'DBD', '1026617', 'Công Ty TNHH Phát Triển Linh Long', 'LOC_RM', 'Oliver.Tuong', 'DBD/PO/000019968', '10/16/2025', 'Confirmed', 'Open', 'Net 60', 'VND', '1002101', 'CORN GLUTENFEED >20%CP', 'Kg', 5030, 320000, 0, 320000, 1609600000, 0, 1609600000, '10/16/2025', 'DHV/PAG/00007562', '', 'DHV/PAG/00007562', 'Open Order', 'NonVAT', 'Feed Item', 'DDP', 'Yes', '', 'China', ''],
+      ['DBD', 'DBD', '1026617', 'Công Ty TNHH Phát Triển Linh Long', 'LOC_RM', 'Oliver.Tuong', 'DBD/PO/000020076', '11/8/2025', 'Confirmed', 'Open', 'Net 60', 'VND', '1002101', 'CORN GLUTENFEED >20%CP', 'Kg', 4300, 111990, 0, 111990, 481557000, 0, 481557000, '11/8/2025', 'DHV/PAG/00005595 Thay thế 1 phần DBD/PO/000019632', '', '', 'Open Order', 'NonVAT', 'Feed Item', 'DDP', 'No', '', 'China', ''],
+      ['DBD', 'DBD', '1047471', 'Chi Nhánh Tây Bắc - Tổng Công Ty Lương Thực Miền Bắc', 'LOC_RM', 'Juliet.Ngoc', 'DBD/PO/000020270', '12/15/2025', 'Confirmed', 'Open', 'Net 30', 'VND', '1802027', 'CASSAVE WITH PEEL >67.5%STARCH', 'Kg', 4650, 500000, 171210, 303790, 2325000000, 796126500, 1412623500, '12/31/2025', 'tạm đóng 303790 kg', '', 'DHV/PAG/00006821', 'Open Order', 'NonVAT', 'Feed Item', 'DDP', 'No', '', 'Việt Nam', ''],
+      ['DBD', 'DBD', '1045802', 'Công Ty TNHH Thức Ăn Chăn Nuôi Hương Kim', 'LOC_RM', 'Argen.Nam', 'DBD/PO/000020378', '1/3/2026', 'Confirmed', 'Open', 'Net 20', 'VND', '1005100', 'RICE HULLS', 'Kg', 4400, 72000, 45156, 26844, 316800000, 198686400, 118113600, '1/3/2026', '75/HĐMH-2022 BSD 01', '', '', 'Open Order', 'NonVAT', 'Feed Item', 'DDP', 'No', '', '', ''],
+      ['DBD', 'DBD', '1047471', 'Chi Nhánh Tây Bắc - Tổng Công Ty Lương Thực Miền Bắc', 'LOC_RM', 'Juliet.Ngoc', 'DBD/PO/000020442', '1/15/2026', 'Confirmed', 'Open', 'Net 30', 'VND', '1802027', 'CASSAVE WITH PEEL >67.5%STARCH', 'Kg', 4650, 96500, 0, 91500, 448725000, 0, 425475000, '1/31/2026', 'Thay thế PO số DBD/PO/000019586', '', 'DHV/PAG/00006821', 'Open Order', 'NonVAT', 'Feed Item', 'DDP', 'Yes', '', 'Việt Nam', ''],
+      ['DBD', 'DBD', '1050186', 'Công Ty TNHH XNK Minh Trang SG', 'LOC_RM', 'Russia.Nga', 'DBD/PO/000020574', '2/9/2026', 'Confirmed', 'Open', 'Net 60', 'VND', '1012500', 'Rice DDGS', 'Kg', 7500, 1500, 1096, 404, 11250000, 8220000, 3030000, '2/9/2026', 'DHV/PAG/00008109 PK 02', '', 'DHV/PAG/00008109', 'Open Order', 'NonVAT', 'Feed Item', 'DDP', 'Yes', '', 'India', ''],
+      ['DBD', 'DBD', '1034915', 'Công Ty TNHH Kemin Industries (Việt Nam)', 'LOC_RM', 'Argen.Nam', 'DBD/PO/000020738', '3/19/2026', 'Confirmed', 'Open', 'Net 30', 'VND', '6101045', 'Mycocurb Liquid 100%', 'Kg', 42000, 34000, 19000, 15000, 1428000000, 798000000, 630000000, '3/19/2026', '04/HĐMH-2025__ giao từ tháng 3/2026_Talena', '', '', 'Open Order', 'NonVAT', 'Feed Item', 'DDP', 'No', '', 'China; Singapore', '']
     ];
   }
 

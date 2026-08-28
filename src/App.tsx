@@ -277,18 +277,23 @@ export function App() {
       setUsageLogs((prev) => [...newItems, ...prev]);
       showToast(`Đã import thành công ${newItems.length} dòng Tiêu Hao Thực Tế (Usage)!`);
     } else if (type === 'PO_Inbound') {
-      const newPODetails: Fact_PO_Detail[] = validData.map((d, i) => ({
-        PODetailID: `POD-IMP-${Date.now()}-${i}`,
-        POID: d.POID || `PO-D365-${Date.now().toString().substr(6, 4)}`,
-        FactoryID: d.ResolvedFactoryID || d.FactoryID || factories[0].FactoryID,
-        MaterialID: d.ResolvedMaterialID || d.MaterialID || materials[0].MaterialID,
-        OrderQty: Number(d.OrderQty || 10000),
-        ReceivedQty: 0,
-        RemainQty: Number(d.OrderQty || 10000),
-        UnitPriceUSD: Number(d.UnitPriceUSD || 2.5),
-      }));
+      const newPODetails: Fact_PO_Detail[] = validData.map((d, i) => {
+        const orderQty = Number(d.OrderQty || d.Quantity || 0);
+        const receivedQty = Number(d.ReceivedQty || 0);
+        const remainQty = Number(d.PendingQty || d.DeliverRemainder || d.RemainQty || (orderQty - receivedQty));
+        return {
+          PODetailID: `POD-IMP-${Date.now()}-${i}`,
+          POID: d.PONumber || d.POID || d.PurchaseOrder || `PO-D365-${Date.now().toString().substr(6, 4)}`,
+          FactoryID: d.ResolvedFactoryID || d.FactoryID || factories[0].FactoryID,
+          MaterialID: d.ResolvedMaterialID || d.MaterialID || materials[0].MaterialID,
+          OrderQty: orderQty > 0 ? orderQty : remainQty,
+          ReceivedQty: receivedQty,
+          RemainQty: remainQty > 0 ? remainQty : orderQty,
+          UnitPriceUSD: Number(d.UnitPriceUSD || (d.UnitPriceVND ? d.UnitPriceVND / 25000 : 2.5)),
+        };
+      });
       setPODetails((prev) => [...newPODetails, ...prev]);
-      showToast(`Đã import thành công ${newPODetails.length} đơn hàng mua (PO Inbound)!`);
+      showToast(`Đã import thành công ${newPODetails.length} dòng đơn hàng mua (PO Pending Inbound) cho Ngày Chốt ${effectiveDate}!`);
     }
   };
 
