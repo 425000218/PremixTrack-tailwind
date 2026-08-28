@@ -245,13 +245,13 @@ export function App() {
     if (type === 'Forecast') {
       const newItems: Fact_Forecast_Detail[] = validData.map((d, i) => ({
         ID: `FCST-IMP-${Date.now()}-${i}`,
-        VersionID: 'FCST-LATEST',
+        VersionID: `FCST-${effectiveDate.replace(/-/g, '')}`,
         FactoryID: d.ResolvedFactoryID || d.FactoryID || factories[0].FactoryID,
         MaterialID: d.ResolvedMaterialID || d.MaterialID || materials[0].MaterialID,
         ForecastQty: Number(d.ForecastQty || 0),
       }));
       setForecastDetails((prev) => [...newItems, ...prev]);
-      showToast(`Đã import thành công ${newItems.length} dòng Dự Báo Nhu Cầu (Forecast)!`);
+      showToast(`Đã import thành công ${newItems.length} dòng Dự Báo Nhu Cầu (Forecast Cut-off: ${effectiveDate})!`);
     } else if (type === 'SOH') {
       const newItems: Fact_Inventory_SOH[] = validData.map((d, i) => ({
         SOH_ID: `SOH-IMP-${Date.now()}-${i}`,

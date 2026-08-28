@@ -1013,15 +1013,16 @@ export function generateSampleExcel(importType: 'Forecast' | 'SOH' | 'Usage' | '
   let fileName = `PremixTrack_Template_${importType}.xlsx`;
 
   if (importType === 'Forecast') {
-    headers = ['Site', 'Item Number', 'Material Description', 'Forecast Qty (Kg)', 'Monthly Usage Note'];
+    headers = ['Material code', 'Material description', '043 Binh Duong VN', '0432 Nghe An VN', '0434 Hau Giang VN', '0436 Hai Phong 1 PC VN', '0437 Can Tho 1 PC VN', '0438 Binh Dinh 1 PC VN', '0439 Can Tho 2 DH VN', '044 Hai Phong 2 DH VN', '045 Vinh Long 1 VN', '0452 Long An VN', '0453 Hung Yen VN', '0454 Vinh Long 5 VN', '0455 Dong Nai 3 VN', '0456 Ha Nam Livestock VN', '0457 Ha Nam Aqua VN', '0458 Binh Dinh 3 VN', '046 Dong Nai 1 DH VN', '0461 Dong Nai 2 Premix VN', '047 Vinh Phuc VN', '048 Binh Dinh 2 DH VN', '049 Vinh Long 2 VN', '0512 Vinh Long 4 VN'];
     sampleRows = [
-      ['DBD', '2580001', 'DL-Methionine 99% Feed Grade', 48000, 'D365 Formula W30 Update'],
-      ['DDN', '2580001', 'DL-Methionine 99% Feed Grade', 39500, 'Regular Pig & Broiler Demand'],
-      ['DBD', '2580002', 'L-Lysine HCl 98.5%', 98000, 'D365 Formula W30 Update'],
-      ['DDN', '2580003', 'L-Threonine 98.5% Min', 29000, 'High inclusion starter'],
-      ['DVL', '2580007', 'Vitamin C Phosphate 35% Stable', 12500, 'Aqua season peak demand'],
-      ['DHY', '2580008', 'Phytase 5000 FTU/g Thermostable', 3800, 'Enzyme replacement batch'],
-      ['043', '2580006', 'Vitamin AD3E Plus Bio-Stab (Mới)', 8900, 'Plant 043 D365 FO Code']
+      ['1001010', 'BARLEY', 208.74, 195.80, 83.70, 62.64, '', '', '', '', '', '', '', '', '', '', '', '', 156.61, '', 78.11, 33.35, '', ''],
+      ['1002010', 'CORN', 10641.79, 11209.44, 5980.49, 7582.08, '', 3762.46, '', '', 5731.64, 1764.29, '', 9306.81, 5214.23, '', 5303.53, 23389.02, '', 14120.76, 5438.04, 12245.69, '', ''],
+      ['1002101', 'CORN GLUTENFEED >20%CP', 99.74, 195.27, 193.60, 110.98, '', '', '', 149.63, 80.63, '', 49.58, 200.42, '', 75.10, '', '', 200.01, 28.94, 303.70, '', ''],
+      ['1002150', 'CORN GLUTENMEAL 60%CP', 70.06, 14.85, '', '', '', '', 535.24, 154.21, 89.99, 7.31, 3.54, 99.98, 59.27, 25.63, 9.00, 50.00, '', 228.28, 20.17, 20.07, 103.92, ''],
+      ['1003010', 'WHEAT <12%CP', 2838.84, 3494.42, 1784.02, 1823.52, 1220.09, 1353.51, 1387.41, 504.46, 2133.65, 2230.43, 379.71, 522.35, 3819.44, 2149.74, 305.13, 3359.05, 5691.25, '', 4085.37, 1833.61, 3531.39, 151.77],
+      ['1003356', 'WHEAT MIDDLINGS MEAL (15-25% STARCH)', 632.10, 1615.58, 1279.99, 994.85, '', 1149.44, '', '', 460.31, 267.15, 75.58, 595.65, 347.18, 52.95, 358.80, 1404.55, '', 1401.02, 730.81, 1507.10, '', ''],
+      ['1005010', 'RICE BRAN FULL FAT', 98.47, 188.21, 76.27, 113.44, 2369.81, '', 979.84, 278.29, 643.38, 133.91, 56.97, 670.21, 371.69, 279.86, 196.41, 177.93, 508.56, '', 349.93, 59.40, 234.68, ''],
+      ['1012106', 'DDGS CORN STAND QUALITY US', 790.56, 1238.58, 912.25, 984.60, '', 656.57, '', 44.55, 49.79, 767.61, 374.15, 103.31, 747.61, 379.16, 141.68, 389.74, 2263.12, '', 1573.84, 826.06, 1419.89, '']
     ];
   } else if (importType === 'SOH') {
     headers = ['REGION', 'WAREHOUSE', 'ORG CODE', 'SUB INV', 'ITEM CODE', 'ITEM NAME', 'SOH', 'Price Average'];

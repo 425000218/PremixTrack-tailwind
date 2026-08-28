@@ -118,13 +118,47 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
           return;
         }
 
-        // Extract headers from the first object keys
-        const headers = Object.keys(jsonData[0]);
-        setFileHeaders(headers);
-        setRawExcelRows(jsonData);
+        let finalHeaders = Object.keys(jsonData[0]);
+        let finalData = jsonData;
+
+        // Auto-unpivot Forecast Matrix format
+        if (importType === 'Forecast') {
+          const materialCol = finalHeaders.find(h => h.toLowerCase().includes('material code') || h.toLowerCase().includes('item number') || h.toLowerCase().includes('mã hàng'));
+          if (materialCol) {
+            const nonFactoryCols = ['material code', 'material description', 'item name', 'item number', 'tên', 'mã'];
+            const factoryCols = finalHeaders.filter(h => !nonFactoryCols.some(nfc => h.toLowerCase().includes(nfc)));
+            
+            if (factoryCols.length > 0) {
+              const unpivoted: any[] = [];
+              const descCol = finalHeaders.find(h => h.toLowerCase().includes('desc') || h.toLowerCase().includes('name')) || '';
+              
+              jsonData.forEach(row => {
+                factoryCols.forEach(fc => {
+                  const qty = Number(String(row[fc] || 0).replace(/,/g, ''));
+                  if (qty > 0) {
+                    unpivoted.push({
+                      'Material Code': row[materialCol],
+                      'Material Name': descCol ? row[descCol] : '',
+                      'Site': fc.split(' ')[0], // Extract '043' from '043 Binh Duong VN'
+                      'Forecast Qty': qty
+                    });
+                  }
+                });
+              });
+              
+              if (unpivoted.length > 0) {
+                finalData = unpivoted;
+                finalHeaders = ['Material Code', 'Material Name', 'Site', 'Forecast Qty'];
+              }
+            }
+          }
+        }
+
+        setFileHeaders(finalHeaders);
+        setRawExcelRows(finalData);
 
         // Auto map headers using fuzzy & learned mappings
-        const { mapped } = autoMapHeaders(headers, importType, learnedMappings);
+        const { mapped } = autoMapHeaders(finalHeaders, importType, learnedMappings);
         setColumnMapping(mapped);
 
         setIsProcessing(false);
@@ -354,7 +388,7 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                   </div>
                 </div>
                 <p className="text-[11px] text-slate-600">
-                  Mốc thời gian này dùng để chốt tồn kho <strong>SOH Cut-off</strong>, đồng bộ trực tiếp với <strong>Ma Trận Vị Thế Cung Ứng (Position Matrix Cut-off: {snapshotDate})</strong> và tính toán chính xác chỉ số DOI/ngày cạn hàng.
+                  Mốc thời gian này dùng để chốt <strong>SOH & Forecast Cut-off</strong>, đồng bộ trực tiếp với <strong>Ma Trận Vị Thế Cung Ứng (Position Matrix Cut-off: {snapshotDate})</strong> và tính toán chính xác chỉ số DOI/ngày cạn hàng.
                 </p>
               </div>
 
