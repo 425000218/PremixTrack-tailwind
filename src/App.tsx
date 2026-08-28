@@ -238,8 +238,10 @@ export function App() {
   // Commit Excel Data Handlers
   const handleCommitImport = (
     type: 'Forecast' | 'SOH' | 'Usage' | 'PO_Inbound',
-    validData: any[]
+    validData: any[],
+    snapshotDate?: string
   ) => {
+    const effectiveDate = snapshotDate || new Date().toISOString().split('T')[0];
     if (type === 'Forecast') {
       const newItems: Fact_Forecast_Detail[] = validData.map((d, i) => ({
         ID: `FCST-IMP-${Date.now()}-${i}`,
@@ -256,13 +258,13 @@ export function App() {
         FactoryID: d.ResolvedFactoryID || d.FactoryID || factories[0].FactoryID,
         MaterialID: d.ResolvedMaterialID || d.MaterialID || materials[0].MaterialID,
         Quantity: Number(d.Quantity || 0),
-        WarehouseLocation: d.WarehouseLocation || 'Kho Tổng D365',
+        WarehouseLocation: d.WarehouseLocation || d.SubInventory || 'Kho RAW D365',
         BatchNumber: d.BatchNumber || `LOT-IMP-${Date.now().toString().substr(7)}`,
         ExpiryDate: d.ExpiryDate || '2027-12-31',
-        UpdateDate: new Date().toISOString().split('T')[0],
+        UpdateDate: effectiveDate,
       }));
       setInventorySOH((prev) => [...newItems, ...prev]);
-      showToast(`Đã import thành công ${newItems.length} dòng Tồn Kho Thực Tế (SOH)!`);
+      showToast(`Đã import thành công ${newItems.length} dòng Tồn Kho SOH (Khớp Ngày Chốt ${effectiveDate})!`);
     } else if (type === 'Usage') {
       const newItems: Fact_Production_Usage[] = validData.map((d, i) => ({
         UsageID: `USG-IMP-${Date.now()}-${i}`,

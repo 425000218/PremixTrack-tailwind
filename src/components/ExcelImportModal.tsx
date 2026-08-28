@@ -13,7 +13,8 @@ import {
   Layers,
   Sparkles,
   Info,
-  Check
+  Check,
+  Calendar
 } from 'lucide-react';
 import {
   Dim_Factory,
@@ -38,7 +39,8 @@ interface ExcelImportModalProps {
   onSaveNewMappings: (newMappings: Sys_Import_Mapping[]) => void;
   onCommitImport: (
     importType: 'Forecast' | 'SOH' | 'Usage' | 'PO_Inbound',
-    validData: any[]
+    validData: any[],
+    snapshotDate?: string
   ) => void;
   language: Language;
 }
@@ -54,6 +56,7 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
   language,
 }) => {
   const [importType, setImportType] = useState<'Forecast' | 'SOH' | 'Usage' | 'PO_Inbound'>('Forecast');
+  const [snapshotDate, setSnapshotDate] = useState<string>('2026-08-25');
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [fileName, setFileName] = useState<string>('');
   const [fileHeaders, setFileHeaders] = useState<string[]>([]);
@@ -187,7 +190,7 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
     const validRows = validationResult.parsedData.filter(
       (r) => r._status === 'Valid' || r._status === 'Warning'
     );
-    onCommitImport(importType, validRows);
+    onCommitImport(importType, validRows, snapshotDate);
 
     confetti({
       particleCount: 80,
@@ -331,11 +334,35 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                 </div>
               </div>
 
+              {/* Snapshot / Cut-off Date Confirmation */}
+              <div className="p-4 rounded-2xl bg-indigo-50/70 border border-indigo-200 text-xs space-y-2">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 font-bold text-slate-900">
+                    <Calendar className="w-4 h-4 text-indigo-600" />
+                    <span>2. Ngày Xác Nhận Chốt Số Liệu (Snapshot / Cut-off Date):</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="date"
+                      value={snapshotDate}
+                      onChange={(e) => setSnapshotDate(e.target.value)}
+                      className="bg-white border border-indigo-300 rounded-xl px-3 py-1.5 font-mono font-bold text-slate-800 text-xs shadow-xs focus:ring-2 focus:ring-indigo-400 focus:outline-none cursor-pointer"
+                    />
+                    <span className="text-[10px] font-bold bg-indigo-200 text-indigo-800 px-2 py-0.5 rounded-full">
+                      Đồng bộ Position Matrix
+                    </span>
+                  </div>
+                </div>
+                <p className="text-[11px] text-slate-600">
+                  Mốc thời gian này dùng để chốt tồn kho <strong>SOH Cut-off</strong>, đồng bộ trực tiếp với <strong>Ma Trận Vị Thế Cung Ứng (Position Matrix Cut-off: {snapshotDate})</strong> và tính toán chính xác chỉ số DOI/ngày cạn hàng.
+                </p>
+              </div>
+
               {/* Upload Dropzone */}
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                    2. Chọn hoặc Kéo thả file Excel (.xlsx, .xls, .csv)
+                    3. Chọn hoặc Kéo thả file Excel (.xlsx, .xls, .csv)
                   </label>
                   <button
                     type="button"

@@ -1024,14 +1024,28 @@ export function generateSampleExcel(importType: 'Forecast' | 'SOH' | 'Usage' | '
       ['043', '2580006', 'Vitamin AD3E Plus Bio-Stab (Mới)', 8900, 'Plant 043 D365 FO Code']
     ];
   } else if (importType === 'SOH') {
-    headers = ['InventLocationId', 'Item Number', 'AvailPhysical', 'Batch', 'Expiry Date', 'Warehouse Location'];
+    headers = ['REGION', 'WAREHOUSE', 'ORG CODE', 'SUB INV', 'ITEM CODE', 'ITEM NAME', 'SOH', 'Price Average'];
     sampleRows = [
-      ['DBD', '2580001', 58000, 'LOT-MET-2608', '2027-08-30', 'KHO-PREMIX-A1'],
-      ['DDN', '2580003', 4200, 'LOT-THR-2608', '2027-08-15', 'KHO-DN-03'],
-      ['DDN', '2580008', 650, 'LOT-PHY-2607', '2027-07-20', 'KHO-DN-06'],
-      ['DVL', '2580007', 2200, 'LOT-VITC-2607', '2027-07-15', 'KHO-VL-03'],
-      ['DHY', '2580002', 65000, 'LOT-LYS-2607', '2027-09-10', 'KHO-HY-02'],
-      ['0432', '2580009', 185000, 'LOT-MCP-2607', '2028-08-01', 'SILO-DN-01']
+      ['SOUTH', 'DBD', 'DBD', 'RAW', '1001010', 'BARLEY', 223683, 8450],
+      ['SOUTH', 'DBD', 'DBD', 'RAW', '1002010', 'CORN', 1110520, 7181],
+      ['SOUTH', 'DBD', 'DBD', 'RAW', '1002101', 'CORN GLUTENFEED >20%CP', 210050, 6799],
+      ['SOUTH', 'DBD', 'DBD', 'RAW', '1002150', 'CORN GLUTEN MEAL 60%', 64934, 18265],
+      ['SOUTH', 'DBD', 'DBD', 'RAW', '1002500', 'CORN STARCH', 1996, 11988],
+      ['SOUTH', 'DBD', 'DBD', 'RAW', '1003010', 'Wheat', 1062664, 7447],
+      ['SOUTH', 'DBD', 'DBD', 'RAW', '1003100', 'Vital Wheat Gluten', 375, 38800],
+      ['SOUTH', 'DBD', 'DBD', 'RAW', '1003356', 'WHEATBRAN MEAL coarse', 345716, 6372],
+      ['SOUTH', 'DBD', 'DBD', 'RAW', '1005010', 'RICEBRAN 12/12/12', 17047, 7600],
+      ['SOUTH', 'DBD', 'DBD', 'RAW', '1005100', 'RICE HULLS', 5990, 4400],
+      ['SOUTH', 'DBD', 'DBD', 'RAW', '1005150', 'RICE BROKEN', 252039, 8350],
+      ['SOUTH', 'DBD', 'DBD', 'RAW', '1012106', 'DDGS CORN STANDARD QUALITY US', 207108, 7200],
+      ['SOUTH', 'DBD', 'DBD', 'RAW', '1012160', 'DDG CORN/YEAST 40%CP', 169819, 9954],
+      ['SOUTH', 'DBD', 'DBD', 'RAW', '1012500', 'Rice DDGS', 6390, 7500],
+      ['SOUTH', 'DBD', 'DBD', 'RAW', '1101018', 'SOYABEANMEAL 48% CP', 533170, 11543],
+      ['SOUTH', 'DBD', 'DBD', 'RAW', '1101107', 'SOY HULLS', 229883, 5365],
+      ['SOUTH', 'DBD', 'DBD', 'RAW', '1101330', 'SPC SOYTIDE 55%', 48275, 20866],
+      ['SOUTH', 'DBD', 'DBD', 'RAW', '1102002', 'RSM 00 > 38%CP GMO', 358441, 8390],
+      ['SOUTH', 'DBD', 'DBD', 'RAW', '1103010', 'PALMKERNEL CAKE <9%FAT', 278030, 5550],
+      ['SOUTH', 'DBD', 'DBD', 'RAW', '1104012', 'SUNFLOWER MEAL', 184118, 8315]
     ];
   } else if (importType === 'Usage') {
     headers = ['Site', 'Item Number', 'Actual Consumption', 'TransDate', 'Recipe Code'];
