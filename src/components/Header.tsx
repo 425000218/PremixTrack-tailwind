@@ -67,7 +67,7 @@ export const Header: React.FC<HeaderProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const canImport = currentUser ? currentUser.permissions.canImportExcel : false;
+  const canImport = currentUser?.permissions?.canImportExcel ?? false;
 
   const handleImportClick = () => {
     if (!currentUser) {

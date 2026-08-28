@@ -8,6 +8,7 @@ import {
   ArrowRightLeft,
   Eye,
   EyeOff,
+  Lock,
 } from 'lucide-react';
 import { MasterDataManagementProps } from './types';
 import { MaterialsTab } from './tabs/MaterialsTab';
@@ -18,6 +19,8 @@ import { ImportMappingsTab } from './tabs/ImportMappingsTab';
 
 export const MasterDataManagement: React.FC<MasterDataManagementProps> = ({
   initialSubTab = 'materials',
+  canEditMasterData = true,
+  currentUserRoleName,
   factories,
   materials,
   suppliers,
@@ -61,18 +64,25 @@ export const MasterDataManagement: React.FC<MasterDataManagementProps> = ({
           <div>
             <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
               <Database className="w-5 h-5 text-blue-600" />
-              <span>Qu?n Tr? Master Data &amp; T? �i?n �nh X? Header Excel</span>
+              <span>Quản Trị Master Data &amp; Từ Điển Ánh Xạ Header Excel</span>
             </h2>
             <p className="text-xs text-slate-500 mt-1">
-              Qu?n l� danh m?c c?t l�i D365 FO (Nguy�n li?u, Nh� m�y, Nh� cung c?p, Ma tr?n thay th? da ngu?n &amp; H? th?ng �nh x? c?t Excel linh ho?t)
+              Quản lý danh mục cốt lõi D365 FO (Nguyên liệu, Nhà máy, Nhà cung cấp, Ma trận thay thế đa nguồn &amp; Hệ thống ánh xạ cột Excel linh hoạt)
             </p>
           </div>
 
-          <div className="flex items-center gap-2 self-start sm:self-auto">
+          <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+            {!canEditMasterData && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                <Lock className="w-3.5 h-3.5 text-amber-600" />
+                <span>Chế Độ Xem (Read-Only)</span>
+              </span>
+            )}
+
             <button
               onClick={() => setIsHeaderSummaryExpanded(!isHeaderSummaryExpanded)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs font-semibold transition-colors cursor-pointer"
-              title={isHeaderSummaryExpanded ? 'Thu g?n thanh th?ng k�' : 'M? r?ng thanh th?ng k�'}
+              title={isHeaderSummaryExpanded ? 'Thu gọn thanh thống kê' : 'Mở rộng thanh thống kê'}
             >
               {isHeaderSummaryExpanded ? (
                 <>

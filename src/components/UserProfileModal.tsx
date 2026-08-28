@@ -153,37 +153,37 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
     {
       title: 'Nạp & Ánh Xạ File Excel D365 FO (Import SOH, Forecast, PO)',
       desc: 'Quyền sử dụng Dynamic Header Mapping nạp dữ liệu từ D365 Finance & Operations vào hệ thống',
-      granted: user.permissions.canImportExcel,
+      granted: user?.permissions?.canImportExcel ?? false,
     },
     {
       title: 'Lập & Đề Xuất Lệnh Điều Chuyển Liên Nhà Máy (Create Transfer)',
       desc: 'Quyền tạo phiếu vận chuyển điều phối nguyên liệu giữa các nhà máy khi xảy ra thiếu hụt',
-      granted: user.permissions.canCreateTransfer,
+      granted: user?.permissions?.canCreateTransfer ?? false,
     },
     {
       title: 'Phê Duyệt Lệnh Điều Chuyển & Cân Bằng Tồn Kho (Approve Transfer)',
       desc: 'Quyền phê duyệt các lệnh điều phối vận tải cấp doanh nghiệp toàn quốc',
-      granted: user.permissions.canApproveTransfer,
+      granted: user?.permissions?.canApproveTransfer ?? false,
     },
     {
       title: 'Ghi Nhận Tiếp Nhận & Nhập Kho Hàng Inbound (Receive Shipment)',
       desc: 'Quyền xác nhận xe tải giao hàng tại trạm cân, tạo số lô Batch và cập nhật SOH',
-      granted: user.permissions.canReceiveShipment,
+      granted: user?.permissions?.canReceiveShipment ?? false,
     },
     {
       title: 'Quản Trị Danh Mục Gốc & Từ Điển Mapping (Master Data Config)',
       desc: 'Quyền cấu hình mã nguyên liệu, quy tắc chuyển đổi Stop_Usage và từ điển cột Excel',
-      granted: user.permissions.canEditMasterData,
+      granted: user?.permissions?.canEditMasterData ?? false,
     },
     {
       title: 'Trợ Lý AI Advisor Chuỗi Cung Ứng (Gemini 3.7 Flash)',
       desc: 'Quyền tham vấn chuyên sâu và phân tích ma trận dữ liệu qua mô hình AI',
-      granted: user.permissions.canUseAiAdvisor,
+      granted: user?.permissions?.canUseAiAdvisor ?? false,
     },
     {
       title: 'Xuất Báo Cáo & File Ma Trận (Export Excel / Printable Slips)',
       desc: 'Quyền tải xuống báo cáo tổng hợp và in phiếu điều chuyển vận tải',
-      granted: user.permissions.canExportReports,
+      granted: user?.permissions?.canExportReports ?? false,
     },
   ];
 

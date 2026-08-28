@@ -1,4 +1,4 @@
-﻿import React, { useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { ArrowUpToLine, ArrowDownToLine } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import {
@@ -32,6 +32,8 @@ export interface DependencyCheckResult {
 
 export interface MasterDataManagementProps {
   initialSubTab?: 'materials' | 'factories' | 'suppliers' | 'substitutions' | 'mappings';
+  canEditMasterData?: boolean;
+  currentUserRoleName?: string;
   factories: Dim_Factory[];
   materials: Dim_Material[];
   suppliers: Dim_Supplier[];

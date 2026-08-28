@@ -84,7 +84,11 @@ export function App() {
     const saved = localStorage.getItem('premixtrack_user');
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const u = JSON.parse(saved);
+        if (u && !u.permissions) {
+          u.permissions = getRolePermissions(u.role, u.assignedFactoryId);
+        }
+        return u;
       } catch {
         return null;
       }
@@ -357,7 +361,7 @@ export function App() {
   };
 
   const handleSaveMapping = (mapping: Sys_Import_Mapping) => {
-    if (currentUser && !currentUser.permissions.canEditMasterData) {
+    if (currentUser && !(currentUser.permissions?.canEditMasterData ?? false)) {
       alert(`Tài khoản "${currentUser.roleNameVN}" không có quyền chỉnh sửa cấu hình Master Data & Mapping.`);
       return;
     }
@@ -372,7 +376,7 @@ export function App() {
   };
 
   const handleDeleteMapping = (mappingId: string) => {
-    if (currentUser && !currentUser.permissions.canEditMasterData) {
+    if (currentUser && !(currentUser.permissions?.canEditMasterData ?? false)) {
       alert(`Tài khoản "${currentUser.roleNameVN}" không có quyền chỉnh sửa cấu hình Master Data & Mapping.`);
       return;
     }
@@ -381,7 +385,7 @@ export function App() {
   };
 
   const handleDeleteFactory = (factoryId: string) => {
-    if (currentUser && !currentUser.permissions.canEditMasterData) {
+    if (currentUser && !(currentUser.permissions?.canEditMasterData ?? false)) {
       alert(`Tài khoản "${currentUser.roleNameVN}" không có quyền xóa nhà máy khỏi Master Data.`);
       return;
     }
@@ -390,7 +394,7 @@ export function App() {
   };
 
   const handleDeleteMaterial = (materialId: string) => {
-    if (currentUser && !currentUser.permissions.canEditMasterData) {
+    if (currentUser && !(currentUser.permissions?.canEditMasterData ?? false)) {
       alert(`Tài khoản "${currentUser.roleNameVN}" không có quyền xóa nguyên liệu khỏi Master Data.`);
       return;
     }
@@ -399,7 +403,7 @@ export function App() {
   };
 
   const handleDeleteSupplier = (supplierId: string) => {
-    if (currentUser && !currentUser.permissions.canEditMasterData) {
+    if (currentUser && !(currentUser.permissions?.canEditMasterData ?? false)) {
       alert(`Tài khoản "${currentUser.roleNameVN}" không có quyền xóa nhà cung cấp khỏi Master Data.`);
       return;
     }
@@ -532,6 +536,8 @@ export function App() {
             {currentTab === 'masterdata' && (
               <MasterDataManagement
                 initialSubTab="materials"
+                canEditMasterData={currentUser?.permissions?.canEditMasterData ?? false}
+                currentUserRoleName={currentUser?.roleNameVN}
                 factories={factories}
                 materials={materials}
                 suppliers={suppliers}

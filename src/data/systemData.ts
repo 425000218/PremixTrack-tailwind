@@ -103,7 +103,7 @@ export function getRolePermissions(role: UserRole, factoryId: string = 'ALL'): U
         canApproveTransfer: true,
         canCreateTransfer: true,
         canReceiveShipment: false,
-        canEditMasterData: false,
+        canEditMasterData: true,
         canUseAiAdvisor: true,
         canManageUsers: false,
         canExportReports: true,
