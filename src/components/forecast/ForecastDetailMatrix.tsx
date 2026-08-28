@@ -414,6 +414,38 @@ export const ForecastDetailMatrix: React.FC<ForecastDetailMatrixProps> = ({
     XLSX.writeFile(wb, `RD_Forecast_MultiRun_Comparison_${dateStr}.xlsx`);
   };
 
+  const handleExportFlatExcel = () => {
+    const exportData: Record<string, any>[] = [];
+
+    filteredCompareRows.forEach((r) => {
+      selectedRunDates.forEach((d) => {
+        const val = r.RunQuantities[d];
+        if (val !== undefined && val !== null && val > 0) {
+          exportData.push({
+            'Version': d,
+            'NM&Code': `${r.SiteCode}${r.MaterialCode}`,
+            'Factory': r.SiteCode,
+            'ITEM CODE': r.MaterialCode,
+            'ITEM NAME': r.MaterialName,
+            'Quantity (mt)': (val / 1000).toFixed(2),
+            'Quantity (Kgs)': val,
+          });
+        }
+      });
+    });
+
+    if (exportData.length === 0) {
+      alert('Không có dữ liệu hợp lệ để xuất.');
+      return;
+    }
+
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Forecast Flat');
+    const dateStr = new Date().toISOString().split('T')[0];
+    XLSX.writeFile(wb, `RD_Forecast_FlatData_${dateStr}.xlsx`);
+  };
+
   // ── Export Disruption Report ──────────────────────────────────────────────
   const handleExportDisruptionReport = () => {
     const disruptionItems = processedRows.filter(
@@ -899,7 +931,17 @@ export const ForecastDetailMatrix: React.FC<ForecastDetailMatrixProps> = ({
                   title="Tải toàn bộ bảng ma trận ra file Excel"
                 >
                   <FileDown className="w-3.5 h-3.5 text-blue-600" />
-                  <span>Xuất Excel ({filteredCompareRows.length})</span>
+                  <span>Xuất Ma Trận ({filteredCompareRows.length})</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleExportFlatExcel}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition-colors cursor-pointer shadow-2xs"
+                  title="Tải dữ liệu Forecast dưới dạng bảng dọc (Flat)"
+                >
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-indigo-600" />
+                  <span>Xuất Dữ Liệu Dọc</span>
                 </button>
               </div>
             </div>
