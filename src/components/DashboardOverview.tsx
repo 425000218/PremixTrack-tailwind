@@ -1,27 +1,20 @@
 import React, { useState, useMemo } from 'react';
 import {
   AlertTriangle,
-  AlertOctagon,
-  CheckCircle2,
-  TrendingDown,
   TrendingUp,
   Truck,
   ArrowLeftRight,
   Package,
-  Clock,
   ChevronRight,
   Sparkles,
   Search,
   Filter,
-  DollarSign,
   ShieldCheck,
-  RefreshCw,
   Boxes,
   Flame,
   ArrowUpRight,
   ArrowRight,
   Layers,
-  Building2,
   Activity,
   Zap,
 } from 'lucide-react';
@@ -82,13 +75,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     const totalDailyUsageKg = scopedMetrics.reduce((sum, m) => sum + (m.DailyUsage || 0), 0);
     const avgDOI = totalDailyUsageKg > 0 ? (totalSOHKg / totalDailyUsageKg) : 0;
 
-    // Overstock Capital tied up (USD)
-    const overstockCapitalUSD = overstock.reduce((sum, m) => {
-      const mat = materials.find((item) => item.MaterialID === m.MaterialID);
-      const excessKg = Math.max(0, m.SOHQty - m.DailyUsage * (m.SafetyStockDays * 2));
-      return sum + excessKg * (mat?.UnitPriceUSD || 2.0);
-    }, 0);
-
     const activeInboundTrucks = inboundSchedules.filter(
       (s) => s.Status === 'In_Transit' || s.Status === 'Scheduled'
     );
@@ -102,11 +88,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       totalSOHTons,
       totalSOHKg,
       avgDOI,
-      overstockCapitalUSD,
       activeTrucksCount: activeInboundTrucks.length,
       criticalItems: critical,
     };
-  }, [scopedMetrics, materials, inboundSchedules]);
+  }, [scopedMetrics, inboundSchedules]);
 
   // Filtered and Sorted Table Data
   const filteredMetrics = useMemo(() => {
@@ -152,39 +137,37 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* ── 1. EXECUTIVE MISSION HUD (HEADS-UP DISPLAY) ── */}
+      {/* ── 1. EXECUTIVE MISSION HUD (4 CARDS LIGHT & HARMONIOUS) ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
-        {/* HUD Card 1: Total SOH Volume */}
-        <div className="bg-slate-900 text-white rounded-2xl p-5 border border-slate-800 shadow-sm relative overflow-hidden flex flex-col justify-between group hover:border-slate-700 transition-all">
+        {/* HUD Card 1: Total SOH Volume (Light Style matching other cards) */}
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs flex flex-col justify-between group hover:border-slate-300 transition-all">
           <div className="flex items-start justify-between">
             <div>
-              <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 font-semibold flex items-center gap-1.5">
-                <Boxes className="w-3.5 h-3.5 text-blue-400" />
+              <span className="text-[11px] font-mono uppercase tracking-wider text-slate-500 font-semibold flex items-center gap-1.5">
+                <Boxes className="w-3.5 h-3.5 text-blue-600" />
                 {language === 'vi' ? 'Tổng Tồn Kho SOH' : 'Total Inventory SOH'}
               </span>
               <div className="mt-2 flex items-baseline gap-2">
-                <span className="text-3xl font-black tracking-tight font-mono tabular-nums text-white">
+                <span className="text-3xl font-black tracking-tight font-mono tabular-nums text-slate-900">
                   {stats.totalSOHTons.toLocaleString()}
                 </span>
-                <span className="text-xs font-semibold text-slate-400 uppercase">Tấn (MT)</span>
+                <span className="text-xs font-semibold text-slate-500 uppercase">Tấn (MT)</span>
               </div>
             </div>
-            <span className="p-2 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
+            <span className="p-2 rounded-xl bg-blue-50 text-blue-600 border border-blue-100">
               <Activity className="w-4 h-4" />
             </span>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
-            <span className="text-slate-400 font-mono">
-              DOI TB: <strong className="text-blue-400">{stats.avgDOI.toFixed(1)} ngày</strong>
+          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+            <span className="text-slate-500 font-mono">
+              DOI TB: <strong className="text-blue-700">{stats.avgDOI.toFixed(1)} ngày</strong>
             </span>
-            <span className="text-emerald-400 font-medium text-[11px] flex items-center gap-0.5">
+            <span className="text-emerald-600 font-semibold text-[11px] flex items-center gap-0.5">
               <TrendingUp className="w-3 h-3" /> +4.2% tuần này
             </span>
           </div>
-          {/* Subtle background glow */}
-          <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-blue-600/10 rounded-full blur-2xl pointer-events-none" />
         </div>
 
         {/* HUD Card 2: Active SKUs & Coverage */}
@@ -208,19 +191,19 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           </div>
 
           <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-            <span>Kỳ D365: <strong>08/2026</strong></span>
+            <span>Kỳ D365: <strong className="text-slate-800">08/2026</strong></span>
             <span className="font-mono text-[11px] bg-slate-100 px-2 py-0.5 rounded text-slate-700 font-semibold">
               28 ngày SX
             </span>
           </div>
         </div>
 
-        {/* HUD Card 3: Critical Shortage Emergencies (High Urgency) */}
+        {/* HUD Card 3: Critical Shortage Emergencies */}
         <div
           onClick={() => setFilterSeverity('CRITICAL')}
-          className={`rounded-2xl p-5 border transition-all cursor-pointer flex flex-col justify-between relative overflow-hidden ${
+          className={`rounded-2xl p-5 border transition-all cursor-pointer flex flex-col justify-between ${
             stats.criticalCount > 0
-              ? 'bg-rose-50/80 border-rose-200 hover:border-rose-300 ring-2 ring-rose-500/10'
+              ? 'bg-rose-50/50 border-rose-200 hover:border-rose-300 shadow-xs'
               : 'bg-white border-slate-200/80'
           }`}
         >
@@ -243,14 +226,14 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           </div>
 
           <div className="mt-4 pt-3 border-t border-rose-200/60 flex items-center justify-between text-xs">
-            <span className="text-rose-700 font-medium">DOI &lt; 7.0 ngày</span>
+            <span className="text-rose-700 font-medium font-mono">DOI &lt; 7.0 ngày</span>
             <span className="font-bold text-rose-600 hover:underline flex items-center gap-0.5">
               Xử lý gấp <ChevronRight className="w-3 h-3" />
             </span>
           </div>
         </div>
 
-        {/* HUD Card 4: Inter-Factory Transfer & Logistics Pulse */}
+        {/* HUD Card 4: Inter-Factory Transfer & Fleet */}
         <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs flex flex-col justify-between group hover:border-slate-300 transition-all">
           <div className="flex items-start justify-between">
             <div>
@@ -272,7 +255,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
           <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
             <span className="text-slate-500 font-mono">
-              Inbound: <strong>{stats.activeTrucksCount} chuyến xe</strong>
+              Inbound: <strong className="text-slate-800">{stats.activeTrucksCount} xe tải</strong>
             </span>
             <button
               onClick={() => onNavigateTab('transfers')}
@@ -285,29 +268,31 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
       </div>
 
-      {/* ── 2. MAIN BATTLEGROUND: TACTICAL MATRIX + CRITICAL ALERTS ── */}
+      {/* ── 2. MAIN WORKSPACE: DATA MATRIX + DISPATCH CARDS ── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
-        {/* Left 8 Cols: Operational Stock & DOI Data Matrix */}
+        {/* Main Matrix Column (8 Cols on Desktop) */}
         <div className="lg:col-span-8 bg-white rounded-2xl border border-slate-200 shadow-xs flex flex-col overflow-hidden">
           
-          {/* Header Action Bar */}
-          <div className="p-4 sm:p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/50">
-            <div>
-              <h3 className="font-bold text-slate-900 text-sm sm:text-base flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-blue-600" />
-                <span>Ma Trận Giám Sát Cung Ứng &amp; Tồn Kho Thực Tế</span>
-                <span className="text-[11px] font-mono font-bold bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
+          {/* Header Action Bar with Proper Text Spacing and No Dropping Lines */}
+          <div className="p-4 sm:p-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/40">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <h3 className="font-bold text-slate-900 text-sm sm:text-base flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
+                  <span>Ma Trận Tồn Kho &amp; Cảnh Báo Thiếu Hụt D365</span>
+                </h3>
+                <span className="text-[11px] font-mono font-bold bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-full shrink-0">
                   {filteredMetrics.length} / {scopedMetrics.length} SKUs
                 </span>
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Chỉ số DOI phản ánh chính xác số ngày sản xuất an toàn dựa trên tồn kho SOH và đơn hàng PO đang về.
+              </div>
+              <p className="text-xs text-slate-500 mt-1">
+                Tính toán thời gian cạn kho (Stockout Date) và số ngày che phủ (DOI = [SOH + PO] / Tiêu_Hao_Ngày).
               </p>
             </div>
 
             {/* Quick Search */}
-            <div className="relative w-full sm:w-64 shrink-0">
+            <div className="relative w-full md:w-72 shrink-0">
               <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
               <input
                 type="text"
@@ -355,24 +340,24 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           {/* High-density Data Table */}
           <div className="flex-1 overflow-x-auto max-h-[520px] divide-y divide-slate-100">
             <table className="w-full text-left border-collapse">
-              <thead className="bg-slate-50/90 backdrop-blur-xs text-slate-500 uppercase text-[10px] font-mono tracking-wider sticky top-0 z-10 border-b border-slate-200">
+              <thead className="bg-slate-50 text-slate-500 uppercase text-[10px] font-mono tracking-wider sticky top-0 z-10 border-b border-slate-200">
                 <tr>
-                  <th onClick={() => handleSort('FACTORY')} className="px-4 py-3 cursor-pointer hover:text-slate-900 transition-colors">
+                  <th onClick={() => handleSort('FACTORY')} className="px-4 py-3 cursor-pointer hover:text-slate-900 transition-colors whitespace-nowrap">
                     Nhà Máy {sortField === 'FACTORY' && (sortOrder === 'ASC' ? '↑' : '↓')}
                   </th>
-                  <th onClick={() => handleSort('NAME')} className="px-4 py-3 cursor-pointer hover:text-slate-900 transition-colors">
+                  <th onClick={() => handleSort('NAME')} className="px-4 py-3 cursor-pointer hover:text-slate-900 transition-colors min-w-[200px]">
                     Mã &amp; Tên Nguyên Liệu {sortField === 'NAME' && (sortOrder === 'ASC' ? '↑' : '↓')}
                   </th>
-                  <th onClick={() => handleSort('SOH')} className="px-4 py-3 text-right cursor-pointer hover:text-slate-900 transition-colors">
+                  <th onClick={() => handleSort('SOH')} className="px-4 py-3 text-right cursor-pointer hover:text-slate-900 transition-colors whitespace-nowrap">
                     Tồn SOH (kg) {sortField === 'SOH' && (sortOrder === 'ASC' ? '↑' : '↓')}
                   </th>
-                  <th className="px-4 py-3 text-right">Đang Về (PO)</th>
-                  <th className="px-4 py-3 text-right">Tiêu Hao/Ngày</th>
-                  <th onClick={() => handleSort('DOI')} className="px-4 py-3 text-center cursor-pointer hover:text-slate-900 transition-colors">
+                  <th className="px-4 py-3 text-right whitespace-nowrap">Đang Về (PO)</th>
+                  <th className="px-4 py-3 text-right whitespace-nowrap">Tiêu Hao/Ngày</th>
+                  <th onClick={() => handleSort('DOI')} className="px-4 py-3 text-center cursor-pointer hover:text-slate-900 transition-colors whitespace-nowrap">
                     DOI An Toàn {sortField === 'DOI' && (sortOrder === 'ASC' ? '↑' : '↓')}
                   </th>
-                  <th className="px-4 py-3 text-center">Dự Kiến Cạn</th>
-                  <th className="px-4 py-3 text-center">Hành Động</th>
+                  <th className="px-4 py-3 text-center whitespace-nowrap">Dự Kiến Cạn</th>
+                  <th className="px-4 py-3 text-center whitespace-nowrap">Thao Tác</th>
                 </tr>
               </thead>
               <tbody className="text-xs divide-y divide-slate-100 text-slate-700">
@@ -422,12 +407,12 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                         </td>
 
                         {/* SOH (kg) */}
-                        <td className="px-4 py-3 text-right font-mono font-bold tabular-nums text-slate-900">
+                        <td className="px-4 py-3 text-right font-mono font-bold tabular-nums text-slate-900 whitespace-nowrap">
                           {Number(item.SOHQty).toLocaleString()}
                         </td>
 
                         {/* Open PO */}
-                        <td className="px-4 py-3 text-right font-mono tabular-nums">
+                        <td className="px-4 py-3 text-right font-mono tabular-nums whitespace-nowrap">
                           {item.OpenPOQty > 0 ? (
                             <span className="text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100">
                               +{Number(item.OpenPOQty).toLocaleString()}
@@ -438,27 +423,25 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                         </td>
 
                         {/* Daily Usage */}
-                        <td className="px-4 py-3 text-right font-mono tabular-nums text-slate-500">
+                        <td className="px-4 py-3 text-right font-mono tabular-nums text-slate-500 whitespace-nowrap">
                           {Math.round(item.DailyUsage).toLocaleString()} <span className="text-[10px]">kg/d</span>
                         </td>
 
-                        {/* DOI Badge with Health Bar */}
+                        {/* DOI Badge */}
                         <td className="px-4 py-3 text-center whitespace-nowrap">
-                          <div className="inline-flex flex-col items-center gap-1">
-                            <span
-                              className={`px-2.5 py-0.5 rounded-md text-[11px] font-mono font-bold tabular-nums ${
-                                isCritical
-                                  ? 'bg-rose-100 text-rose-800 border border-rose-200'
-                                  : isWarning
-                                  ? 'bg-amber-100 text-amber-800 border border-amber-200'
-                                  : isOverstock
-                                  ? 'bg-blue-100 text-blue-800 border border-blue-200'
-                                  : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-                              }`}
-                            >
-                              {item.DOI_Total >= 999 ? '> 90 ngày' : `${item.DOI_Total.toFixed(1)} ngày`}
-                            </span>
-                          </div>
+                          <span
+                            className={`px-2.5 py-0.5 rounded-md text-[11px] font-mono font-bold tabular-nums inline-block ${
+                              isCritical
+                                ? 'bg-rose-100 text-rose-800 border border-rose-200'
+                                : isWarning
+                                ? 'bg-amber-100 text-amber-800 border border-amber-200'
+                                : isOverstock
+                                ? 'bg-blue-100 text-blue-800 border border-blue-200'
+                                : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                            }`}
+                          >
+                            {item.DOI_Total >= 999 ? '> 90 ngày' : `${item.DOI_Total.toFixed(1)} ngày`}
+                          </span>
                         </td>
 
                         {/* Stockout Date */}
@@ -501,7 +484,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           {/* Footer Bar */}
           <div className="p-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
             <span className="text-xs text-slate-500 font-medium">
-              Hiển thị <strong className="text-slate-800">{filteredMetrics.length}</strong> / {scopedMetrics.length} dòng
+              Hiển thị <strong className="text-slate-800">{filteredMetrics.length}</strong> / {scopedMetrics.length} mã nguyên liệu
             </span>
             <button
               onClick={() => onNavigateTab('position-matrix')}
@@ -513,68 +496,9 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           </div>
         </div>
 
-        {/* Right 4 Cols: Urgent Shortage Command Radar + AI S&OP Strategy */}
+        {/* Right 4 Cols: Clean Dispatch Suggestions & AI Strategy */}
         <div className="lg:col-span-4 space-y-5">
           
-          {/* Tactical Emergency Card: Shortage Radar */}
-          <div className="bg-slate-950 text-white rounded-2xl p-5 border border-slate-800 shadow-md relative overflow-hidden flex flex-col justify-between">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping shrink-0" />
-                  <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-rose-400">
-                    Cảnh Báo Cạn Kho Thời Gian Thực
-                  </h3>
-                </div>
-                <span className="text-[10px] font-mono text-slate-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
-                  {stats.criticalCount} Điểm Nóng
-                </span>
-              </div>
-
-              <div className="space-y-3">
-                {stats.criticalItems.length === 0 ? (
-                  <div className="text-xs text-slate-400 italic py-6 text-center">
-                    ✅ Toàn bộ nhà máy đang trong ngưỡng tồn kho an toàn.
-                  </div>
-                ) : (
-                  stats.criticalItems.slice(0, 3).map((item, idx) => (
-                    <div
-                      key={idx}
-                      className="p-3 bg-slate-900/90 rounded-xl border border-rose-500/20 hover:border-rose-500/40 transition-colors space-y-1.5"
-                    >
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="font-mono font-bold text-rose-400">
-                          {item.FactoryCode} • DOI {item.DOI_Total.toFixed(1)}d
-                        </span>
-                        <span className="text-[10px] text-slate-400 font-mono">
-                          Cạn: {item.StockoutDate}
-                        </span>
-                      </div>
-                      <div className="font-bold text-white text-xs truncate">
-                        {item.MaterialName_VN}
-                      </div>
-                      <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-800 font-mono">
-                        <span>Tồn: {Number(item.SOHQty).toLocaleString()} kg</span>
-                        <span className="text-rose-300">Dùng: {Math.round(item.DailyUsage)} kg/d</span>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-
-            <div className="pt-4 mt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
-              <span className="text-slate-400 font-mono text-[11px]">D365 FO Live Sync</span>
-              <button
-                onClick={() => onNavigateTab('transfers')}
-                className="text-amber-400 font-bold hover:underline flex items-center gap-1 cursor-pointer"
-              >
-                <span>Xem phương án cứu viện</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
-
           {/* S&OP Dispatch & Transfer Recommendation Card */}
           <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs flex flex-col justify-between">
             <div>
@@ -591,18 +515,18 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               </div>
 
               <div className="space-y-3 mt-3">
-                {transferSuggestions.slice(0, 2).map((sug, i) => (
+                {transferSuggestions.slice(0, 4).map((sug, i) => (
                   <div
                     key={i}
                     className="p-3 bg-slate-50 rounded-xl border border-slate-100 hover:border-slate-200 transition-colors text-xs flex items-center justify-between gap-2"
                   >
-                    <div className="min-w-0">
-                      <div className="font-mono font-bold text-slate-900 flex items-center gap-1">
-                        <span>{sug.SourceFactoryCode}</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="font-mono font-bold text-slate-900 flex items-center gap-1.5 text-xs">
+                        <span className="bg-white px-1.5 py-0.5 rounded border border-slate-200">{sug.SourceFactoryCode}</span>
                         <span className="text-slate-400">→</span>
-                        <span className="text-blue-700">{sug.TargetFactoryCode}</span>
+                        <span className="bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded border border-blue-100">{sug.TargetFactoryCode}</span>
                       </div>
-                      <div className="text-[11px] text-slate-600 font-medium truncate mt-0.5">
+                      <div className="text-[11px] text-slate-700 font-semibold truncate mt-1">
                         {sug.MaterialName}
                       </div>
                       <div className="text-[10px] text-slate-400 font-mono mt-0.5">
@@ -620,19 +544,47 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 ))}
 
                 {transferSuggestions.length === 0 && (
-                  <p className="text-xs text-slate-400 italic text-center py-4">
-                    Hiện chưa có đề xuất điều chuyển nào cần thực hiện.
+                  <p className="text-xs text-slate-400 italic text-center py-6">
+                    Hiện chưa có đề xuất điều chuyển nào cần xử lý.
                   </p>
                 )}
               </div>
             </div>
 
+            <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+              <span className="text-[11px] text-slate-500">Tự động cân bằng tồn kho</span>
+              <button
+                onClick={() => onNavigateTab('transfers')}
+                className="text-blue-600 font-bold hover:underline flex items-center gap-0.5 cursor-pointer text-xs"
+              >
+                <span>Tất cả tuyến</span>
+                <ChevronRight className="w-3 h-3" />
+              </button>
+            </div>
+          </div>
+
+          {/* AI Advisor Card */}
+          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+                Trợ Lý Chuỗi Cung Ứng AI
+              </span>
+              <span className="text-[10px] font-bold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full border border-blue-100">
+                S&amp;OP Advisor
+              </span>
+            </div>
+            
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Tự động phân tích nguy cơ thiếu hụt, đánh giá tiến độ tàu cảng Inbound và khuyến nghị kịch bản điều phối liên cơ sở tối ưu chi phí.
+            </p>
+
             <button
               onClick={() => onNavigateTab('ai-advisor')}
-              className="mt-4 w-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold py-2.5 rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold py-2.5 rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               <Sparkles className="w-4 h-4 text-blue-400" />
-              <span>Phân Tích Với Trợ Lý Chuỗi Cung Ứng AI</span>
+              <span>Mở Trợ Lý AI Advisor</span>
             </button>
           </div>
 
