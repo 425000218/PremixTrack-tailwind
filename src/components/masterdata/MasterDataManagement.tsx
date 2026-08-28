@@ -102,11 +102,11 @@ export const MasterDataManagement: React.FC<MasterDataManagementProps> = ({
         {/* Sub-Tabs Bar */}
         <div className="flex items-center gap-1 bg-slate-100 p-1.5 rounded-xl text-xs flex-wrap border border-slate-200/60">
           {[
-            { id: 'materials' as const, label: `Nguy�n Li?u tblItem (${materials.length})`, icon: Layers },
-            { id: 'substitutions' as const, label: `Ma Tr?n Thay Th? (${substitutions.length})`, icon: ArrowRightLeft },
-            { id: 'factories' as const, label: `Nh� M�y tblFactory (${factories.length})`, icon: Factory },
-            { id: 'suppliers' as const, label: `Nh� Cung C?p tblNCC (${suppliers.length})`, icon: Building2 },
-            { id: 'mappings' as const, label: `T? �i?n Header (${learnedMappings.length})`, icon: Tag },
+            { id: 'materials' as const, label: `Nguyên Liệu tblItem (${materials.length})`, icon: Layers },
+            { id: 'substitutions' as const, label: `Ma Trận Thay Thế (${substitutions.length})`, icon: ArrowRightLeft },
+            { id: 'factories' as const, label: `Nhà Máy tblFactory (${factories.length})`, icon: Factory },
+            { id: 'suppliers' as const, label: `Nhà Cung Cấp tblNCC (${suppliers.length})`, icon: Building2 },
+            { id: 'mappings' as const, label: `Từ Điển Header (${learnedMappings.length})`, icon: Tag },
           ].map((tab) => {
             const Icon = tab.icon;
             return (

@@ -123,7 +123,7 @@ export const ForecastVersionTable: React.FC<ForecastVersionTableProps> = ({
         const data = XLSX.utils.sheet_to_json<any>(ws);
 
         if (data.length === 0) {
-          alert('File Excel r?ng, vui lng ki?m tra l?i.');
+          alert('File Excel rỗng, vui lòng kiểm tra lại.');
           return;
         }
 
@@ -143,10 +143,10 @@ export const ForecastVersionTable: React.FC<ForecastVersionTableProps> = ({
         const updated = forecastVersions.map((v) => ({ ...v }));
         onUpdateVersions([newVer, ...updated]);
         setIsUploadModalOpen(false);
-        setUploadStatusMsg(` import thnh cng ${data.length} dng d? li?u vo phin b?n m?i!`);
+        setUploadStatusMsg(`Đã import thành công ${data.length} dòng dữ liệu vào phiên bản mới!`);
         setTimeout(() => setUploadStatusMsg(null), 5000);
       } catch (err: any) {
-        alert('L?i khi d?c file Excel: ' + err.message);
+        alert('Lỗi khi đọc file Excel: ' + err.message);
       }
     };
     reader.readAsBinaryString(file);

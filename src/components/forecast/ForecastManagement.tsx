@@ -71,11 +71,11 @@ export const ForecastManagement: React.FC<ForecastManagementProps> = ({
             </div>
             <div>
               <h2 className="text-sm font-bold text-slate-900">
-                K? Ho?ch &amp; Theo D�i D? B�o Forecast Nhu C?u Nguy�n Li?u (RD)
+                Kế Hoạch &amp; Theo Dõi Dự Báo Forecast Nhu Cầu Nguyên Liệu (RD)
               </h2>
               {isHeaderSummaryExpanded && (
                 <p className="text-[11px] text-slate-500 mt-0.5 animate-fade-in">
-                  �?i so�t v� ph�n t�ch bi?n d?ng Raw Material Consumption t? R&amp;D theo ng�y upload, h? tr? Multi-Select Slicers (Ng�nh, PIC Mua H�ng, Nh� M�y), so s�nh 2 k? li?n k? sau c�ng.
+                  Đối soát và phân tích biến động Raw Material Consumption từ R&amp;D theo ngày upload, hỗ trợ Multi-Select Slicers (Ngành, PIC Mua Hàng, Nhà Máy), so sánh 2 kỳ liền kề sau cùng.
                 </p>
               )}
             </div>
@@ -87,7 +87,7 @@ export const ForecastManagement: React.FC<ForecastManagementProps> = ({
               className="px-2.5 py-1 text-[11px] font-semibold text-slate-500 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
             >
               {isHeaderSummaryExpanded ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5 text-blue-600" />}
-              <span>{isHeaderSummaryExpanded ? 'Thu G?n' : 'M? R?ng'}</span>
+              <span>{isHeaderSummaryExpanded ? 'Thu Gọn' : 'Mở Rộng'}</span>
             </button>
           </div>
         </div>
@@ -97,17 +97,17 @@ export const ForecastManagement: React.FC<ForecastManagementProps> = ({
           {[
             {
               id: 'matrix' as const,
-              label: `Ma Tr?n So S�nh �a K? (${compareData.length} d�ng)`,
+              label: `Ma Trận So Sánh Đa Kỳ (${compareData.length} dòng)`,
               icon: Layers,
             },
             {
               id: 'analytics' as const,
-              label: 'Bi?u �? Xu Hu?ng & Ph�n T�ch Bi?n �?ng',
+              label: 'Biểu Đồ Xu Hướng & Phân Tích Biến Động',
               icon: BarChart3,
             },
             {
               id: 'versions' as const,
-              label: `Qu?n L� �?t Upload (${forecastVersions.length} d?t)`,
+              label: `Quản Lý Đợt Upload (${forecastVersions.length} đợt)`,
               icon: Calendar,
             },
           ].map((tab) => {
