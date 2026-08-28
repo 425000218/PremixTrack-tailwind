@@ -11,6 +11,9 @@ import {
   PackageCheck,
   X,
   Save,
+  Scale,
+  Check,
+  Sliders,
 } from 'lucide-react';
 import {
   Dim_Material,
@@ -279,7 +282,7 @@ export const SubstitutionsTab: React.FC<SubstitutionsTabProps> = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedDivisionFilter, setSelectedDivisionFilter] = useState<string>('ALL');
-  const [selectedTypeFilter, setSelectedTypeFilter] = useState<string>('ALL');
+  const [selectedSubTypeFilter, setSelectedSubTypeFilter] = useState<string>('ALL');
   const [subModal, setSubModal] = useState<{
     open: boolean;
     item: Dim_Material_Substitution | null;
@@ -289,6 +292,19 @@ export const SubstitutionsTab: React.FC<SubstitutionsTabProps> = ({
   });
 
   const subTableRef = useRef<HTMLDivElement>(null);
+
+  const directCount = useMemo(
+    () => (substitutions || []).filter((s) => s.SubstitutionType === 'Direct_1_to_1').length,
+    [substitutions]
+  );
+  const ratioCount = useMemo(
+    () => (substitutions || []).filter((s) => s.SubstitutionType === 'Ratio_Adjusted').length,
+    [substitutions]
+  );
+  const reworkCount = useMemo(
+    () => (substitutions || []).filter((s) => s.SubstitutionType === 'Formula_Rework').length,
+    [substitutions]
+  );
 
   const subHeaders = [
     'OriginalMaterialCode',
@@ -302,6 +318,7 @@ export const SubstitutionsTab: React.FC<SubstitutionsTabProps> = ({
     'IsBiDirectional',
     'Status',
     'ApprovedBy',
+    'EffectiveDate',
     'Note',
   ];
 
@@ -349,21 +366,21 @@ export const SubstitutionsTab: React.FC<SubstitutionsTabProps> = ({
       if (selectedDivisionFilter !== 'ALL' && s.DivisionScope !== selectedDivisionFilter && s.DivisionScope !== 'ALL') {
         return false;
       }
-      if (selectedTypeFilter !== 'ALL' && s.SubstitutionType !== selectedTypeFilter) {
+      if (selectedSubTypeFilter !== 'ALL' && s.SubstitutionType !== selectedSubTypeFilter) {
         return false;
       }
       if (!searchTerm) return true;
       const q = searchTerm.toLowerCase();
       return (
         s.OriginalMaterialCode.toLowerCase().includes(q) ||
-        s.OriginalMaterialName.toLowerCase().includes(q) ||
+        s.OriginalMaterialName?.toLowerCase().includes(q) ||
         s.SubstituteMaterialCode.toLowerCase().includes(q) ||
-        s.SubstituteMaterialName.toLowerCase().includes(q) ||
+        s.SubstituteMaterialName?.toLowerCase().includes(q) ||
         (s.ApprovedBy && s.ApprovedBy.toLowerCase().includes(q)) ||
         (s.Note && s.Note.toLowerCase().includes(q))
       );
     });
-  }, [substitutions, searchTerm, selectedDivisionFilter, selectedTypeFilter]);
+  }, [substitutions, searchTerm, selectedDivisionFilter, selectedSubTypeFilter]);
 
   const handleSaveSubstitution = (item: Dim_Material_Substitution) => {
     if (!onUpdateSubstitutions) return;
@@ -637,7 +654,7 @@ export const SubstitutionsTab: React.FC<SubstitutionsTabProps> = ({
                               <Edit2 className="w-3.5 h-3.5" />
                             </button>
                             <button
-                              onClick={() => deleteSubstitution(sub.SubstitutionID)}
+                              onClick={() => handleDeleteSubstitution(sub.SubstitutionID)}
                               className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors cursor-pointer"
                               title="Xóa quy tắc chuyển đổi này"
                             >

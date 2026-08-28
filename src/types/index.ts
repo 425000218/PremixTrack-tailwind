@@ -58,7 +58,9 @@ export type MaterialCategory =
   | 'Toxin_Binders'
   | 'Acidifiers'
   | 'Medicinals'
-  | 'Carriers_Minerals';
+  | 'Carriers_Minerals'
+  | 'Grain'
+  | 'Protein';
 
 export type MaterialStatus = 'Active' | 'Stop_Usage' | 'Phase_Out' | 'Testing';
 
@@ -240,6 +242,33 @@ export interface Fact_PO_Detail {
   SupplierName?: string;
   CoverDays?: number;
   CoverDate?: string;
+}
+
+export interface Fact_Inbound_Schedule {
+  ScheduleID: string;
+  POID?: string;
+  PODetailID?: string;
+  PONumber?: string;
+  MaterialCode?: string;
+  MaterialName?: string;
+  SupplierName?: string;
+  FactoryID?: string;
+  FactoryCode?: string;
+  FactoryName?: string;
+  ScheduledQtyKg?: number;
+  PlannedQty?: number;
+  ExpectedDate?: string;
+  EstimatedArrivalDate?: string;
+  ActualArrivalDate?: string;
+  ContainerNo?: string;
+  ContainerNumber?: string;
+  PortOfDischarge?: string;
+  TruckPlate?: string;
+  TruckPlateNumber?: string;
+  DriverName?: string;
+  DriverPhone?: string;
+  Status: 'PLANNED' | 'IN_TRANSIT' | 'CUSTOMS_CLEARING' | 'ARRIVED_PORT' | 'GATE_CHECKIN' | 'WEIGHED' | 'UNLOADED' | 'RECEIVED' | 'CANCELLED' | 'In_Transit' | 'Scheduled' | 'Received' | 'Unloaded';
+  Notes?: string;
 }
 
 export interface Fact_Position_Snapshot {

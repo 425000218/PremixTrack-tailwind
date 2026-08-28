@@ -12,6 +12,9 @@ import {
   Save,
   PackageCheck,
   Building,
+  Trash2,
+  Warehouse,
+  Globe2,
 } from 'lucide-react';
 import {
   Dim_Factory,
@@ -366,6 +369,23 @@ export const FactoriesTab: React.FC<FactoriesTabProps> = ({
 
   const facTableRef = useRef<HTMLDivElement>(null);
 
+  const livestockCount = useMemo(
+    () => (factories || []).filter((f) => f.Division === 'Livestock').length,
+    [factories]
+  );
+  const aquaCount = useMemo(
+    () => (factories || []).filter((f) => f.Division === 'Aqua').length,
+    [factories]
+  );
+  const southCount = useMemo(
+    () => (factories || []).filter((f) => f.RegionID === 'SOUTH').length,
+    [factories]
+  );
+  const northCount = useMemo(
+    () => (factories || []).filter((f) => f.RegionID === 'NORTH').length,
+    [factories]
+  );
+
   const checkFactoryDependencies = (fac: Dim_Factory): DependencyCheckResult => {
     const facId = fac.FactoryID;
     const intCode = fac.InternalCode.toUpperCase();
@@ -375,15 +395,13 @@ export const FactoriesTab: React.FC<FactoriesTabProps> = ({
     const sohCount = (inventorySOH || []).filter((s) => match(s.FactoryID)).length;
     const fcCount = (forecastDetails || []).filter((f) => match(f.FactoryID)).length;
     const usageCount = (usageLogs || []).filter((u) => match(u.FactoryID)).length;
-    const inboundCount = (inboundSchedules || []).filter((i) => match(i.FactoryID)).length;
-    const poCount = (poHeaders || []).filter((p) => match(p.DestinationFactoryID)).length;
+    const inboundCount = (inboundSchedules || []).filter((i) => match(i.FactoryCode) || match(i.FactoryName)).length;
 
     const reasons: string[] = [];
-    if (sohCount > 0) reasons.push(`${sohCount} b?n ghi T?n kho th?c t? (SOH)`);
-    if (fcCount > 0) reasons.push(`${fcCount} d�ng D? b�o nhu c?u (Forecast Details)`);
-    if (usageCount > 0) reasons.push(`${usageCount} nh?t k� Ti�u hao s?n xu?t (Usage Logs)`);
-    if (inboundCount > 0) reasons.push(`${inboundCount} l?ch Giao h�ng / C�n xe (Inbound Schedules)`);
-    if (poCount > 0) reasons.push(`${poCount} �on d?t h�ng li�n quan (Purchase Orders)`);
+    if (sohCount > 0) reasons.push(`${sohCount} bản ghi Tồn kho thực tế (SOH)`);
+    if (fcCount > 0) reasons.push(`${fcCount} dòng Dự báo nhu cầu (Forecast Details)`);
+    if (usageCount > 0) reasons.push(`${usageCount} nhật ký Tiêu hao sản xuất (Usage Logs)`);
+    if (inboundCount > 0) reasons.push(`${inboundCount} lịch Giao hàng / Cân xe (Inbound Schedules)`);
 
     return {
       canDelete: reasons.length === 0,

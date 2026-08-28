@@ -11,6 +11,11 @@ import {
   Layers,
   FileSpreadsheet,
   Database,
+  Check,
+  BookOpen,
+  ChevronUp,
+  ChevronDown,
+  FileDown,
 } from 'lucide-react';
 import {
   Sys_Import_Mapping,
@@ -204,7 +209,8 @@ export const ImportMappingsTab: React.FC<ImportMappingsTabProps> = ({
   language,
 }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [selectedModuleFilter, setSelectedModuleFilter] = useState<string>('ALL');
+  const [selectedMappingTypeFilter, setSelectedMappingTypeFilter] = useState<string>('ALL');
+  const [isAliasReferenceOpen, setIsAliasReferenceOpen] = useState<boolean>(false);
   const [mappingModal, setMappingModal] = useState<{
     open: boolean;
     item: Sys_Import_Mapping | null;
@@ -215,9 +221,21 @@ export const ImportMappingsTab: React.FC<ImportMappingsTabProps> = ({
 
   const mapTableRef = useRef<HTMLDivElement>(null);
 
+  const masterDataMappingsCount = useMemo(() => {
+    return (learnedMappings || []).filter((m) =>
+      ['Material', 'Factory', 'Supplier', 'Substitution'].includes(m.ImportType)
+    ).length;
+  }, [learnedMappings]);
+
+  const factMappingsCount = useMemo(() => {
+    return (learnedMappings || []).filter((m) =>
+      ['Forecast', 'SOH', 'Usage', 'PO_Inbound'].includes(m.ImportType)
+    ).length;
+  }, [learnedMappings]);
+
   const filteredMappings = useMemo(() => {
-    return learnedMappings.filter((m) => {
-      if (selectedModuleFilter !== 'ALL' && m.ImportType !== selectedModuleFilter) {
+    return (learnedMappings || []).filter((m) => {
+      if (selectedMappingTypeFilter !== 'ALL' && m.ImportType !== selectedMappingTypeFilter) {
         return false;
       }
       if (!searchTerm) return true;
@@ -228,7 +246,18 @@ export const ImportMappingsTab: React.FC<ImportMappingsTabProps> = ({
         (m.Description && m.Description.toLowerCase().includes(q))
       );
     });
-  }, [learnedMappings, searchTerm, selectedModuleFilter]);
+  }, [learnedMappings, searchTerm, selectedMappingTypeFilter]);
+
+  const handleExportMappings = () => {
+    const exportData = filteredMappings.map((m) => ({
+      ImportType: m.ImportType,
+      ExcelHeaderName: m.ExcelHeaderName,
+      SystemFieldName: m.SystemFieldName,
+      Description: m.Description || '',
+      CreatedAt: m.CreatedAt,
+    }));
+    exportToExcel(exportData, 'Tu_Dien_Anh_Xa_Header_Excel');
+  };
 
   const handleSaveMappingInternal = (item: Sys_Import_Mapping) => {
     if (!onSaveMapping) return;
@@ -237,7 +266,7 @@ export const ImportMappingsTab: React.FC<ImportMappingsTabProps> = ({
   };
 
   const handleDeleteMappingInternal = (id: string) => {
-    if (confirm('X�c nh?n x�a quy t?c �nh x? ti�u d? c?t n�y?')) {
+    if (confirm('Xác nhận xóa quy tắc ánh xạ tiêu đề cột này?')) {
       onDeleteMapping(id);
     }
   };

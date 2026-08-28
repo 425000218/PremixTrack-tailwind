@@ -13,6 +13,7 @@ import {
   Building,
   Check,
   X,
+  Plus,
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import {
@@ -122,26 +123,27 @@ export const ForecastVersionTable: React.FC<ForecastVersionTableProps> = ({
         const data = XLSX.utils.sheet_to_json<any>(ws);
 
         if (data.length === 0) {
-          alert('File Excel r?ng, vui l�ng ki?m tra l?i.');
+          alert('File Excel r?ng, vui lng ki?m tra l?i.');
           return;
         }
 
         const newVer: ForecastRunVersion = {
           VersionID: `FC-VER-${Date.now()}`,
-          VersionName: newVersionName || `�?t ch?y ${newRunDate}`,
+          VersionName: newVersionName || `Đợt chạy ${newRunDate}`,
           RunDate: newRunDate,
-          TotalSKUs: data.length,
-          TotalVolumeKg: 100000,
-          Status: 'Active',
-          IsActive: true,
+          TotalForecastQty: 100000,
+          SKUCount: data.length,
+          PlantCount: factories.length || 9,
+          UploadedAt: new Date().toISOString(),
+          UploadedBy: 'Planner',
+          SourceFileName: file.name,
           Notes: newNotes || 'Imported via Excel',
-          CreatedAt: new Date().toISOString(),
         };
 
-        const updated = forecastVersions.map((v) => ({ ...v, IsActive: false }));
+        const updated = forecastVersions.map((v) => ({ ...v }));
         onUpdateVersions([newVer, ...updated]);
         setIsUploadModalOpen(false);
-        setUploadStatusMsg(`�� import th�nh c�ng ${data.length} d�ng d? li?u v�o phi�n b?n m?i!`);
+        setUploadStatusMsg(` import thnh cng ${data.length} dng d? li?u vo phin b?n m?i!`);
         setTimeout(() => setUploadStatusMsg(null), 5000);
       } catch (err: any) {
         alert('L?i khi d?c file Excel: ' + err.message);

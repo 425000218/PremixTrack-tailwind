@@ -15,6 +15,9 @@ import {
   Building,
   Ship,
   Truck,
+  Trash2,
+  FileText,
+  Mail,
 } from 'lucide-react';
 import {
   Dim_Supplier,
@@ -353,7 +356,7 @@ export const SuppliersTab: React.FC<SuppliersTabProps> = ({
   language,
 }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [selectedTypeFilter, setSelectedTypeFilter] = useState<string>('ALL');
+  const [selectedSupplierTypeFilter, setSelectedSupplierTypeFilter] = useState<string>('ALL');
   const [selectedIncotermFilter, setSelectedIncotermFilter] = useState<string>('ALL');
   const [supModal, setSupModal] = useState<{ open: boolean; item: Dim_Supplier | null }>({
     open: false,
@@ -361,6 +364,19 @@ export const SuppliersTab: React.FC<SuppliersTabProps> = ({
   });
 
   const supTableRef = useRef<HTMLDivElement>(null);
+
+  const importCount = useMemo(
+    () => (suppliers || []).filter((s) => s.SupplierType === 'IMPORT').length,
+    [suppliers]
+  );
+  const localCount = useMemo(
+    () => (suppliers || []).filter((s) => s.SupplierType === 'LOCAL').length,
+    [suppliers]
+  );
+  const contractCount = useMemo(
+    () => (suppliers || []).filter((s) => s.ContractNo && s.ContractNo !== '_').length,
+    [suppliers]
+  );
 
   const checkSupplierDependencies = (sup: Dim_Supplier): DependencyCheckResult => {
     const supId = sup.SupplierID;
@@ -370,7 +386,7 @@ export const SuppliersTab: React.FC<SuppliersTabProps> = ({
     ).length;
 
     const reasons: string[] = [];
-    if (poCount > 0) reasons.push(`${poCount} �on d?t h�ng mua (Purchase Orders) li�n k?t`);
+    if (poCount > 0) reasons.push(`${poCount} đơn đặt hàng mua (Purchase Orders) liên kết`);
 
     return {
       canDelete: reasons.length === 0,
@@ -380,18 +396,16 @@ export const SuppliersTab: React.FC<SuppliersTabProps> = ({
   };
 
   const supHeaders = [
-    'SupplierCode',
-    'SupplierName_VN',
+    'NCC',
+    'CODE',
+    'DESC',
+    'HĐNT',
+    'Incoterm',
+    'Terms of payment',
+    'MAIL',
+    'Note_0',
+    'Note_1',
     'SupplierType',
-    'CountryOfOrigin',
-    'DefaultIncoterm',
-    'LeadTimeDays',
-    'PaymentTerms',
-    'ContactPerson',
-    'Email',
-    'Phone',
-    'Status',
-    'Address',
   ];
 
   const supUpload = useExcelUpload<Dim_Supplier>(
@@ -410,18 +424,18 @@ export const SuppliersTab: React.FC<SuppliersTabProps> = ({
         const itemToSave: Dim_Supplier = {
           SupplierID: prev?.SupplierID || `SUP-${r.SupplierCode}`,
           SupplierCode: r.SupplierCode.toUpperCase(),
-          SupplierName_VN: r.SupplierName_VN || r.SupplierCode,
-          SupplierName_EN: r.SupplierName_EN || r.SupplierName_VN || r.SupplierCode,
+          ShortName: r.ShortName || prev?.ShortName || r.SupplierCode,
+          SupplierName: r.SupplierName || prev?.SupplierName || r.SupplierCode,
           SupplierType: (r.SupplierType as SupplierType) || prev?.SupplierType || 'IMPORT',
-          CountryOfOrigin: r.CountryOfOrigin || prev?.CountryOfOrigin || 'Vi?t Nam',
-          DefaultIncoterm: r.DefaultIncoterm || prev?.DefaultIncoterm || 'CIF',
-          LeadTimeDays: Number(r.LeadTimeDays ?? prev?.LeadTimeDays ?? 30),
-          PaymentTerms: r.PaymentTerms || prev?.PaymentTerms || 'T/T 30 days',
-          ContactPerson: r.ContactPerson || prev?.ContactPerson || '',
+          ContractNo: r.ContractNo || prev?.ContractNo || '_',
+          Incoterm: r.Incoterm || prev?.Incoterm || 'DDP',
+          PaymentTerms: r.PaymentTerms || prev?.PaymentTerms || 'Net 30',
           Email: r.Email || prev?.Email || '',
-          Phone: r.Phone || prev?.Phone || '',
-          Status: (r.Status as any) || prev?.Status || 'Active',
-          Address: r.Address || prev?.Address || '',
+          Note_0: r.Note_0 || prev?.Note_0 || '',
+          Note_1: r.Note_1 || prev?.Note_1 || '',
+          Country: r.Country || prev?.Country || 'Việt Nam',
+          LeadTimeDays: Number(r.LeadTimeDays ?? prev?.LeadTimeDays ?? 7),
+          Rating: Number(r.Rating ?? prev?.Rating ?? 4.8),
         };
         existingMap.set(codeUpper, itemToSave);
       });
@@ -430,25 +444,25 @@ export const SuppliersTab: React.FC<SuppliersTabProps> = ({
   );
 
   const filteredSuppliers = useMemo(() => {
-    return suppliers.filter((s) => {
-      if (selectedTypeFilter !== 'ALL' && s.SupplierType !== selectedTypeFilter) {
+    return (suppliers || []).filter((s) => {
+      if (selectedSupplierTypeFilter !== 'ALL' && s.SupplierType !== selectedSupplierTypeFilter) {
         return false;
       }
-      if (selectedIncotermFilter !== 'ALL' && s.DefaultIncoterm !== selectedIncotermFilter) {
+      if (selectedIncotermFilter !== 'ALL' && s.Incoterm !== selectedIncotermFilter) {
         return false;
       }
       if (!searchTerm) return true;
       const q = searchTerm.toLowerCase();
       return (
         s.SupplierCode.toLowerCase().includes(q) ||
-        s.SupplierName_VN.toLowerCase().includes(q) ||
-        s.CountryOfOrigin?.toLowerCase().includes(q) ||
-        s.ContactPerson?.toLowerCase().includes(q) ||
-        s.Email?.toLowerCase().includes(q) ||
-        s.Phone?.toLowerCase().includes(q)
+        s.SupplierName.toLowerCase().includes(q) ||
+        (s.ShortName && s.ShortName.toLowerCase().includes(q)) ||
+        (s.ContractNo && s.ContractNo.toLowerCase().includes(q)) ||
+        (s.Email && s.Email.toLowerCase().includes(q)) ||
+        (s.Country && s.Country.toLowerCase().includes(q))
       );
     });
-  }, [suppliers, searchTerm, selectedTypeFilter, selectedIncotermFilter]);
+  }, [suppliers, searchTerm, selectedSupplierTypeFilter, selectedIncotermFilter]);
 
   const handleSaveSupplier = (item: Dim_Supplier) => {
     if (!onUpdateSuppliers) return;
@@ -470,18 +484,16 @@ export const SuppliersTab: React.FC<SuppliersTabProps> = ({
 
   const handleExportSuppliers = () => {
     const exportData = filteredSuppliers.map((s) => ({
-      SupplierCode: s.SupplierCode,
-      SupplierName_VN: s.SupplierName_VN,
-      SupplierType: s.SupplierType,
-      CountryOfOrigin: s.CountryOfOrigin || 'Vi?t Nam',
-      DefaultIncoterm: s.DefaultIncoterm || 'CIF',
-      LeadTimeDays: s.LeadTimeDays,
-      PaymentTerms: s.PaymentTerms || '',
-      ContactPerson: s.ContactPerson || '',
-      Email: s.Email || '',
-      Phone: s.Phone || '',
-      Status: s.Status,
-      Address: s.Address || '',
+      'Phân Loại': s.SupplierType,
+      'NCC': s.ShortName,
+      'CODE': s.SupplierCode,
+      'DESC': s.SupplierName,
+      'HĐNT': s.ContractNo || '_',
+      'Incoterm': s.Incoterm,
+      'Terms of payment': s.PaymentTerms,
+      'MAIL': s.Email || '',
+      'Note_0': s.Note_0 || '',
+      'Note_1': s.Note_1 || '',
     }));
     exportToExcel(exportData, 'Danh_Muc_Nha_Cung_Cap_tblNCC');
   };

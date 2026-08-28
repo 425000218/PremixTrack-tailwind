@@ -15,6 +15,7 @@ import {
   Tag,
   Scale,
   Trash2,
+  UserCheck,
 } from 'lucide-react';
 import {
   Dim_Material,
@@ -837,6 +838,10 @@ export const MaterialsTab: React.FC<MaterialsTabProps> = ({
       if (m.PIC) s.add(m.PIC);
     });
     return Array.from(s);
+  }, [materials]);
+
+  const bagsCount = useMemo(() => {
+    return materials.filter((m) => m.PackingGroup === 'Bags').length;
   }, [materials]);
 
   const filteredMaterials = useMemo(() => {
