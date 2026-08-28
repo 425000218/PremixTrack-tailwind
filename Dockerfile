@@ -19,7 +19,6 @@ COPY . .
 
 # Biên dịch Frontend (Vite) và Backend (Esbuild)
 RUN npm run build
-RUN npx esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs
 
 # Loại bỏ devDependencies để giảm tối đa dung lượng
 RUN npm prune --production
