@@ -372,7 +372,7 @@ export const systemFieldsByType: Record<ImportDataType, SystemFieldDefinition[]>
       label_EN: 'Material / Item Number',
       required: true,
       type: 'string',
-      aliases: ['item number', 'mã hàng', 'mã nl', 'materialcode', 'itemid', 'item_id', 'mã nguyên liệu', 'vật tư', 'product code', 'sku']
+      aliases: ['item number', 'mã hàng', 'mã nl', 'materialcode', 'itemid', 'item_id', 'mã nguyên liệu', 'vật tư', 'product code', 'sku', 'item code']
     },
     {
       field: 'ForecastQty',
@@ -380,7 +380,7 @@ export const systemFieldsByType: Record<ImportDataType, SystemFieldDefinition[]>
       label_EN: 'Forecast Quantity (Kg/Month)',
       required: true,
       type: 'number',
-      aliases: ['forecast qty', 'forecast', 'monthly usage', 'nhu cầu tháng', 'dự báo', 'forecast_qty', 'usage/month', 'khối lượng kg', 'kế hoạch (kg)', 'nhu cầu (kg)']
+      aliases: ['forecast qty', 'forecast', 'monthly usage', 'nhu cầu tháng', 'dự báo', 'forecast_qty', 'usage/month', 'khối lượng kg', 'kế hoạch (kg)', 'nhu cầu (kg)', 'quantity (kgs)', 'quantity']
     },
     {
       field: 'VersionName',
@@ -1007,7 +1007,7 @@ export function validateImportData(
 }
 
 // Generate Sample D365 FO Excel Files
-export function generateSampleExcel(importType: 'Forecast' | 'SOH' | 'Usage' | 'PO_Inbound'): void {
+export function generateSampleExcel(importType: 'Forecast' | 'Forecast_Flat' | 'SOH' | 'Usage' | 'PO_Inbound'): void {
   let headers: string[] = [];
   let sampleRows: any[] = [];
   let fileName = `PremixTrack_Template_${importType}.xlsx`;
@@ -1023,6 +1023,23 @@ export function generateSampleExcel(importType: 'Forecast' | 'SOH' | 'Usage' | '
       ['1003356', 'WHEAT MIDDLINGS MEAL (15-25% STARCH)', 632.10, 1615.58, 1279.99, 994.85, '', 1149.44, '', '', 460.31, 267.15, 75.58, 595.65, 347.18, 52.95, 358.80, 1404.55, '', 1401.02, 730.81, 1507.10, '', ''],
       ['1005010', 'RICE BRAN FULL FAT', 98.47, 188.21, 76.27, 113.44, 2369.81, '', 979.84, 278.29, 643.38, 133.91, 56.97, 670.21, 371.69, 279.86, 196.41, 177.93, 508.56, '', 349.93, 59.40, 234.68, ''],
       ['1012106', 'DDGS CORN STAND QUALITY US', 790.56, 1238.58, 912.25, 984.60, '', 656.57, '', 44.55, 49.79, 767.61, 374.15, 103.31, 747.61, 379.16, 141.68, 389.74, 2263.12, '', 1573.84, 826.06, 1419.89, '']
+    ];
+  } else if (importType === 'Forecast_Flat') {
+    headers = ['Version', 'NM&Code', 'Factory', 'ITEM CODE', 'ITEM NAME', 'Quantity (mt)', 'Quantity (Kgs)'];
+    sampleRows = [
+      ['8/21/2026', 'DBD1001010', 'DBD', '1001010', 'BARLEY', 208.74, 208737.41],
+      ['8/21/2026', 'DBD1002010', 'DBD', '1002010', 'CORN', 10614.46, 10614458.40],
+      ['8/21/2026', 'DBD1002101', 'DBD', '1002101', 'CORN GLUTENFEED >20%CP', 99.74, 99740.17],
+      ['8/21/2026', 'DBD1002150', 'DBD', '1002150', 'CORN GLUTENMEAL 60%CP', 70.06, 70058.32],
+      ['8/21/2026', 'DBD1003010', 'DBD', '1003010', 'WHEAT <12%CP', 2836.54, 2836536.18],
+      ['8/21/2026', 'DBD1003356', 'DBD', '1003356', 'WHEAT MIDDLINGS MEAL (15-25% STARCH)', 632.10, 632098.62],
+      ['8/21/2026', 'DBD1005010', 'DBD', '1005010', 'RICE BRAN FULL FAT', 129.53, 129526.83],
+      ['8/21/2026', 'DBD1005150', 'DBD', '1005150', 'RICE BROKEN, COARSE', 672.94, 672940.23],
+      ['8/21/2026', 'DBD1012105', 'DBD', '1012105', 'DDGS CORN STANDARD QUALITY', 0.00, 0.12],
+      ['8/21/2026', 'DBD1012106', 'DBD', '1012106', 'DDGS CORN STAND QUALITY US', 790.56, 790558.91],
+      ['8/21/2026', 'DBD1012160', 'DBD', '1012160', 'DDG CORN 40%CP', 168.80, 168797.78],
+      ['8/21/2026', 'DBD1101018', 'DBD', '1101018', 'SBM 48.5-50%CP', 4141.01, 4141011.88],
+      ['8/21/2026', 'DBD1101107', 'DBD', '1101107', 'SOY HULLS', 317.48, 317477.65]
     ];
   } else if (importType === 'SOH') {
     headers = ['REGION', 'WAREHOUSE', 'ORG CODE', 'SUB INV', 'ITEM CODE', 'ITEM NAME', 'SOH', 'Price Average'];

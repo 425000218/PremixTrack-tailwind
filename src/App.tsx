@@ -271,11 +271,11 @@ export function App() {
         FactoryID: d.ResolvedFactoryID || d.FactoryID || factories[0].FactoryID,
         MaterialID: d.ResolvedMaterialID || d.MaterialID || materials[0].MaterialID,
         ActualQty: Number(d.ActualQty || 0),
-        LogDate: d.LogDate || d.UsageDate || new Date().toISOString().split('T')[0],
+        LogDate: d.LogDate || d.UsageDate || effectiveDate,
         RecipeCode: d.RecipeCode || 'AUTO_IMPORT',
       }));
       setUsageLogs((prev) => [...newItems, ...prev]);
-      showToast(`Đã import thành công ${newItems.length} dòng Tiêu Hao Thực Tế (Usage)!`);
+      showToast(`Đã import thành công ${newItems.length} dòng Tiêu Hao Thực Tế (Usage Cut-off: ${effectiveDate})!`);
     } else if (type === 'PO_Inbound') {
       const newPODetails: Fact_PO_Detail[] = validData.map((d, i) => {
         const orderQty = Number(d.OrderQty || d.Quantity || 0);

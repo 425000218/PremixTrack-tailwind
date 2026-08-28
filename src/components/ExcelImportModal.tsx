@@ -125,7 +125,7 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
         if (importType === 'Forecast') {
           const materialCol = finalHeaders.find(h => h.toLowerCase().includes('material code') || h.toLowerCase().includes('item number') || h.toLowerCase().includes('mã hàng'));
           if (materialCol) {
-            const nonFactoryCols = ['material code', 'material description', 'item name', 'item number', 'tên', 'mã'];
+            const nonFactoryCols = ['material code', 'material description', 'item name', 'item number', 'tên', 'mã', 'version', 'factory', 'nm&code', 'quantity', 'site'];
             const factoryCols = finalHeaders.filter(h => !nonFactoryCols.some(nfc => h.toLowerCase().includes(nfc)));
             
             if (factoryCols.length > 0) {
@@ -388,7 +388,7 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                   </div>
                 </div>
                 <p className="text-[11px] text-slate-600">
-                  Mốc thời gian này dùng để chốt <strong>SOH & Forecast Cut-off</strong>, đồng bộ trực tiếp với <strong>Ma Trận Vị Thế Cung Ứng (Position Matrix Cut-off: {snapshotDate})</strong> và tính toán chính xác chỉ số DOI/ngày cạn hàng.
+                  Mốc thời gian này dùng để chốt <strong>SOH, Forecast & Usage Cut-off</strong>, đồng bộ trực tiếp với <strong>Ma Trận Vị Thế Cung Ứng (Position Matrix Cut-off: {snapshotDate})</strong> và tính toán chính xác chỉ số DOI/ngày cạn hàng.
                 </p>
               </div>
 
@@ -398,14 +398,28 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                   <label className="text-xs font-bold uppercase tracking-wider text-slate-500">
                     3. Chọn hoặc Kéo thả file Excel (.xlsx, .xls, .csv)
                   </label>
-                  <button
-                    type="button"
-                    onClick={() => generateSampleExcel(importType)}
-                    className="flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-700 font-bold hover:underline cursor-pointer"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    <span>Tải file mẫu D365 ({importType}.xlsx)</span>
-                  </button>
+                  <div className="flex gap-3">
+                    {importType === 'Forecast' && (
+                      <button
+                        type="button"
+                        onClick={() => generateSampleExcel('Forecast_Flat')}
+                        className="flex items-center gap-1.5 text-xs text-indigo-600 hover:text-indigo-700 font-bold hover:underline cursor-pointer"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        <span>Tải file mẫu (Forecast Dọc)</span>
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => generateSampleExcel(importType)}
+                      className="flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-700 font-bold hover:underline cursor-pointer"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>
+                        Tải file mẫu D365 ({importType === 'Forecast' ? 'Forecast Ngang' : importType}.xlsx)
+                      </span>
+                    </button>
+                  </div>
                 </div>
 
                 <div
