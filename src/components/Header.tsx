@@ -13,7 +13,9 @@ import {
   LogIn,
   UserPlus,
   Lock,
-  ArrowRight
+  ArrowRight,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from 'lucide-react';
 import { Dim_Factory, Language, AppUser } from '../types';
 import { mockUsers } from '../data/mockData';
@@ -27,6 +29,8 @@ interface HeaderProps {
   onNavigateTab: (tab: string) => void;
   language: Language;
   onToggleMobileSidebar: () => void;
+  isDesktopSidebarCollapsed?: boolean;
+  onToggleDesktopSidebar?: () => void;
   currentUser: AppUser | null;
   onOpenAuthModal: (mode?: 'login' | 'register') => void;
   onOpenProfileModal: () => void;
@@ -44,6 +48,8 @@ export const Header: React.FC<HeaderProps> = ({
   onNavigateTab,
   language,
   onToggleMobileSidebar,
+  isDesktopSidebarCollapsed,
+  onToggleDesktopSidebar,
   currentUser,
   onOpenAuthModal,
   onOpenProfileModal,
@@ -82,16 +88,32 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="h-16 bg-white border-b border-slate-200 px-4 md:px-8 flex items-center justify-between shrink-0 z-30 shadow-xs relative">
-      {/* Left side: Mobile Menu + Title + Status */}
-      <div className="flex items-center gap-3 md:gap-4">
+    <header className="h-16 bg-white border-b border-slate-200 px-4 md:px-6 flex items-center justify-between shrink-0 z-30 shadow-xs relative">
+      {/* Left side: Sidebar Toggle (Mobile & Desktop) + Title + Status */}
+      <div className="flex items-center gap-2 md:gap-3">
+        {/* Mobile Hamburger Toggle */}
         <button
           onClick={onToggleMobileSidebar}
-          className="lg:hidden p-2 text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-100 cursor-pointer"
-          title="Toggle Navigation"
+          className="lg:hidden p-2 text-slate-600 hover:text-slate-900 rounded-xl hover:bg-slate-100 cursor-pointer"
+          title="Mở menu (Mobile)"
         >
           <Menu className="w-5 h-5" />
         </button>
+
+        {/* Desktop Sidebar Collapse / Expand Button in Header */}
+        {onToggleDesktopSidebar && (
+          <button
+            onClick={onToggleDesktopSidebar}
+            className="hidden lg:flex p-2 text-slate-500 hover:text-slate-900 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer"
+            title={isDesktopSidebarCollapsed ? 'Mở rộng Sidebar (Expand)' : 'Thu gọn Sidebar (Collapse)'}
+          >
+            {isDesktopSidebarCollapsed ? (
+              <PanelLeftOpen className="w-5 h-5 text-blue-600" />
+            ) : (
+              <PanelLeftClose className="w-5 h-5" />
+            )}
+          </button>
+        )}
 
         <div className="flex items-center gap-3">
           <h2 className="text-base md:text-lg font-bold text-slate-900 tracking-tight">

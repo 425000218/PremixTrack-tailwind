@@ -108,7 +108,18 @@ export function App() {
   const [language, setLanguage] = useState<Language>('vi');
   const [isImportModalOpen, setIsImportModalOpen] = useState<boolean>(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState<boolean>(false);
+  const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] = useState<boolean>(() => {
+    return localStorage.getItem('premixtrack_sidebar_collapsed') === 'true';
+  });
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const toggleDesktopSidebar = () => {
+    setIsDesktopSidebarCollapsed((prev) => {
+      const next = !prev;
+      localStorage.setItem('premixtrack_sidebar_collapsed', String(next));
+      return next;
+    });
+  };
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -437,6 +448,8 @@ export function App() {
         onResetData={handleResetData}
         isOpenMobile={isMobileSidebarOpen}
         onCloseMobile={() => setIsMobileSidebarOpen(false)}
+        isCollapsed={isDesktopSidebarCollapsed}
+        onToggleCollapse={toggleDesktopSidebar}
       />
 
       {/* Main Content Column */}
@@ -451,6 +464,8 @@ export function App() {
           onNavigateTab={(tab) => setCurrentTab(tab)}
           language={language}
           onToggleMobileSidebar={() => setIsMobileSidebarOpen((prev) => !prev)}
+          isDesktopSidebarCollapsed={isDesktopSidebarCollapsed}
+          onToggleDesktopSidebar={toggleDesktopSidebar}
           currentUser={currentUser}
           onOpenAuthModal={handleOpenAuthModal}
           onOpenProfileModal={() => setIsProfileModalOpen(true)}
