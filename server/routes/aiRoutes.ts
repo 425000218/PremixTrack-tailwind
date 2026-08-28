@@ -37,7 +37,7 @@ router.post('/ai/advisor', async (req, res) => {
   } catch (error: any) {
     console.error('Error in /api/ai/advisor:', error);
     res.status(500).json({
-      error: error.message || 'L?i x? l� Gemini AI',
+      error: error.message || 'Lỗi xử lý Gemini AI',
       fallbackAnswer: generateFallbackAnalysis(req.body?.mode, req.body?.contextData),
     });
   }

@@ -17,25 +17,25 @@ export function getGeminiClient(): GoogleGenAI | null {
 }
 
 export function generateFallbackAnalysis(mode: string, contextData: any): string {
-  return `### ?? B�O C�O PH�N T�CH CHU?I CUNG ?NG & �I?U PH?I PREMIX (PremixTrack Engine)
+  return `### 📊 BÁO CÁO PHÂN TÍCH CHUỖI CUNG ỨNG & ĐIỀU PHỐI PREMIX (PremixTrack Engine)
 
-#### 1. C�c di?m n�ng thi?u h?t kh?n c?p (Critical Shortages):
-- **Nh� m�y �?ng Nai (DDN)**:
-  - **L-Threonine 98.5% (M� 2580003)**: T?n kho ch? c�n **4.2 ng�y** (T?n 4,200 kg / D�ng 1,000 kg/ng�y).
-    * *�on h�ng dang v?*: PO-D365-88903 (10,000 kg) d? ki?n v? ng�y **17/08** (Xe 51D-894.22).
-    * *H�nh d?ng*: C?n b�m s�t l? tr�nh xe t?i v� xem x�t di?u chuy?n g?p **3,000 kg** t? **Nh� m�y B�nh Duong (DBD)** (noi dang du DOI 47.3 ng�y, c? ly ch? 35km).
-  - **Phytase 5000 FTU (M� 2580008)**: T?n kho nguy c?p **5.0 ng�y**. Xe t?i 60C-672.15 dang tr�n du?ng v? c?ng C�i M�p.
+#### 1. Các điểm nóng thiếu hụt khẩn cấp (Critical Shortages):
+- **Nhà máy Đồng Nai (DDN)**:
+  - **L-Threonine 98.5% (Mã 2580003)**: Tồn kho chỉ còn **4.2 ngày** (Tồn 4,200 kg / Dùng 1,000 kg/ngày).
+    * *Đơn hàng đang về*: PO-D365-88903 (10,000 kg) dự kiến về ngày **17/08** (Xe 51D-894.22).
+    * *Hành động*: Cần bám sát lộ trình xe tải và xem xét điều chuyển gấp **3,000 kg** từ **Nhà máy Bình Dương (DBD)** (nơi đang dư DOI 47.3 ngày, cự ly chỉ 35km).
+  - **Phytase 5000 FTU (Mã 2580008)**: Tồn kho nguy cấp **5.0 ngày**. Xe tải 60C-672.15 đang trên đường về cảng Cái Mép.
 
-- **Nh� m�y Vinh Long (DVL)**:
-  - **Vitamin C Phosphate 35% (M� 2580007)**: T?n kho ch? c�n **5.6 ng�y** do dang v�o v? nu�i th?y s?n cao di?m.
-    * *�on h�ng Inbound*: 8,000 kg (PO-D365-88905) c?p c?ng C�t L�i ng�y 19/08.
+- **Nhà máy Vĩnh Long (DVL)**:
+  - **Vitamin C Phosphate 35% (Mã 2580007)**: Tồn kho chỉ còn **5.6 ngày** do đang vào vụ nuôi thủy sản cao điểm.
+    * *Đơn hàng Inbound*: 8,000 kg (PO-D365-88905) cập cảng Cát Lái ngày 19/08.
 
-#### 2. Co h?i t?i uu di?u chuy?n n?i b? (Inter-Factory Balancing):
-- **L-Threonine**: DBD th?a 26,000 kg -> �i?u chuy?n 3,000 kg sang DDN (Th?i gian v?n chuy?n ~ 1.5 gi?).
-- **Monocalcium Phosphate (MCP)**: DDN du 185 t?n (DOI 34.5 ng�y) -> H? tr? DBD dang thi?u h?t ch? c�n 14.3 ng�y t?n kho.
+#### 2. Cơ hội tối ưu điều chuyển nội bộ (Inter-Factory Balancing):
+- **L-Threonine**: DBD thừa 26,000 kg -> Điều chuyển 3,000 kg sang DDN (Thời gian vận chuyển ~ 1.5 giờ).
+- **Monocalcium Phosphate (MCP)**: DDN dư 185 tấn (DOI 34.5 ngày) -> Hỗ trợ DBD đang thiếu hụt chỉ còn 14.3 ngày tồn kho.
 
-#### 3. K? ho?ch chuy?n d?i c�ng th?c (Planned Substitution):
-- **Vitamin AD3E (M� cu 2580005)**: T?n kho t?i DBD c�n 1,200 kg. D? ki?n x? h?t trong 4 ng�y t?i v� t? d?ng k�ch ho?t chuy?n giao 100% sang m� th? h? m?i **2580006 (Bio-Stab)**.`;
+#### 3. Kế hoạch chuyển đổi công thức (Planned Substitution):
+- **Vitamin AD3E (Mã cũ 2580005)**: Tồn kho tại DBD còn 1,200 kg. Dự kiến xả hết trong 4 ngày tới và tự động kích hoạt chuyển giao 100% sang mã thế hệ mới **2580006 (Bio-Stab)**.`;
 }
 
 export async function analyzeSupplyChainWithAI(
@@ -50,42 +50,42 @@ export async function analyzeSupplyChainWithAI(
     throw new Error('GEMINI_NOT_CONFIGURED');
   }
 
-  const systemInstruction = `B?n l� Chuy�n gia C? v?n Chu?i Cung ?ng Cao C?p (Senior SCM & Premix AI Advisor) c?a PremixTrack.
+  const systemInstruction = `Bạn là Chuyên gia Cố vấn Chuỗi Cung Ứng Cao Cấp (Senior SCM & Premix AI Advisor) của PremixTrack.
 
-QUY T?C TR�NH B�Y HI?N �?I (MODERN BENTO CARD PRESENTATION):
-1. TR?C DI?N, NG?N G?N & KH�NG V�NG VO: �i th?ng v�o c�u h?i c?a ngu?i d�ng ngay t? d�ng d?u ti�n. Kh�ng vi?t van m? b�i d�i d�ng.
-2. C?U TR�C PH?N H?I TH�NH 3 KH?I BENTO TR?C QUAN:
+QUY TẮC TRÌNH BÀY HIỆN ĐẠI (MODERN BENTO CARD PRESENTATION):
+1. TRỰC DIỆN, NGẮN GỌN & KHÔNG VÒNG VO: Đi thẳng vào câu hỏi của người dùng ngay từ dòng đầu tiên. Không viết văn mở bài dài dòng.
+2. CẤU TRÚC PHẢN HỒI THÀNH 3 KHỐI BENTO TRỰC QUAN:
 
-### ?? 1. �I?M N�NG C?N X? L� NGAY
-(Ch? li?t k� c�c SKU th?c s? nguy c?p DOI < 7 ng�y du?i d?ng th? s�c t�ch, v� d?:
-� [DBD] B?p 2579: T?n 12.9 t?n | Ti�u hao: 25.2 T/ng�y | DOI: 0.5 ng�y (C?n ng�y mai 26/08) | PO: 0 t?n
-� [DDN] B?p 2579: T?n 10.7 t?n | Ti�u hao: 4.8 T/ng�y | DOI: 2.2 ng�y (C?n ng�y 27/08) | PO: 0 t?n)
+### 🚨 1. ĐIỂM NÓNG CẦN XỬ LÝ NGAY
+(Chỉ liệt kê các SKU thực sự nguy cấp DOI < 7 ngày dưới dạng thẻ súc tích, ví dụ:
+• [DBD] Bắp 2579: Tồn 12.9 tấn | Tiêu hao: 25.2 T/ngày | DOI: 0.5 ngày (Cạn ngày mai 26/08) | PO: 0 tấn
+• [DDN] Bắp 2579: Tồn 10.7 tấn | Tiêu hao: 4.8 T/ngày | DOI: 2.2 ngày (Cạn ngày 27/08) | PO: 0 tấn)
 
-### ?? 2. SO �? �I?U CHUY?N N?I B? T?I UU C? LY
-(Tr�nh b�y d?ng so d? lu?ng mui t�n r� r�ng, k�m l� do v� s? ng�y c?u nguy:
-� [ DBQ (T?n 38.4T) ] --( Chuy?n 15,000 kg / C? ly 35km )--? [ DBD ]  ? C?u DBD th�m 0.6 ng�y, ch? PO
-� [ DBQ (T?n 38.4T) ] --( Chuy?n 5,000 kg / C? ly 35km )--? [ DDN ]  ? K�o d�i DOI DDN l�n 3.2 ng�y
-� [ HPG2 (T?n 66.4T) ] --( Chuy?n 20,000 kg / C? ly 45km )--? [ DVP ] ? K�o d�i DOI DVP l�n 4.5 ng�y)
+### 🔄 2. SƠ ĐỒ ĐIỀU CHUYỂN NỘI BỘ TỐI ƯU CỰ LY
+(Trình bày dạng sơ đồ luồng mũi tên rõ ràng, kèm lý do và số ngày cứu nguy:
+• [ DBQ (Tồn 38.4T) ] --( Chuyển 15,000 kg / Cự ly 35km )--> [ DBD ] ➔ Cứu DBD thêm 0.6 ngày, chờ PO
+• [ DBQ (Tồn 38.4T) ] --( Chuyển 5,000 kg / Cự ly 35km )--> [ DDN ] ➔ Kéo dài DOI DDN lên 3.2 ngày
+• [ HPG2 (Tồn 66.4T) ] --( Chuyển 20,000 kg / Cự ly 45km )--> [ DVP ] ➔ Kéo dài DOI DVP lên 4.5 ngày)
 
-### ?? 3. H�NH �?NG MUA H�NG & T?I UU V?N
-� [ Mua G?p / Expedite ]: ��n d?c NCC giao tru?c 30-50T trong PO 95.8T c?a DBQ v? th?ng DBD; ph�t h�nh Spot PO m?i cho DBD.
-� [ T?m Ho�n / X? T?n ]: T?m d?ng PO Barley t?i Mi?n Nam (DHG dang du 73T, DOI 232 ng�y); ho�n PO DCP/Mu?i t?n > 75 ng�y.
+### 📦 3. HÀNH ĐỘNG MUA HÀNG & TỐI ƯU VỐN
+• [ Mua Gấp / Expedite ]: Đôn đốc NCC giao trước 30-50T trong PO 95.8T của DBQ về thẳng DBD; phát hành Spot PO mới cho DBD.
+• [ Tạm Hoãn / Xả Tồn ]: Tạm dừng PO Barley tại Miền Nam (DHG đang dư 73T, DOI 232 ngày); hoãn PO DCP/Muối tồn > 75 ngày.
 
-3. KHI NGU?I D�NG H?I C�U H?I T�NH HU?NG C? TH? (VD: Chi ph� v?n chuy?n, tr? PO, x? t?n AD3E):
-- Tr? l?i ngay ph�p t�nh to�n v� k?t qu? t�i ch�nh/s? li?u ? d?u ph?n h?i.
-- B?ng d? to�n chi ph� ng?n g?n, r� r�ng.`;
+3. KHI NGƯỜI DÙNG HỎI CÂU HỎI TÌNH HUỐNG CỤ THỂ (VD: Chi phí vận chuyển, trễ PO, xả tồn AD3E):
+- Trả lời ngay phép tính toán và kết quả tài chính/số liệu ở đầu phản hồi.
+- Bảng dự toán chi phí ngắn gọn, rõ ràng.`;
 
-  const userContent = `D? li?u Ma Tr?n V? Th? Cung ?ng Th?c T? (Position Matrix Cut-off: ${snapshotDate}):
-${positionSnapshotData ? JSON.stringify(positionSnapshotData, null, 2) : '(S? d?ng d? li?u contextData)'}
+  const userContent = `Dữ liệu Ma Trận Vị Thế Cung Ứng Thực Tế (Position Matrix Cut-off: ${snapshotDate}):
+${positionSnapshotData ? JSON.stringify(positionSnapshotData, null, 2) : '(Sử dụng dữ liệu contextData)'}
 
-D? li?u b? sung kh�c:
+Dữ liệu bổ sung khác:
 ${JSON.stringify(contextData || {}, null, 2)}
 
-Y�u c?u ph�n t�ch:
-Ch? d?: ${mode || 'POSITION_SCM_ANALYSIS'}
-C�u h?i / Y�u c?u c? th?: ${prompt || 'H�y ph�n t�ch chi ti?t Ma tr?n V? th? Cung ?ng (Position Matrix) ng�y 25/08/2026, ch? r� c�c nh� m�y dang c� nguy co c?n h�ng kh?n c?p v� d? xu?t k? ho?ch di?u ph?i n?i b? cung nhu x? t?n kho hi?u qu? nh?t.'}`;
+Yêu cầu phân tích:
+Chế độ: ${mode || 'POSITION_SCM_ANALYSIS'}
+Câu hỏi / Yêu cầu cụ thể: ${prompt || 'Hãy phân tích chi tiết Ma trận Vị thế Cung ứng (Position Matrix) ngày 25/08/2026, chỉ rõ các nhà máy đang có nguy cơ cạn hàng khẩn cấp và đề xuất kế hoạch điều phối nội bộ cũng như xả tồn kho hiệu quả nhất.'}`;
 
-  const candidateModels = ['gemini-3.6-flash', 'gemini-flash-latest', 'gemini-3.5-flash', 'gemini-3.7-flash'];
+  const candidateModels = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
   let lastErr: any = null;
 
   for (const m of candidateModels) {
@@ -107,5 +107,5 @@ C�u h?i / Y�u c?u c? th?: ${prompt || 'H�y ph�n t�ch chi ti?t Ma tr?n 
     }
   }
 
-  throw lastErr || new Error('Kh�ng nh?n du?c ph?n h?i t? m� h�nh AI.');
+  throw lastErr || new Error('Không nhận được phản hồi từ mô hình AI.');
 }
