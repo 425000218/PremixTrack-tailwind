@@ -58,10 +58,10 @@ export const ForecastVersionTable: React.FC<ForecastVersionTableProps> = ({
 
   const handleDeleteVersion = (verId: string) => {
     if (forecastVersions.length <= 1) {
-      alert('Kh�ng th? x�a version duy nh?t c�n l?i trong h? th?ng.');
+      alert('Không thể xóa version duy nhất còn lại trong hệ thống.');
       return;
     }
-    if (confirm('X�c nh?n x�a b?n ghi d?t ch?y Forecast n�y?')) {
+    if (confirm('Xác nhận xóa bản ghi đợt chạy Forecast này?')) {
       const updated = forecastVersions.filter((v) => v.VersionID !== verId);
       if (!updated.some((v) => v.IsActive) && updated.length > 0) {
         updated[0].IsActive = true;
@@ -93,9 +93,9 @@ export const ForecastVersionTable: React.FC<ForecastVersionTableProps> = ({
     const rows: any[] = [];
     materials.slice(0, 10).forEach((mat) => {
       const sampleRow: any = {
-        'M� Nguy�n Li?u': mat.MaterialCode,
-        'T�n Nguy�n Li?u': mat.Name_VN,
-        '�on V? T�nh': 'kg',
+        'Mã Nguyên Liệu': mat.MaterialCode,
+        'Tên Nguyên Liệu': mat.Name_VN,
+        'Đơn Vị Tính': 'kg',
       };
       factories.forEach((fac) => {
         sampleRow[fac.InternalCode] = Math.floor(Math.random() * 5000) + 100;

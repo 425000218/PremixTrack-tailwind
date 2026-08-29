@@ -134,22 +134,22 @@ export function FloatingHomeEndButtons({
       <button
         onClick={scrollToTop}
         className="group relative flex items-center justify-center w-10 h-10 rounded-full bg-slate-900/80 hover:bg-blue-600 text-white backdrop-blur-md border border-white/20 shadow-lg hover:shadow-blue-500/30 transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer"
-        title="L�n d?u b?ng (Home)"
+        title="Lên đầu bảng (Home)"
       >
         <ArrowUpToLine className="w-5 h-5 transition-transform group-hover:-translate-y-0.5" />
         <span className="absolute right-full mr-2 px-2.5 py-1 rounded-lg bg-slate-900 text-white text-[11px] font-semibold whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity shadow-md">
-          L�n d?u b?ng (Home)
+          Lên đầu bảng (Home)
         </span>
       </button>
 
       <button
         onClick={scrollToBottom}
         className="group relative flex items-center justify-center w-10 h-10 rounded-full bg-slate-900/80 hover:bg-blue-600 text-white backdrop-blur-md border border-white/20 shadow-lg hover:shadow-blue-500/30 transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer"
-        title="Xu?ng cu?i b?ng (End)"
+        title="Xuống cuối bảng (End)"
       >
         <ArrowDownToLine className="w-5 h-5 transition-transform group-hover:translate-y-0.5" />
         <span className="absolute right-full mr-2 px-2.5 py-1 rounded-lg bg-slate-900 text-white text-[11px] font-semibold whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity shadow-md">
-          Xu?ng cu?i b?ng (End)
+          Xuống cuối bảng (End)
         </span>
       </button>
     </div>
@@ -225,7 +225,7 @@ export function LineItemModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.MaterialCode || !form.SiteCode) {
-      alert('Vui l�ng ch?n M� nguy�n li?u v� Nh� m�y.');
+      alert('Vui lòng chọn Mã nguyên liệu và Nhà máy.');
       return;
     }
 
@@ -256,10 +256,10 @@ export function LineItemModal({
           <div>
             <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
               <Edit2 className="w-4 h-4 text-blue-600" />
-              <span>{isNew ? 'Th�m D�ng Nguy�n Li?u M?i (Manual Add)' : `Ch?nh S?a D�ng: ${form.MaterialCode} (${form.FactoryName})`}</span>
+              <span>{isNew ? 'Thêm Dòng Nguyên Liệu Mới (Manual Add)' : `Chỉnh Sửa Dòng: ${form.MaterialCode} (${form.FactoryName})`}</span>
             </h3>
             <p className="text-[11px] text-slate-500 mt-0.5">
-              C?p nh?t s? li?u Forecast chi ti?t theo t?ng ng�y d?t ch?y c?a R&amp;D.
+              Cập nhật số liệu Forecast chi tiết theo từng ngày đợt chạy của R&amp;D.
             </p>
           </div>
           <button onClick={onClose} className="p-1.5 text-slate-400 hover:text-slate-700 cursor-pointer">
@@ -271,7 +271,7 @@ export function LineItemModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">
-                Nguy�n Li?u (Material) (*)
+                Nguyên Liệu (Material) (*)
               </label>
               <select
                 className={inputCls}
@@ -289,7 +289,7 @@ export function LineItemModal({
 
             <div>
               <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">
-                Nh� M�y / Recipe Site (*)
+                Nhà Máy / Recipe Site (*)
               </label>
               <select
                 className={inputCls}
@@ -309,7 +309,7 @@ export function LineItemModal({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">
-                T�n Hi?n Th? (DESC)
+                Tên Hiển Thị (DESC)
               </label>
               <input
                 className={inputCls}
@@ -320,15 +320,15 @@ export function LineItemModal({
             </div>
             <div>
               <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">
-                Ng�nh (Division)
+                Ngành (Division)
               </label>
               <select
                 className={inputCls}
                 value={form.Division}
                 onChange={(e) => setForm((prev) => ({ ...prev, Division: e.target.value as FactoryDivision }))}
               >
-                <option value="Livestock">Gia s�c (Livestock)</option>
-                <option value="Aqua">Th?y s?n (Aqua)</option>
+                <option value="Livestock">Gia súc (Livestock)</option>
+                <option value="Aqua">Thủy sản (Aqua)</option>
                 <option value="Premix">Premix</option>
               </select>
             </div>
@@ -337,7 +337,7 @@ export function LineItemModal({
           <div className="border-t border-slate-100 pt-3">
             <label className="block text-xs font-bold text-blue-900 uppercase tracking-wider mb-2 flex items-center gap-1.5">
               <Calendar className="w-3.5 h-3.5 text-blue-600" />
-              <span>Nh?p Kh?i Lu?ng Forecast Theo T?ng Ng�y (kg)</span>
+              <span>Nhập Khối Lượng Forecast Theo Từng Ngày (kg)</span>
             </label>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -365,14 +365,14 @@ export function LineItemModal({
               onClick={onClose}
               className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer"
             >
-              H?y
+              Hủy
             </button>
             <button
               type="submit"
               className="px-5 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
             >
               <Save className="w-3.5 h-3.5" />
-              <span>{isNew ? 'Th�m D�ng M?i' : 'Luu Thay �?i'}</span>
+              <span>{isNew ? 'Thêm Dòng Mới' : 'Lưu Thay Đổi'}</span>
             </button>
           </div>
         </form>

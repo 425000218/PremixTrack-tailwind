@@ -87,12 +87,12 @@ export const MasterDataManagement: React.FC<MasterDataManagementProps> = ({
               {isHeaderSummaryExpanded ? (
                 <>
                   <EyeOff className="w-3.5 h-3.5 text-slate-500" />
-                  <span>Thu G?n Header</span>
+                  <span>Thu Gọn Header</span>
                 </>
               ) : (
                 <>
                   <Eye className="w-3.5 h-3.5 text-blue-600" />
-                  <span>M? R?ng Header</span>
+                  <span>Mở Rộng Header</span>
                 </>
               )}
             </button>

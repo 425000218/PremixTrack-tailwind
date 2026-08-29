@@ -47,7 +47,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 <AlertOctagon className="w-8 h-8 text-red-500" />
               </div>
               <div>
-                <h1 className="text-lg font-bold text-white">�� X?y Ra S? C? Hi?n Th? Giao Di?n</h1>
+          <h1 className="text-lg font-bold text-white">Đã Xảy Ra Sự Cố Hiển Thị Giao Diện</h1>
                 <p className="text-xs text-slate-400">PremixTrack Safe Recovery Shield</p>
               </div>
             </div>
@@ -72,7 +72,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 font-bold text-xs text-white transition-all shadow-md cursor-pointer"
               >
                 <RefreshCw className="w-4 h-4" />
-                <span>Kh�i Ph?c & T?i L?i Trang</span>
+              <span>Khôi Phục & Tải Lại Trang</span>
               </button>
               <button
                 onClick={() => {
@@ -82,7 +82,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-600 hover:bg-slate-700 text-xs font-semibold text-slate-300 transition-colors cursor-pointer"
               >
                 <Home className="w-4 h-4" />
-                <span>Trang Ch?</span>
+                <span>Trang Chủ</span>
               </button>
             </div>
           </div>

@@ -768,13 +768,13 @@ export const MaterialsTab: React.FC<MaterialsTabProps> = ({
     ).length;
 
     const reasons: string[] = [];
-    if (sohCount > 0) reasons.push(`${sohCount} b?n ghi T?n kho th?c t? (SOH) t?i c�c nh� m�y`);
-    if (fcCount > 0) reasons.push(`${fcCount} d�ng D? b�o nhu c?u k? ho?ch (Forecast)`);
-    if (bomCount > 0) reasons.push(`${bomCount} C�ng th?c s?n xu?t (Formula BOM) dang s? d?ng`);
-    if (usageCount > 0) reasons.push(`${usageCount} nh?t k� Ti�u hao s?n xu?t (Usage Logs)`);
-    if (poCount > 0) reasons.push(`${poCount} �on d?t h�ng mua (PO Details)`);
+    if (sohCount > 0) reasons.push(`${sohCount} bản ghi Tồn kho thực tế (SOH) tại các nhà máy`);
+    if (fcCount > 0) reasons.push(`${fcCount} dòng Dự báo nhu cầu kế hoạch (Forecast)`);
+    if (bomCount > 0) reasons.push(`${bomCount} Công thức sản xuất (Formula BOM) đang sử dụng`);
+    if (usageCount > 0) reasons.push(`${usageCount} nhật ký Tiêu hao sản xuất (Usage Logs)`);
+    if (poCount > 0) reasons.push(`${poCount} Đơn đặt hàng mua (PO Details)`);
     if (subCount > 0)
-      reasons.push(`${subCount} quy t?c trong Ma Tr?n Thay Th? Nguy�n Li?u (Substitution Rules)`);
+      reasons.push(`${subCount} quy tắc trong Ma Trận Thay Thế Nguyên Liệu (Substitution Rules)`);
 
     return {
       canDelete: reasons.length === 0,
@@ -819,7 +819,7 @@ export const MaterialsTab: React.FC<MaterialsTabProps> = ({
           TaxGroup: r.TaxGroup || prev?.TaxGroup || 'NonVAT',
           OverdeliveryPct: Number(r.OverdeliveryPct ?? prev?.OverdeliveryPct ?? 0),
           PackingGroup: r.PackingGroup || prev?.PackingGroup || 'Bags',
-          CountryOfOrigin: r.CountryOfOrigin || prev?.CountryOfOrigin || 'Vi?t Nam',
+          CountryOfOrigin: r.CountryOfOrigin || prev?.CountryOfOrigin || 'Việt Nam',
           Category: (r.Category as MaterialCategory) || prev?.Category || 'Carriers_Minerals',
           Unit: r.Unit || prev?.Unit || 'kg',
           SafetyStockDays: Number(r.SafetyStockDays ?? prev?.SafetyStockDays ?? 14),
@@ -919,7 +919,7 @@ export const MaterialsTab: React.FC<MaterialsTabProps> = ({
       'Item sales tax group': m.TaxGroup || 'NonVAT',
       'Overdelivery (%)': m.OverdeliveryPct ?? 0,
       'Packing group': m.PackingGroup || 'Bags',
-      CountryOfOrigin: m.CountryOfOrigin || 'Vi?t Nam',
+      CountryOfOrigin: m.CountryOfOrigin || 'Việt Nam',
       Category: m.Category,
       Unit: m.Unit || 'kg',
       SafetyStockDays: m.SafetyStockDays,

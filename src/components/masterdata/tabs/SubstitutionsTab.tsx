@@ -398,7 +398,7 @@ export const SubstitutionsTab: React.FC<SubstitutionsTabProps> = ({
 
   const handleDeleteSubstitution = (id: string) => {
     if (!onUpdateSubstitutions) return;
-    if (confirm('X�c nh?n x�a quy t?c thay th? n�y?')) {
+    if (confirm('Xác nhận xóa quy tắc thay thế này?')) {
       onUpdateSubstitutions(substitutions.filter((s) => s.SubstitutionID !== id));
     }
   };

@@ -12,7 +12,7 @@ router.post('/auth/login', async (req, res) => {
   try {
     const { username, password } = req.body;
     if (!username || !password) {
-      return res.status(400).json({ success: false, message: 'Vui l�ng nh?p d?y d? T�n dang nh?p v� M?t kh?u.' });
+      return res.status(400).json({ success: false, message: 'Vui lòng nhập đầy đủ Tên đăng nhập và Mật khẩu.' });
     }
 
     const result = await executeQuery(
@@ -21,13 +21,13 @@ router.post('/auth/login', async (req, res) => {
     );
 
     if (!result.success || result.data.length === 0) {
-      return res.status(401).json({ success: false, message: 'T�n dang nh?p ho?c m?t kh?u kh�ng ch�nh x�c.' });
+      return res.status(401).json({ success: false, message: 'Tên đăng nhập hoặc mật khẩu không chính xác.' });
     }
 
     const dbUser = result.data[0];
 
     if (!dbUser.IsActive) {
-      return res.status(403).json({ success: false, message: 'Ti kho?n ny dang b? kha. Vui lng lin h? Qu?n tr? vin (Admin).' });
+      return res.status(403).json({ success: false, message: 'Tài khoản này đang bị khóa. Vui lòng liên hệ Quản trị viên (Admin).' });
     }
 
     let isMatch = false;
@@ -41,7 +41,7 @@ router.post('/auth/login', async (req, res) => {
     }
 
     if (!isMatch) {
-      return res.status(401).json({ success: false, message: 'Mật khẩu không chính xác. Vui lòng thử lại.' });
+      return res.status(401).json({ success: false, message: 'Tên đăng nhập hoặc mật khẩu không chính xác.' });
     }
 
     const roleMap: Record<string, { role: string; roleNameVN: string; avatarBg: string }> = {

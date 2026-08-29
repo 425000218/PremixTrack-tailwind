@@ -11,8 +11,8 @@ export interface EmptyDataPlaceholderProps {
 }
 
 export const EmptyDataPlaceholder: React.FC<EmptyDataPlaceholderProps> = ({
-  title = 'Kh�ng c� d? li?u',
-  description = 'Chua c� b?n ghi n�o ph� h?p v?i di?u ki?n t�m ki?m ho?c d? li?u chua du?c n?p.',
+  title = 'Không có dữ liệu',
+  description = 'Chưa có bản ghi nào phù hợp với điều kiện tìm kiếm hoặc dữ liệu chưa được nạp.',
   actionLabel,
   onAction,
   icon: Icon = FolderOpen,

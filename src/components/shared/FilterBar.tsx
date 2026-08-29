@@ -12,7 +12,7 @@ export interface FilterBarProps {
 export const FilterBar: React.FC<FilterBarProps> = ({
   searchTerm,
   onSearchChange,
-  placeholder = 'T�m ki?m...',
+  placeholder = 'Tìm kiếm...',
   children,
   className = '',
 }) => {

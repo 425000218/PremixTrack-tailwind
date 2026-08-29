@@ -1,0 +1,127 @@
+[
+  {
+    "file": "src\\App.tsx",
+    "line": 366,
+    "content": "if (window.confirm('Khôi phục toàn bộ dữ liệu về trạng thái mẫu ban đầu?')) {"
+  },
+  {
+    "file": "src\\components\\forecast\\ForecastDetailMatrix.tsx",
+    "line": 588,
+    "content": "title={isRowDivisionPicExpanded ? 'Thu gọn hàng' : 'Mở rộng hàng'}"
+  },
+  {
+    "file": "src\\components\\forecast\\ForecastDetailMatrix.tsx",
+    "line": 732,
+    "content": "title={isRowSiteExpanded ? 'Thu gọn hàng' : 'Mở rộng hàng'}"
+  },
+  {
+    "file": "src\\components\\forecast\\ForecastManagement.tsx",
+    "line": 90,
+    "content": "<span>{isHeaderSummaryExpanded ? 'Thu Gọn' : 'Mở Rộng'}</span>"
+  },
+  {
+    "file": "src\\components\\forecast\\ForecastVersionTable.tsx",
+    "line": 64,
+    "content": "if (confirm('Xác nhận xóa bản ghi đợt chạy Forecast này?')) {"
+  },
+  {
+    "file": "src\\components\\forecast\\ForecastVersionTable.tsx",
+    "line": 253,
+    "content": "if (window.confirm(`Xác nhận xóa đợt Forecast ngày [${ver.RunDate}]?`)) {"
+  },
+  {
+    "file": "src\\components\\forecast\\types.tsx",
+    "line": 259,
+    "content": "<span>{isNew ? 'Thêm Dòng Nguyên Liệu Mới (Manual Add)' : `Chỉnh Sửa Dòng: ${form.MaterialCode} (${form.FactoryName})`}</span>"
+  },
+  {
+    "file": "src\\components\\forecast\\types.tsx",
+    "line": 375,
+    "content": "<span>{isNew ? 'Thêm Dòng Mới' : 'Lưu Thay Đổi'}</span>"
+  },
+  {
+    "file": "src\\components\\Header.tsx",
+    "line": 108,
+    "content": "title={isDesktopSidebarCollapsed ? 'Mở rộng Sidebar (Expand)' : 'Thu gọn Sidebar (Collapse)'}"
+  },
+  {
+    "file": "src\\components\\Header.tsx",
+    "line": 170,
+    "content": "title={canImport ? 'Nạp file Excel D365 FO' : 'Tài khoản không có quyền nạp Excel'}"
+  },
+  {
+    "file": "src\\components\\masterdata\\MasterDataManagement.tsx",
+    "line": 85,
+    "content": "title={isHeaderSummaryExpanded ? 'Thu gọn thanh thống kê' : 'Mở rộng thanh thống kê'}"
+  },
+  {
+    "file": "src\\components\\masterdata\\tabs\\ImportMappingsTab.tsx",
+    "line": 189,
+    "content": "<span>{isNew ? 'Thêm Mới' : 'Lưu Thay Đổi'}</span>"
+  },
+  {
+    "file": "src\\components\\masterdata\\tabs\\ImportMappingsTab.tsx",
+    "line": 269,
+    "content": "if (confirm('Xác nhận xóa quy tắc ánh xạ tiêu đề cột này?')) {"
+  },
+  {
+    "file": "src\\components\\masterdata\\tabs\\SubstitutionsTab.tsx",
+    "line": 259,
+    "content": "<span>{isNew ? 'Thêm Mới' : 'Lưu Thay Đổi'}</span>"
+  },
+  {
+    "file": "src\\components\\masterdata\\tabs\\SubstitutionsTab.tsx",
+    "line": 401,
+    "content": "if (confirm('Xác nhận xóa quy tắc thay thế này?')) {"
+  },
+  {
+    "file": "src\\components\\PositionMatrixView.tsx",
+    "line": 302,
+    "content": "<span>{isEnterprise ? 'Tổng Tồn SOH' : 'Total SOH'}</span>"
+  },
+  {
+    "file": "src\\components\\PositionMatrixView.tsx",
+    "line": 315,
+    "content": "<span>{isEnterprise ? 'Tiêu Hao / Ngày' : 'Usage / Day'}</span>"
+  },
+  {
+    "file": "src\\components\\PositionMatrixView.tsx",
+    "line": 328,
+    "content": "<span>{isEnterprise ? 'Ngày Tồn SOH' : 'Covered Day Usage'}</span>"
+  },
+  {
+    "file": "src\\components\\PositionMatrixView.tsx",
+    "line": 341,
+    "content": "<span>{isEnterprise ? 'Lượng Cần Bù (Buffer)' : 'Arrange More'}</span>"
+  },
+  {
+    "file": "src\\components\\PositionMatrixView.tsx",
+    "line": 354,
+    "content": "<span>{isEnterprise ? 'Đơn Mua Đang Về' : 'PO PENDING'}</span>"
+  },
+  {
+    "file": "src\\components\\PositionMatrixView.tsx",
+    "line": 367,
+    "content": "<span>{isEnterprise ? 'Bảo Vệ Toàn Diện' : 'Max Coverage'}</span>"
+  },
+  {
+    "file": "src\\components\\Sidebar.tsx",
+    "line": 155,
+    "content": "title={isCollapsed ? 'Mở rộng thanh menu (Expand)' : 'Thu gọn thanh menu (Collapse)'}"
+  },
+  {
+    "file": "src\\components\\Sidebar.tsx",
+    "line": 193,
+    "content": "title={isCollapsed ? itemLabel : undefined}"
+  },
+  {
+    "file": "src\\components\\UserManagementModal.tsx",
+    "line": 187,
+    "content": "if (!confirm(`Bạn có chắc chắn muốn xóa tài khoản \"${username}\" không?`)) return;"
+  },
+  {
+    "file": "src\\components\\UserManagementModal.tsx",
+    "line": 351,
+    "content": "title={isPwVisible ? 'Ẩn mật khẩu' : 'Xem mật khẩu'}"
+  }
+]
