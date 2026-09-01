@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   AlertTriangle,
   TrendingUp,
@@ -66,6 +66,23 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
   // Floating Bubbles State: 'NONE' | 'TRANSFERS' | 'AI'
   const [activeBubble, setActiveBubble] = useState<'NONE' | 'TRANSFERS' | 'AI'>('NONE');
+  
+  // Track if any modal/drawer popup is open to auto-hide floating bubbles
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
+  useEffect(() => {
+    const checkModalState = () => {
+      const isAnyOpen =
+        document.body.classList.contains('modal-open') ||
+        document.body.style.overflow === 'hidden';
+      setIsModalOpen(isAnyOpen);
+    };
+
+    checkModalState();
+    const observer = new MutationObserver(checkModalState);
+    observer.observe(document.body, { attributes: true, attributeFilter: ['class', 'style'] });
+    return () => observer.disconnect();
+  }, []);
 
   // Filter metrics according to global multi-factory selection
   const scopedMetrics = useMemo(() => {
@@ -528,167 +545,169 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         </div>
       </div>
 
-      {/* ── 3. FLOATING BUBBLES DOCK (BÊN PHẢI MÀN HÌNH) ── */}
-      <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-3 pointer-events-none">
-        
-        {/* Floating Bubble Popover: ĐỀ XUẤT ĐIỀU PHỐI */}
-        {activeBubble === 'TRANSFERS' && (
-          <div className="pointer-events-auto w-80 sm:w-96 bg-white/95 backdrop-blur-xl rounded-2xl border border-slate-200 shadow-2xl p-5 mb-2 animate-in fade-in slide-in-from-bottom-5 duration-200 space-y-3">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-              <div className="flex items-center gap-2">
-                <span className="p-1.5 bg-amber-100 text-amber-700 rounded-lg">
-                  <Zap className="w-4 h-4" />
-                </span>
-                <div>
-                  <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wide">
-                    Đề Xuất Điều Phối Nội Bộ
-                  </h4>
-                  <span className="text-[10px] text-slate-400 font-mono">
-                    {transferSuggestions.length} Tuyến Đề Xuất
+      {/* ── 3. FLOATING BUBBLES DOCK (BÊN PHẢI MÀN HÌNH - TỰ ĐỘNG ẨN KHI CÓ MODAL/POPUP/DRAWER) ── */}
+      {!isModalOpen && (
+        <div className="fixed bottom-5 right-5 z-20 flex flex-col items-end gap-2.5 pointer-events-none transition-all duration-200">
+          
+          {/* Floating Bubble Popover: ĐỀ XUẤT ĐIỀU PHỐI */}
+          {activeBubble === 'TRANSFERS' && (
+            <div className="pointer-events-auto w-80 sm:w-96 bg-white/95 backdrop-blur-xl rounded-2xl border border-slate-200 shadow-2xl p-5 mb-2 animate-in fade-in slide-in-from-bottom-5 duration-200 space-y-3">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                <div className="flex items-center gap-2">
+                  <span className="p-1.5 bg-amber-100 text-amber-700 rounded-lg">
+                    <Zap className="w-4 h-4" />
                   </span>
-                </div>
-              </div>
-              <button
-                onClick={() => setActiveBubble('NONE')}
-                className="p-1 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="max-h-64 overflow-y-auto space-y-2.5 pr-1">
-              {transferSuggestions.slice(0, 5).map((sug, i) => (
-                <div
-                  key={i}
-                  className="p-2.5 bg-slate-50 rounded-xl border border-slate-100 hover:border-slate-200 transition-colors text-xs flex items-center justify-between gap-2"
-                >
-                  <div className="min-w-0 flex-1">
-                    <div className="font-mono font-bold text-slate-900 flex items-center gap-1.5 text-xs">
-                      <span className="bg-white px-1.5 py-0.5 rounded border border-slate-200">{sug.SourceFactoryCode}</span>
-                      <span className="text-slate-400">→</span>
-                      <span className="bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded border border-blue-100">{sug.TargetFactoryCode}</span>
-                    </div>
-                    <div className="text-[11px] text-slate-700 font-semibold truncate mt-1">
-                      {sug.MaterialName}
-                    </div>
-                    <div className="text-[10px] text-slate-400 font-mono mt-0.5">
-                      Khối lượng: <strong className="text-slate-800">{Number(sug.RecommendedTransferKg).toLocaleString()} kg</strong>
-                    </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wide">
+                      Đề Xuất Điều Phối Nội Bộ
+                    </h4>
+                    <span className="text-[10px] text-slate-400 font-mono">
+                      {transferSuggestions.length} Tuyến Đề Xuất
+                    </span>
                   </div>
-
-                  <button
-                    onClick={() => {
-                      setActiveBubble('NONE');
-                      onNavigateTab('transfers');
-                    }}
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded-lg text-[10px] shadow-xs transition-colors shrink-0 cursor-pointer"
-                  >
-                    XỬ LÝ
-                  </button>
                 </div>
-              ))}
+                <button
+                  onClick={() => setActiveBubble('NONE')}
+                  className="p-1 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
 
-              {transferSuggestions.length === 0 && (
-                <p className="text-xs text-slate-400 italic text-center py-6">
-                  Hiện chưa có đề xuất điều chuyển nào cần xử lý.
-                </p>
-              )}
+              <div className="max-h-64 overflow-y-auto space-y-2.5 pr-1">
+                {transferSuggestions.slice(0, 5).map((sug, i) => (
+                  <div
+                    key={i}
+                    className="p-2.5 bg-slate-50 rounded-xl border border-slate-100 hover:border-slate-200 transition-colors text-xs flex items-center justify-between gap-2"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="font-mono font-bold text-slate-900 flex items-center gap-1.5 text-xs">
+                        <span className="bg-white px-1.5 py-0.5 rounded border border-slate-200">{sug.SourceFactoryCode}</span>
+                        <span className="text-slate-400">→</span>
+                        <span className="bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded border border-blue-100">{sug.TargetFactoryCode}</span>
+                      </div>
+                      <div className="text-[11px] text-slate-700 font-semibold truncate mt-1">
+                        {sug.MaterialName}
+                      </div>
+                      <div className="text-[10px] text-slate-400 font-mono mt-0.5">
+                        Khối lượng: <strong className="text-slate-800">{Number(sug.RecommendedTransferKg).toLocaleString()} kg</strong>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        setActiveBubble('NONE');
+                        onNavigateTab('transfers');
+                      }}
+                      className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded-lg text-[10px] shadow-xs transition-colors shrink-0 cursor-pointer"
+                    >
+                      XỬ LÝ
+                    </button>
+                  </div>
+                ))}
+
+                {transferSuggestions.length === 0 && (
+                  <p className="text-xs text-slate-400 italic text-center py-6">
+                    Hiện chưa có đề xuất điều chuyển nào cần xử lý.
+                  </p>
+                )}
+              </div>
+
+              <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+                <span className="text-[11px] text-slate-500">Tự động cân bằng tồn kho</span>
+                <button
+                  onClick={() => {
+                    setActiveBubble('NONE');
+                    onNavigateTab('transfers');
+                  }}
+                  className="text-blue-600 font-bold hover:underline flex items-center gap-0.5 cursor-pointer text-xs"
+                >
+                  <span>Mở Toàn Bộ Tuyến</span>
+                  <ChevronRight className="w-3 h-3" />
+                </button>
+              </div>
             </div>
+          )}
 
-            <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
-              <span className="text-[11px] text-slate-500">Tự động cân bằng tồn kho</span>
+          {/* Floating Bubble Popover: TRỢ LÝ AI CHUỖI CUNG ỨNG */}
+          {activeBubble === 'AI' && (
+            <div className="pointer-events-auto w-80 sm:w-96 bg-white/95 backdrop-blur-xl rounded-2xl border border-slate-200 shadow-2xl p-5 mb-2 animate-in fade-in slide-in-from-bottom-5 duration-200 space-y-3">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                <div className="flex items-center gap-2">
+                  <span className="p-1.5 bg-blue-100 text-blue-700 rounded-lg">
+                    <Sparkles className="w-4 h-4" />
+                  </span>
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wide">
+                      Trợ Lý AI Chuỗi Cung Ứng
+                    </h4>
+                    <span className="text-[10px] text-blue-600 font-semibold font-mono">
+                      PremixTrack S&amp;OP Engine
+                    </span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setActiveBubble('NONE')}
+                  className="p-1 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Trợ lý AI sẵn sàng phân tích nhanh các điểm nghẽn chuỗi cung ứng, dự báo nhu cầu nguyên liệu và đề xuất phương án điều chuyển tối ưu chi phí.
+              </p>
+
               <button
                 onClick={() => {
                   setActiveBubble('NONE');
-                  onNavigateTab('transfers');
+                  onNavigateTab('ai-advisor');
                 }}
-                className="text-blue-600 font-bold hover:underline flex items-center gap-0.5 cursor-pointer text-xs"
+                className="w-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold py-2.5 rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
-                <span>Mở Toàn Bộ Tuyến</span>
-                <ChevronRight className="w-3 h-3" />
+                <Sparkles className="w-4 h-4 text-blue-400" />
+                <span>Bắt Đầu Phân Tích Với AI</span>
               </button>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Floating Bubble Popover: TRỢ LÝ AI CHUỖI CUNG ỨNG */}
-        {activeBubble === 'AI' && (
-          <div className="pointer-events-auto w-80 sm:w-96 bg-white/95 backdrop-blur-xl rounded-2xl border border-slate-200 shadow-2xl p-5 mb-2 animate-in fade-in slide-in-from-bottom-5 duration-200 space-y-3">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-              <div className="flex items-center gap-2">
-                <span className="p-1.5 bg-blue-100 text-blue-700 rounded-lg">
-                  <Sparkles className="w-4 h-4" />
-                </span>
-                <div>
-                  <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wide">
-                    Trợ Lý AI Chuỗi Cung Ứng
-                  </h4>
-                  <span className="text-[10px] text-blue-600 font-semibold font-mono">
-                    PremixTrack S&amp;OP Engine
-                  </span>
-                </div>
-              </div>
-              <button
-                onClick={() => setActiveBubble('NONE')}
-                className="p-1 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Trợ lý AI sẵn sàng phân tích nhanh các điểm nghẽn chuỗi cung ứng, dự báo nhu cầu nguyên liệu và đề xuất phương án điều chuyển tối ưu chi phí.
-            </p>
-
+          {/* Ultra-Compact Floating Action Bubbles (Bottom Right) */}
+          <div className="pointer-events-auto flex items-center gap-1 bg-slate-900/90 backdrop-blur-xl p-1 rounded-full border border-slate-800 shadow-xl">
+            
+            {/* Mini Bubble 1: Đề Xuất Điều Phối */}
             <button
-              onClick={() => {
-                setActiveBubble('NONE');
-                onNavigateTab('ai-advisor');
-              }}
-              className="w-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold py-2.5 rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
+              onClick={() => setActiveBubble(prev => prev === 'TRANSFERS' ? 'NONE' : 'TRANSFERS')}
+              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                activeBubble === 'TRANSFERS'
+                  ? 'bg-amber-500 text-slate-950 shadow-md'
+                  : 'text-amber-400 hover:bg-slate-800'
+              }`}
+              title={`Xem ${transferSuggestions.length} đề xuất điều chuyển`}
             >
-              <Sparkles className="w-4 h-4 text-blue-400" />
-              <span>Bắt Đầu Phân Tích Với AI</span>
+              <Zap className="w-3.5 h-3.5 fill-current" />
+              <span className="text-[11px] font-mono">{transferSuggestions.length}</span>
             </button>
+
+            <div className="w-px h-3.5 bg-slate-700/80" />
+
+            {/* Mini Bubble 2: Trợ Lý AI */}
+            <button
+              onClick={() => setActiveBubble(prev => prev === 'AI' ? 'NONE' : 'AI')}
+              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                activeBubble === 'AI'
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'text-blue-400 hover:bg-slate-800'
+              }`}
+              title="Mở Trợ lý AI Advisor"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span className="text-[11px]">AI</span>
+            </button>
+
           </div>
-        )}
-
-        {/* Ultra-Compact Floating Action Bubbles (Bottom Right) */}
-        <div className="pointer-events-auto flex items-center gap-1 bg-slate-900/90 backdrop-blur-xl p-1 rounded-full border border-slate-800 shadow-xl">
-          
-          {/* Mini Bubble 1: Đề Xuất Điều Phối */}
-          <button
-            onClick={() => setActiveBubble(prev => prev === 'TRANSFERS' ? 'NONE' : 'TRANSFERS')}
-            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
-              activeBubble === 'TRANSFERS'
-                ? 'bg-amber-500 text-slate-950 shadow-md'
-                : 'text-amber-400 hover:bg-slate-800'
-            }`}
-            title={`Xem ${transferSuggestions.length} đề xuất điều chuyển`}
-          >
-            <Zap className="w-3.5 h-3.5 fill-current" />
-            <span className="text-[11px] font-mono">{transferSuggestions.length}</span>
-          </button>
-
-          <div className="w-px h-3.5 bg-slate-700/80" />
-
-          {/* Mini Bubble 2: Trợ Lý AI */}
-          <button
-            onClick={() => setActiveBubble(prev => prev === 'AI' ? 'NONE' : 'AI')}
-            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
-              activeBubble === 'AI'
-                ? 'bg-blue-600 text-white shadow-md'
-                : 'text-blue-400 hover:bg-slate-800'
-            }`}
-            title="Mở Trợ lý AI Advisor"
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span className="text-[11px]">AI</span>
-          </button>
 
         </div>
-
-      </div>
+      )}
 
     </div>
   );

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Factory,
   Search,
@@ -54,15 +55,18 @@ export const MultiFactorySelect: React.FC<MultiFactorySelectProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen]);
 
-  // Prevent background body scroll when drawer is open
+  // Prevent background body scroll & signal modal-open when drawer is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      document.body.classList.add('modal-open');
     } else {
       document.body.style.overflow = '';
+      document.body.classList.remove('modal-open');
     }
     return () => {
       document.body.style.overflow = '';
+      document.body.classList.remove('modal-open');
     };
   }, [isOpen]);
 
@@ -257,9 +261,9 @@ export const MultiFactorySelect: React.FC<MultiFactorySelectProps> = ({
         </div>
       </button>
 
-      {/* ── 2. Floating Filter Sheet (Slide-over Drawer from Right) ── */}
-      {isOpen && (
-        <div className="fixed inset-0 z-50 overflow-hidden animate-fade-in">
+      {/* ── 2. Floating Filter Sheet (Slide-over Drawer from Right) via Portal ── */}
+      {isOpen && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[9999] overflow-hidden animate-fade-in">
           {/* Backdrop Blur Overlay */}
           <div
             onClick={() => setIsOpen(false)}
@@ -545,7 +549,8 @@ export const MultiFactorySelect: React.FC<MultiFactorySelectProps> = ({
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
