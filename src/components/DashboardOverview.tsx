@@ -165,8 +165,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         onChange={(ids) => {
           if (onSelectFactoryIds) {
             onSelectFactoryIds(ids);
-          }
-          if (onSelectFactory) {
+          } else if (onSelectFactory) {
             onSelectFactory(ids.length === 1 ? ids[0] : (ids.includes('ALL') ? 'ALL' : ids[0]));
           }
         }}

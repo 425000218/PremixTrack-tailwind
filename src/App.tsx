@@ -608,6 +608,17 @@ export function App() {
     showToast('Đã xóa quy tắc ánh xạ khỏi từ điển.');
   };
 
+  const handleSelectFactoryIds = (ids: string[]) => {
+    setSelectedFactoryIds(ids);
+    if (ids.length === 1) {
+      setSelectedFactoryId(ids[0]);
+    } else if (ids.includes('ALL') || ids.length === 0) {
+      setSelectedFactoryId('ALL');
+    } else {
+      setSelectedFactoryId(ids[0]);
+    }
+  };
+
   // Fullscreen Login Gate if not authenticated
   if (!currentUser) {
     return <LoginGate onLoginSuccess={handleLoginSuccess} />;
@@ -639,7 +650,7 @@ export function App() {
           selectedFactoryId={selectedFactoryId}
           setSelectedFactoryId={setSelectedFactoryId}
           selectedFactoryIds={selectedFactoryIds}
-          setSelectedFactoryIds={setSelectedFactoryIds}
+          setSelectedFactoryIds={handleSelectFactoryIds}
           criticalAlertsCount={criticalAlertsCount}
           onOpenImportModal={() => setIsImportModalOpen(true)}
           onNavigateTab={(tab) => setCurrentTab(tab)}
@@ -668,10 +679,9 @@ export function App() {
                 selectedFactoryId={selectedFactoryId}
                 selectedFactoryIds={selectedFactoryIds}
                 onSelectFactory={(id) => {
-                  setSelectedFactoryId(id);
-                  setSelectedFactoryIds(id === 'ALL' ? ['ALL'] : [id]);
+                  handleSelectFactoryIds(id === 'ALL' ? ['ALL'] : [id]);
                 }}
-                onSelectFactoryIds={setSelectedFactoryIds}
+                onSelectFactoryIds={handleSelectFactoryIds}
                 onNavigateTab={(tab) => setCurrentTab(tab)}
                 language={language}
               />

@@ -56,20 +56,29 @@ export const DashboardFactorySlicer: React.FC<DashboardFactorySlicerProps> = ({
     );
   }, [factories, searchQuery]);
 
+  // Check if a factory is selected
+  const isFactorySelected = (f: Dim_Factory) => {
+    if (isAllSelected) return true;
+    return selectedFactoryIds.includes(f.FactoryID) || selectedFactoryIds.includes(f.InternalCode);
+  };
+
   // Toggle single factory
-  const handleToggle = (factoryId: string) => {
+  const handleToggle = (factory: Dim_Factory) => {
     if (isAllSelected) {
       // If currently ALL, selecting one means isolating that factory
-      onChange([factoryId]);
+      onChange([factory.FactoryID]);
       return;
     }
 
-    if (selectedFactoryIds.includes(factoryId)) {
-      const remaining = selectedFactoryIds.filter((id) => id !== factoryId);
+    const isCurrentSelected = selectedFactoryIds.includes(factory.FactoryID) || selectedFactoryIds.includes(factory.InternalCode);
+
+    if (isCurrentSelected) {
+      const remaining = selectedFactoryIds.filter(
+        (id) => id !== factory.FactoryID && id !== factory.InternalCode
+      );
       onChange(remaining);
     } else {
-      const updated = [...selectedFactoryIds, factoryId];
-      onChange(updated);
+      onChange([...selectedFactoryIds, factory.FactoryID]);
     }
   };
 
@@ -266,13 +275,13 @@ export const DashboardFactorySlicer: React.FC<DashboardFactorySlicerProps> = ({
         /* Full Multi-Column Grid View */
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 pt-1">
           {filteredFactories.map((f) => {
-            const isSelected = isAllSelected || selectedFactoryIds.includes(f.FactoryID) || selectedFactoryIds.includes(f.InternalCode);
+            const isSelected = isFactorySelected(f);
 
             return (
               <button
                 key={f.FactoryID}
                 type="button"
-                onClick={() => handleToggle(f.FactoryID)}
+                onClick={() => handleToggle(f)}
                 className={`flex items-center justify-between p-2 rounded-xl text-xs transition-all cursor-pointer border text-left ${
                   isSelected
                     ? 'bg-blue-600 border-blue-600 text-white shadow-xs font-bold'
@@ -298,13 +307,13 @@ export const DashboardFactorySlicer: React.FC<DashboardFactorySlicerProps> = ({
         /* Compact 1-Row Horizontal Scroll View */
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar pt-0.5">
           {factories.map((f) => {
-            const isSelected = isAllSelected || selectedFactoryIds.includes(f.FactoryID) || selectedFactoryIds.includes(f.InternalCode);
+            const isSelected = isFactorySelected(f);
 
             return (
               <button
                 key={f.FactoryID}
                 type="button"
-                onClick={() => handleToggle(f.FactoryID)}
+                onClick={() => handleToggle(f)}
                 className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs shrink-0 transition-all cursor-pointer border ${
                   isSelected
                     ? 'bg-blue-600 border-blue-600 text-white shadow-2xs font-bold'
