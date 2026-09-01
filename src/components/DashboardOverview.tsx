@@ -654,37 +654,37 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           </div>
         )}
 
-        {/* Floating Bubble Buttons Bar */}
-        <div className="pointer-events-auto flex items-center gap-2.5 bg-slate-900/90 backdrop-blur-xl p-1.5 rounded-full border border-slate-800 shadow-2xl">
+        {/* Ultra-Compact Floating Action Bubbles (Bottom Right) */}
+        <div className="pointer-events-auto flex items-center gap-1 bg-slate-900/90 backdrop-blur-xl p-1 rounded-full border border-slate-800 shadow-xl">
           
-          {/* Bubble 1: Đề Xuất Điều Phối */}
+          {/* Mini Bubble 1: Đề Xuất Điều Phối */}
           <button
             onClick={() => setActiveBubble(prev => prev === 'TRANSFERS' ? 'NONE' : 'TRANSFERS')}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-full font-bold text-xs transition-all cursor-pointer ${
+            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
               activeBubble === 'TRANSFERS'
                 ? 'bg-amber-500 text-slate-950 shadow-md'
                 : 'text-amber-400 hover:bg-slate-800'
             }`}
-            title="Xem đề xuất điều phối nội bộ"
+            title={`Xem ${transferSuggestions.length} đề xuất điều chuyển`}
           >
-            <Zap className="w-4 h-4 fill-current" />
-            <span>Đề Xuất ({transferSuggestions.length})</span>
+            <Zap className="w-3.5 h-3.5 fill-current" />
+            <span className="text-[11px] font-mono">{transferSuggestions.length}</span>
           </button>
 
-          <div className="w-px h-4 bg-slate-700" />
+          <div className="w-px h-3.5 bg-slate-700/80" />
 
-          {/* Bubble 2: Trợ Lý AI */}
+          {/* Mini Bubble 2: Trợ Lý AI */}
           <button
             onClick={() => setActiveBubble(prev => prev === 'AI' ? 'NONE' : 'AI')}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-full font-bold text-xs transition-all cursor-pointer ${
+            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
               activeBubble === 'AI'
                 ? 'bg-blue-600 text-white shadow-md'
                 : 'text-blue-400 hover:bg-slate-800'
             }`}
-            title="Mở trợ lý AI Advisor"
+            title="Mở Trợ lý AI Advisor"
           >
-            <Sparkles className="w-4 h-4" />
-            <span>Trợ Lý AI</span>
+            <Sparkles className="w-3.5 h-3.5" />
+            <span className="text-[11px]">AI</span>
           </button>
 
         </div>

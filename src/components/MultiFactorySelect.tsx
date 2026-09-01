@@ -304,7 +304,7 @@ export const MultiFactorySelect: React.FC<MultiFactorySelectProps> = ({
 
               {/* ── Action Toolbar: Check All, Clear Check & Invert ── */}
               <div className="p-3 bg-slate-50 border-b border-slate-200 shrink-0 space-y-2.5">
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 gap-2">
                   {/* Option 1: CHECK ALL */}
                   <button
                     type="button"
@@ -331,17 +331,6 @@ export const MultiFactorySelect: React.FC<MultiFactorySelectProps> = ({
                   >
                     <Square className="w-3.5 h-3.5" />
                     <span>Bỏ Chọn Hết</span>
-                  </button>
-
-                  {/* Option 3: INVERT SELECTION */}
-                  <button
-                    type="button"
-                    onClick={handleInvertCheck}
-                    className="flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-xl text-xs font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-100 hover:border-slate-300 transition-all cursor-pointer"
-                    title="Đảo ngược các nhà máy đang chọn"
-                  >
-                    <ArrowRightLeft className="w-3.5 h-3.5 text-slate-500" />
-                    <span>Đảo Lựa Chọn</span>
                   </button>
                 </div>
 

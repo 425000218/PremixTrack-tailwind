@@ -149,17 +149,6 @@ export const DashboardFactorySlicer: React.FC<DashboardFactorySlicerProps> = ({
             <span className="hidden sm:inline">Bỏ Chọn</span>
           </button>
 
-          {/* Invert Selection */}
-          <button
-            type="button"
-            onClick={handleInvert}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition-all cursor-pointer"
-            title="Đảo lựa chọn"
-          >
-            <ArrowRightLeft className="w-3.5 h-3.5" />
-            <span className="hidden md:inline">Đảo Chọn</span>
-          </button>
-
           {/* Expand / Collapse Grid Toggle */}
           <button
             type="button"
