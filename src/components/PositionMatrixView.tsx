@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { Fact_Position_Snapshot, PositionHeaderMode, Language } from '../types';
 import { mockPositionSnapshots } from '../data/mockData';
+import { fetchWithAuth } from '../utils/apiClient';
 
 interface PositionMatrixViewProps {
   language?: Language;
@@ -67,10 +68,11 @@ export const PositionMatrixView: React.FC<PositionMatrixViewProps> = ({
         snapshotDate,
         region: regionFilter,
         division: divisionFilter,
+        factoryId: factoryFilter,
       });
-      const res = await fetch(`/api/position/matrix?${queryParams.toString()}`);
+      const res = await fetchWithAuth(`/api/position/matrix?${queryParams.toString()}`);
       const result = await res.json();
-      if (result.success && Array.isArray(result.data)) {
+      if (result.success && Array.isArray(result.data) && result.data.length > 0) {
         setPositions(result.data);
         setSummary(result.summary);
       } else {
@@ -87,13 +89,13 @@ export const PositionMatrixView: React.FC<PositionMatrixViewProps> = ({
 
   useEffect(() => {
     fetchPositionData();
-  }, [snapshotDate, regionFilter, divisionFilter]);
+  }, [snapshotDate, regionFilter, divisionFilter, factoryFilter]);
 
   // Trigger Stored Procedure Recalculation
   const handleRecalculate = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/position/calculate', {
+      const res = await fetchWithAuth('/api/position/calculate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -130,7 +132,7 @@ export const PositionMatrixView: React.FC<PositionMatrixViewProps> = ({
     }
 
     try {
-      const res = await fetch('/api/ai/advisor', {
+      const res = await fetchWithAuth('/api/ai/advisor', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

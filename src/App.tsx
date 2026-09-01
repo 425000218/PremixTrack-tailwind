@@ -31,10 +31,26 @@ import {
   mockUsageLogs,
   mockFormulas,
   mockInitialMappings,
-  mockUsers,
-  mockSubstitutions,
   getRolePermissions,
 } from './data/mockData';
+
+import {
+  loadAllBootstrapData,
+  saveMaterialToDb,
+  deleteMaterialFromDb,
+  saveFactoryToDb,
+  deleteFactoryFromDb,
+  saveSupplierToDb,
+  deleteSupplierFromDb,
+  saveSubstitutionToDb,
+  deleteSubstitutionFromDb,
+  saveMappingToDb,
+  deleteMappingFromDb,
+  syncForecastToDb,
+  syncInventorySOHToDb,
+  syncUsageToDb,
+  syncPurchaseOrdersToDb,
+} from './services/dataService';
 
 import {
   calculateAllMetrics,
@@ -67,7 +83,7 @@ export function App() {
   const [materials, setMaterials] = useState<Dim_Material[]>(mockMaterials);
   const [suppliers, setSuppliers] = useState<Dim_Supplier[]>(mockSuppliers);
   const [formulas, setFormulas] = useState<Formula_BOM[]>(mockFormulas);
-  const [substitutions, setSubstitutions] = useState<Dim_Material_Substitution[]>(mockSubstitutions);
+  const [substitutions, setSubstitutions] = useState<Dim_Material_Substitution[]>([]);
   const [learnedMappings, setLearnedMappings] = useState<Sys_Import_Mapping[]>(mockInitialMappings);
 
   // Operational Fact Data & Forecast Run Versions State
@@ -79,6 +95,10 @@ export function App() {
   const [poDetails, setPODetails] = useState<Fact_PO_Detail[]>(mockPODetails);
   const [inboundSchedules, setInboundSchedules] = useState<Fact_Inbound_Schedule[]>(mockInboundSchedules);
   const [usageLogs, setUsageLogs] = useState<Fact_Production_Usage[]>(mockUsageLogs);
+
+  // Data Loading & Connection Status State
+  const [isDataLoaded, setIsDataLoaded] = useState<boolean>(false);
+  const [dbSource, setDbSource] = useState<'MSSQL' | 'FALLBACK_LOCAL'>('FALLBACK_LOCAL');
 
   // User Authentication & RBAC State (Requires Login Gate)
   const [currentUser, setCurrentUser] = useState<AppUser | null>(() => {
@@ -125,6 +145,49 @@ export function App() {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3500);
   };
+
+  // --------------------------------------------------------------------------
+  // 1. Initial Load: Load all data from MS SQL Server Database
+  // --------------------------------------------------------------------------
+  useEffect(() => {
+    let isMounted = true;
+
+    async function initializeDatabaseData() {
+      try {
+        const bootstrap = await loadAllBootstrapData();
+        if (!isMounted) return;
+
+        setDbSource(bootstrap.source);
+        setIsDataLoaded(true);
+
+        if (bootstrap.factories.length > 0) setFactories(bootstrap.factories);
+        if (bootstrap.materials.length > 0) setMaterials(bootstrap.materials);
+        if (bootstrap.suppliers.length > 0) setSuppliers(bootstrap.suppliers);
+        if (bootstrap.substitutions.length > 0) setSubstitutions(bootstrap.substitutions);
+        if (bootstrap.formulas.length > 0) setFormulas(bootstrap.formulas);
+        if (bootstrap.mappings.length > 0) setLearnedMappings(bootstrap.mappings);
+
+        if (bootstrap.forecastVersions.length > 0) setForecastVersions(bootstrap.forecastVersions);
+        if (bootstrap.forecastDetails.length > 0) setForecastDetails(bootstrap.forecastDetails);
+        if (bootstrap.inventorySOH.length > 0) setInventorySOH(bootstrap.inventorySOH);
+        if (bootstrap.usageLogs.length > 0) setUsageLogs(bootstrap.usageLogs);
+        if (bootstrap.inboundSchedules.length > 0) setInboundSchedules(bootstrap.inboundSchedules);
+        if (bootstrap.poHeaders.length > 0) setPOHeaders(bootstrap.poHeaders);
+        if (bootstrap.poDetails.length > 0) setPODetails(bootstrap.poDetails);
+
+        if (bootstrap.isOnline) {
+          showToast('✅ Đã kết nối MS SQL Server (PremixTrackDB - Live Data)');
+        }
+      } catch (err) {
+        console.warn('Init DB error:', err);
+      }
+    }
+
+    initializeDatabaseData();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Live Refresh current user profile from MS SQL Server (dbo.sys_User_Account)
   const refreshUserProfileFromDb = () => {
@@ -189,7 +252,7 @@ export function App() {
       .catch((err) => console.warn('Could not sync user profile from DB:', err));
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     refreshUserProfileFromDb();
   }, []);
 
@@ -247,71 +310,149 @@ export function App() {
     return calculatedMetrics.filter((m) => m.Severity === 'CRITICAL').length;
   }, [calculatedMetrics]);
 
-  // Commit Excel Data Handlers
-  const handleCommitImport = (
+  // --------------------------------------------------------------------------
+  // Commit Excel Data Handlers & Asynchronous SQL Server Sync
+  // --------------------------------------------------------------------------
+  const handleCommitImport = async (
     type: 'Forecast' | 'SOH' | 'Usage' | 'PO_Inbound',
     validData: any[],
     snapshotDate?: string
   ) => {
     const effectiveDate = snapshotDate || new Date().toISOString().split('T')[0];
+
     if (type === 'Forecast') {
       const newItems: Fact_Forecast_Detail[] = validData.map((d, i) => ({
         ID: `FCST-IMP-${Date.now()}-${i}`,
         VersionID: `FCST-${effectiveDate.replace(/-/g, '')}`,
-        FactoryID: d.ResolvedFactoryID || d.FactoryID || factories[0].FactoryID,
-        MaterialID: d.ResolvedMaterialID || d.MaterialID || materials[0].MaterialID,
+        FactoryID: d.ResolvedFactoryID || d.FactoryID || factories[0]?.FactoryID || 'FAC-DBD',
+        MaterialID: d.ResolvedMaterialID || d.MaterialID || materials[0]?.MaterialID || 'MAT-2579',
         ForecastQty: Number(d.ForecastQty || 0),
+        RunDate: effectiveDate,
+        SiteCode: d.SiteCode || 'DBD',
+        FactoryCode: d.FactoryCode || 'DBD',
+        PlantName: d.PlantName || '043 Binh Duong',
+        MaterialCode: d.MaterialCode || '2579',
+        MaterialName: d.MaterialName || 'CORN NGMO',
+        Division: d.Division || 'Livestock',
+        ForecastQtyKg: Number(d.ForecastQty || 0),
       }));
+
+      const newVersion: ForecastRunVersion = {
+        VersionID: `FCST-${effectiveDate.replace(/-/g, '')}`,
+        VersionName: `Đợt Forecast ${effectiveDate}`,
+        RunDate: effectiveDate,
+        SKUCount: new Set(newItems.map((n) => n.MaterialCode)).size,
+        TotalForecastQty: newItems.reduce((sum, n) => sum + (n.ForecastQty || 0), 0),
+        PlantCount: 22,
+        UploadedAt: new Date().toISOString(),
+        UploadedBy: currentUser?.fullName || 'User',
+        SourceFileName: 'Manual_Import.xlsx',
+      };
+
       setForecastDetails((prev) => [...newItems, ...prev]);
+      setForecastVersions((prev) => [newVersion, ...prev.filter((v) => v.VersionID !== newVersion.VersionID)]);
       showToast(`Đã import thành công ${newItems.length} dòng Dự Báo Nhu Cầu (Forecast Cut-off: ${effectiveDate})!`);
+
+      // Persist to SQL Server in background
+      syncForecastToDb([newVersion], newItems).then((ok) => {
+        if (ok) console.log('✅ Forecast synced to SQL Server.');
+      });
+
     } else if (type === 'SOH') {
       const newItems: Fact_Inventory_SOH[] = validData.map((d, i) => ({
         SOH_ID: `SOH-IMP-${Date.now()}-${i}`,
-        FactoryID: d.ResolvedFactoryID || d.FactoryID || factories[0].FactoryID,
-        MaterialID: d.ResolvedMaterialID || d.MaterialID || materials[0].MaterialID,
-        Quantity: Number(d.Quantity || 0),
+        InventoryID: `SOH-IMP-${Date.now()}-${i}`,
+        FactoryID: d.ResolvedFactoryID || d.FactoryID || factories[0]?.FactoryID || 'FAC-DBD',
+        MaterialID: d.ResolvedMaterialID || d.MaterialID || materials[0]?.MaterialID || 'MAT-2579',
+        MaterialCode: d.MaterialCode || '2579',
+        MaterialName: d.MaterialName || 'CORN NGMO',
+        Quantity: Number(d.Quantity || d.SOHQtyKg || 0),
+        SOHQtyKg: Number(d.Quantity || d.SOHQtyKg || 0),
         WarehouseLocation: d.WarehouseLocation || d.SubInventory || 'Kho RAW D365',
+        WarehouseCode: d.WarehouseCode || d.FactoryCode || 'DBD',
         BatchNumber: d.BatchNumber || `LOT-IMP-${Date.now().toString().substr(7)}`,
         ExpiryDate: d.ExpiryDate || '2027-12-31',
         UpdateDate: effectiveDate,
+        SnapshotDate: effectiveDate,
+        AveragePrice: Number(d.AveragePrice || 0),
+        Region: d.Region || 'SOUTH',
       }));
+
       setInventorySOH((prev) => [...newItems, ...prev]);
       showToast(`Đã import thành công ${newItems.length} dòng Tồn Kho SOH (Khớp Ngày Chốt ${effectiveDate})!`);
+
+      // Persist to SQL Server in background
+      syncInventorySOHToDb(newItems, effectiveDate).then((ok) => {
+        if (ok) console.log('✅ Inventory SOH synced to SQL Server.');
+      });
+
     } else if (type === 'Usage') {
       const newItems: Fact_Production_Usage[] = validData.map((d, i) => ({
         UsageID: `USG-IMP-${Date.now()}-${i}`,
-        FactoryID: d.ResolvedFactoryID || d.FactoryID || factories[0].FactoryID,
-        MaterialID: d.ResolvedMaterialID || d.MaterialID || materials[0].MaterialID,
-        ActualQty: Number(d.ActualQty || 0),
+        FactoryID: d.ResolvedFactoryID || d.FactoryID || factories[0]?.FactoryID || 'FAC-DBD',
+        FactoryCode: d.FactoryCode || 'DBD',
+        MaterialID: d.ResolvedMaterialID || d.MaterialID || materials[0]?.MaterialID || 'MAT-2579',
+        MaterialCode: d.MaterialCode || '2579',
+        MaterialName: d.MaterialName || 'CORN NGMO',
+        ActualQty: Number(d.ActualQty || d.ActualUsageKg || 0),
+        ActualUsageKg: Number(d.ActualQty || d.ActualUsageKg || 0),
         LogDate: d.LogDate || d.UsageDate || effectiveDate,
-        RecipeCode: d.RecipeCode || 'AUTO_IMPORT',
+        UsageDate: d.LogDate || d.UsageDate || effectiveDate,
+        RecipeCode: d.RecipeCode || d.FormulaCode || 'AUTO_IMPORT',
+        Division: d.Division || 'Livestock',
       }));
+
       setUsageLogs((prev) => [...newItems, ...prev]);
       showToast(`Đã import thành công ${newItems.length} dòng Tiêu Hao Thực Tế (Usage Cut-off: ${effectiveDate})!`);
+
+      // Persist to SQL Server in background
+      syncUsageToDb(newItems).then((ok) => {
+        if (ok) console.log('✅ Usage logs synced to SQL Server.');
+      });
+
     } else if (type === 'PO_Inbound') {
       const newPODetails: Fact_PO_Detail[] = validData.map((d, i) => {
-        const orderQty = Number(d.OrderQty || d.Quantity || 0);
-        const receivedQty = Number(d.ReceivedQty || 0);
-        const remainQty = Number(d.PendingQty || d.DeliverRemainder || d.RemainQty || (orderQty - receivedQty));
+        const orderQty = Number(d.OrderQty || d.OrderedQtyKg || d.Quantity || 0);
+        const receivedQty = Number(d.ReceivedQty || d.ReceivedQtyKg || 0);
+        const remainQty = Number(d.PendingQty || d.PendingQtyKg || d.DeliverRemainder || d.RemainQty || (orderQty - receivedQty));
+        const poNumber = d.PONumber || d.POID || d.PurchaseOrder || `PO-D365-${Date.now().toString().substr(6, 4)}`;
+
         return {
           PODetailID: `POD-IMP-${Date.now()}-${i}`,
-          POID: d.PONumber || d.POID || d.PurchaseOrder || `PO-D365-${Date.now().toString().substr(6, 4)}`,
-          FactoryID: d.ResolvedFactoryID || d.FactoryID || factories[0].FactoryID,
-          MaterialID: d.ResolvedMaterialID || d.MaterialID || materials[0].MaterialID,
+          PO_Detail_ID: `POD-IMP-${Date.now()}-${i}`,
+          POID: poNumber,
+          PONumber: poNumber,
+          FactoryID: d.ResolvedFactoryID || d.FactoryID || factories[0]?.FactoryID || 'FAC-DBD',
+          FactoryCode: d.FactoryCode || 'DBD',
+          MaterialID: d.ResolvedMaterialID || d.MaterialID || materials[0]?.MaterialID || 'MAT-2579',
+          MaterialCode: d.MaterialCode || '2579',
+          MaterialName: d.MaterialName || 'CORN NGMO',
           OrderQty: orderQty > 0 ? orderQty : remainQty,
+          OrderedQtyKg: orderQty > 0 ? orderQty : remainQty,
           ReceivedQty: receivedQty,
+          ReceivedQtyKg: receivedQty,
           RemainQty: remainQty > 0 ? remainQty : orderQty,
+          PendingQtyKg: remainQty > 0 ? remainQty : orderQty,
           UnitPriceUSD: Number(d.UnitPriceUSD || (d.UnitPriceVND ? d.UnitPriceVND / 25000 : 2.5)),
+          PromisedDeliveryDate: d.PromisedDeliveryDate || d.DeliveryDate || effectiveDate,
+          SupplierName: d.SupplierName || 'Nhà Cung Cấp D365',
         };
       });
+
       setPODetails((prev) => [...newPODetails, ...prev]);
       showToast(`Đã import thành công ${newPODetails.length} dòng đơn hàng mua (PO Pending Inbound) cho Ngày Chốt ${effectiveDate}!`);
+
+      // Persist to SQL Server in background
+      syncPurchaseOrdersToDb([], newPODetails).then((ok) => {
+        if (ok) console.log('✅ Purchase orders synced to SQL Server.');
+      });
     }
   };
 
   const handleSaveNewMappings = (newMappings: Sys_Import_Mapping[]) => {
     setLearnedMappings((prev) => [...newMappings, ...prev]);
     showToast(`Đã lưu ${newMappings.length} quy tắc ánh xạ mới vào từ điển hệ thống!`);
+    newMappings.forEach((m) => saveMappingToDb(m));
   };
 
   const handleReceiveShipment = (scheduleId: string, receivedQty: number) => {
@@ -350,13 +491,16 @@ export function App() {
         SOH_ID: `SOH-REC-${Date.now()}`,
         FactoryID: targetPODetail.FactoryID,
         MaterialID: targetPODetail.MaterialID,
+        MaterialCode: targetPODetail.MaterialCode || '2579',
         BatchNumber: `LOT-REC-${Date.now().toString().substr(7)}`,
         Quantity: receivedQty,
         UpdateDate: new Date().toISOString().split('T')[0],
+        SnapshotDate: new Date().toISOString().split('T')[0],
         ExpiryDate: '2028-06-30',
         WarehouseLocation: 'Kho Nhập Vừa Nhận',
       };
       setInventorySOH((prev) => [newSOH, ...prev]);
+      syncInventorySOHToDb([newSOH]);
     }
 
     showToast(`Đã nhập kho thành công ${receivedQty.toLocaleString()} kg vào tồn kho SOH!`);
@@ -379,6 +523,60 @@ export function App() {
     }
   };
 
+  // --------------------------------------------------------------------------
+  // Master Data Update & Delete Handlers with SQL Server Sync
+  // --------------------------------------------------------------------------
+  const handleUpdateMaterials = (updated: Dim_Material[]) => {
+    setMaterials(updated);
+    // Find newly added or updated items and sync
+    updated.forEach((m) => saveMaterialToDb(m));
+  };
+
+  const handleDeleteMaterial = (materialId: string) => {
+    if (currentUser && !(currentUser.permissions?.canEditMasterData ?? false)) {
+      alert(`Tài khoản "${currentUser.roleNameVN}" không có quyền xóa nguyên liệu khỏi Master Data.`);
+      return;
+    }
+    setMaterials((prev) => prev.filter((m) => m.MaterialID !== materialId && m.MaterialCode !== materialId));
+    deleteMaterialFromDb(materialId);
+    showToast('Đã xóa nguyên liệu khỏi danh mục Master Data.');
+  };
+
+  const handleUpdateFactories = (updated: Dim_Factory[]) => {
+    setFactories(updated);
+    updated.forEach((f) => saveFactoryToDb(f));
+  };
+
+  const handleDeleteFactory = (factoryId: string) => {
+    if (currentUser && !(currentUser.permissions?.canEditMasterData ?? false)) {
+      alert(`Tài khoản "${currentUser.roleNameVN}" không có quyền xóa nhà máy khỏi Master Data.`);
+      return;
+    }
+    setFactories((prev) => prev.filter((f) => f.FactoryID !== factoryId && f.InternalCode !== factoryId));
+    deleteFactoryFromDb(factoryId);
+    showToast('Đã xóa nhà máy khỏi danh mục.');
+  };
+
+  const handleUpdateSuppliers = (updated: Dim_Supplier[]) => {
+    setSuppliers(updated);
+    updated.forEach((s) => saveSupplierToDb(s));
+  };
+
+  const handleDeleteSupplier = (supplierId: string) => {
+    if (currentUser && !(currentUser.permissions?.canEditMasterData ?? false)) {
+      alert(`Tài khoản "${currentUser.roleNameVN}" không có quyền xóa nhà cung cấp khỏi Master Data.`);
+      return;
+    }
+    setSuppliers((prev) => prev.filter((s) => s.SupplierID !== supplierId && s.SupplierCode !== supplierId));
+    deleteSupplierFromDb(supplierId);
+    showToast('Đã xóa nhà cung cấp khỏi danh mục Master Data.');
+  };
+
+  const handleUpdateSubstitutions = (updated: Dim_Material_Substitution[]) => {
+    setSubstitutions(updated);
+    updated.forEach((s) => saveSubstitutionToDb(s));
+  };
+
   const handleSaveMapping = (mapping: Sys_Import_Mapping) => {
     if (currentUser && !(currentUser.permissions?.canEditMasterData ?? false)) {
       alert(`Tài khoản "${currentUser.roleNameVN}" không có quyền chỉnh sửa cấu hình Master Data & Mapping.`);
@@ -391,6 +589,7 @@ export function App() {
       }
       return [mapping, ...prev];
     });
+    saveMappingToDb(mapping);
     showToast('Đã lưu quy tắc ánh xạ vào từ điển hệ thống!');
   };
 
@@ -400,34 +599,8 @@ export function App() {
       return;
     }
     setLearnedMappings((prev) => prev.filter((m) => m.MappingID !== mappingId));
+    deleteMappingFromDb(mappingId);
     showToast('Đã xóa quy tắc ánh xạ khỏi từ điển.');
-  };
-
-  const handleDeleteFactory = (factoryId: string) => {
-    if (currentUser && !(currentUser.permissions?.canEditMasterData ?? false)) {
-      alert(`Tài khoản "${currentUser.roleNameVN}" không có quyền xóa nhà máy khỏi Master Data.`);
-      return;
-    }
-    setFactories((prev) => prev.filter((f) => f.FactoryID !== factoryId && f.InternalCode !== factoryId));
-    showToast('Đã xóa nhà máy khỏi danh mục.');
-  };
-
-  const handleDeleteMaterial = (materialId: string) => {
-    if (currentUser && !(currentUser.permissions?.canEditMasterData ?? false)) {
-      alert(`Tài khoản "${currentUser.roleNameVN}" không có quyền xóa nguyên liệu khỏi Master Data.`);
-      return;
-    }
-    setMaterials((prev) => prev.filter((m) => m.MaterialID !== materialId && m.MaterialCode !== materialId));
-    showToast('Đã xóa nguyên liệu khỏi danh mục Master Data.');
-  };
-
-  const handleDeleteSupplier = (supplierId: string) => {
-    if (currentUser && !(currentUser.permissions?.canEditMasterData ?? false)) {
-      alert(`Tài khoản "${currentUser.roleNameVN}" không có quyền xóa nhà cung cấp khỏi Master Data.`);
-      return;
-    }
-    setSuppliers((prev) => prev.filter((s) => s.SupplierID !== supplierId && s.SupplierCode !== supplierId));
-    showToast('Đã xóa nhà cung cấp khỏi danh mục Master Data.');
   };
 
   // Fullscreen Login Gate if not authenticated
@@ -573,13 +746,13 @@ export function App() {
                 inboundSchedules={inboundSchedules}
                 poHeaders={poHeaders}
                 poDetails={poDetails}
-                onUpdateMaterials={(updated) => setMaterials(updated)}
+                onUpdateMaterials={handleUpdateMaterials}
                 onDeleteMaterial={handleDeleteMaterial}
-                onUpdateFactories={(updated) => setFactories(updated)}
+                onUpdateFactories={handleUpdateFactories}
                 onDeleteFactory={handleDeleteFactory}
-                onUpdateSuppliers={(updated) => setSuppliers(updated)}
+                onUpdateSuppliers={handleUpdateSuppliers}
                 onDeleteSupplier={handleDeleteSupplier}
-                onUpdateSubstitutions={(updated) => setSubstitutions(updated)}
+                onUpdateSubstitutions={handleUpdateSubstitutions}
                 onSaveMapping={handleSaveMapping}
                 onDeleteMapping={handleDeleteMapping}
                 language={language}

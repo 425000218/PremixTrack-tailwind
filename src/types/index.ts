@@ -163,9 +163,13 @@ export interface ForecastCompareRow {
 
 export interface Fact_Inventory_SOH {
   SOH_ID: string;
+  InventoryID?: string;
   FactoryID: string;
   MaterialID: string;
+  MaterialCode?: string;
+  MaterialName?: string;
   Quantity: number; // kg on hand
+  SOHQtyKg?: number;
   WarehouseLocation?: string;
   BatchNumber?: string;
   ExpiryDate?: string;

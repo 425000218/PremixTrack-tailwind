@@ -3,20 +3,24 @@ import { executeQuery } from '../db/queryHelper';
 
 const router = Router();
 
-// -----------------------------------------------------------------------------
-// S&OP INVENTORY & SUPPLY POSITION MATRIX (D365 FO Live & Cached)
-// -----------------------------------------------------------------------------
-
+// ============================================================================
+// 1. S&OP SUPPLY POSITION MATRIX (D365 FO Live & Cached)
+// ============================================================================
 router.get('/position/matrix', async (req, res) => {
   try {
-    const { snapshotDate = '2026-08-28', factoryId, division, category, search } = req.query;
+    const { snapshotDate = '2026-08-25', region, division, factoryId, search } = req.query;
 
-    let whereClause = 'WHERE SnapshotDate = @SnapshotDate';
-    const params: Record<string, any> = { SnapshotDate: snapshotDate };
+    let whereClause = 'WHERE 1=1';
+    const params: Record<string, any> = {};
 
-    if (factoryId && factoryId !== 'ALL') {
-      whereClause += ' AND FactoryCode = @FactoryCode';
-      params.FactoryCode = factoryId;
+    if (snapshotDate) {
+      whereClause += ' AND (SnapshotDate = @SnapshotDate OR @SnapshotDate IS NULL)';
+      params.SnapshotDate = snapshotDate;
+    }
+
+    if (region && region !== 'ALL') {
+      whereClause += ' AND Region = @Region';
+      params.Region = region;
     }
 
     if (division && division !== 'ALL') {
@@ -24,9 +28,9 @@ router.get('/position/matrix', async (req, res) => {
       params.Division = division;
     }
 
-    if (category && category !== 'ALL') {
-      whereClause += ' AND RMGroup = @RMGroup';
-      params.RMGroup = category;
+    if (factoryId && factoryId !== 'ALL') {
+      whereClause += ' AND FactoryCode = @FactoryCode';
+      params.FactoryCode = factoryId;
     }
 
     if (search) {
@@ -34,17 +38,19 @@ router.get('/position/matrix', async (req, res) => {
       params.Search = `%${search}%`;
     }
 
+    // Try fact_Position_Snapshot first
     const query = `
       SELECT 
-        RecordID, SnapshotDate, Region, RMGroup, Division, FactoryCode,
+        PositionID, SnapshotDate, CutoffWorkingDays, StandardMonthDays,
+        Region, RMGroup, Division, FactoryCode,
         MaterialCode, MaterialName, PIC,
         SOHQtyKg, MTD_Production_PrevMonth_Kg, MTD_Production_CurrMonth_Kg,
         MonthlyUsageForecastKg, PctUsedUsage, DailyStandardUsageKg,
         DOI_Standard_Days, DOI_Actual_MTD_Days, StockoutDateSOH,
         EmergencyBufferQtyKg, DOI_AfterBuffer_Days,
         PO_PendingInboundKg, TotalPipeline_DOI_Days, MaxProtectedDate,
-        SeverityLevel, ActionSuggested, UpdatedAt
-      FROM dbo.vw_Supply_Position_Matrix
+        CreatedAt
+      FROM dbo.fact_Position_Snapshot
       ${whereClause}
       ORDER BY TotalPipeline_DOI_Days ASC, SOHQtyKg ASC
     `;
@@ -57,41 +63,61 @@ router.get('/position/matrix', async (req, res) => {
         source: 'MSSQL',
         totalRows: result.data.length,
         snapshotDate,
-        data: result.data
+        data: result.data.map((r: any) => ({
+          ...r,
+          SnapshotDate: r.SnapshotDate ? r.SnapshotDate.toISOString().split('T')[0] : '',
+          StockoutDateSOH: r.StockoutDateSOH ? r.StockoutDateSOH.toISOString().split('T')[0] : '',
+          MaxProtectedDate: r.MaxProtectedDate ? r.MaxProtectedDate.toISOString().split('T')[0] : '',
+        })),
       });
     }
 
     return res.json({
       success: true,
-      source: 'MSSQL_EMPTY',
+      source: 'FALLBACK_LOCAL',
       totalRows: 0,
       snapshotDate,
-      data: []
+      data: [],
     });
   } catch (err: any) {
-    res.status(500).json({ success: false, message: err.message });
+    return res.status(500).json({ success: false, message: err.message });
   }
 });
 
-// Dynamic Calculation Trigger for Live Position Matrix
+// ============================================================================
+// 2. DYNAMIC CALCULATION TRIGGER (sp_Calculate_Position_Matrix)
+// ============================================================================
 router.post('/position/calculate', async (req, res) => {
   try {
-    const { snapshotDate = '2026-08-28' } = req.body;
+    const {
+      snapshotDate = '2026-08-25',
+      cutoffWorkingDays = 22,
+      standardMonthDays = 28,
+    } = req.body;
 
-    const result = await executeQuery('EXEC dbo.sp_Calculate_Supply_Position_Daily @SnapshotDate = @SnapshotDate', {
-      SnapshotDate: snapshotDate
+    const result = await executeQuery(`
+      EXEC dbo.sp_Calculate_Position_Matrix 
+        @SnapshotDate = @SnapshotDate,
+        @CutoffWorkingDays = @CutoffWorkingDays,
+        @StandardMonthDays = @StandardMonthDays
+    `, {
+      SnapshotDate: snapshotDate,
+      CutoffWorkingDays: cutoffWorkingDays,
+      StandardMonthDays: standardMonthDays,
     });
 
     if (result.success) {
-      return res.json({ success: true, message: `Tính toán hoàn tất cho ngày ${snapshotDate}` });
+      return res.json({ success: true, message: `Tính toán hoàn tất ma trận Position cho ngày ${snapshotDate}` });
     }
-    res.status(400).json({ success: false, message: result.error });
+    return res.status(400).json({ success: false, message: result.error });
   } catch (err: any) {
-    res.status(500).json({ success: false, message: err.message });
+    return res.status(500).json({ success: false, message: err.message });
   }
 });
 
-// Column Header Dictionary (Enterprise Mode vs Legacy Mode)
+// ============================================================================
+// 3. COLUMN HEADER DICTIONARY (Enterprise Mode vs D365 Legacy Mode)
+// ============================================================================
 router.get('/position/headers', (req, res) => {
   const { mode = 'Enterprise' } = req.query;
   const isEnterprise = mode === 'Enterprise';
