@@ -137,7 +137,7 @@ export const Header: React.FC<HeaderProps> = ({
             className="bg-transparent text-xs font-semibold text-slate-800 focus:outline-none cursor-pointer pr-1"
           >
             <option value="ALL">
-              {language === 'vi' ? '🏢 Toàn quốc (8 Nhà máy)' : '🏢 All 8 Factories'}
+              {language === 'vi' ? `🏢 Toàn quốc (${factories.length} Nhà máy)` : `🏢 All ${factories.length} Factories`}
             </option>
             {factories.map((f) => (
               <option key={f.FactoryID} value={f.FactoryID}>

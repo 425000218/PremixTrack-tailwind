@@ -25,6 +25,7 @@ interface SidebarProps {
   setLanguage: (lang: Language) => void;
   criticalAlertsCount: number;
   transferSuggestionsCount: number;
+  factoriesCount?: number;
   onResetData: () => void;
   isOpenMobile?: boolean;
   onCloseMobile?: () => void;
@@ -39,6 +40,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   setLanguage,
   criticalAlertsCount,
   transferSuggestionsCount,
+  factoriesCount = 22,
   onResetData,
   isOpenMobile,
   onCloseMobile,
@@ -247,12 +249,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <p className="text-xs font-semibold text-blue-400 uppercase tracking-wide">
                 Today, 09:42 AM
               </p>
-              <p className="text-[10px] text-slate-500 mt-0.5">8 Nhà máy trực tuyến</p>
+              <p className="text-[10px] text-slate-500 mt-0.5">{factoriesCount} Nhà máy trực tuyến</p>
             </div>
           ) : (
             <div
               className="w-10 h-10 bg-slate-800/90 rounded-xl border border-slate-700/50 flex items-center justify-center cursor-pointer"
-              title="D365 FO Sync: Today, 09:42 AM (8 Nhà máy trực tuyến)"
+              title={`D365 FO Sync: Today, 09:42 AM (${factoriesCount} Nhà máy trực tuyến)`}
             >
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
             </div>

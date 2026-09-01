@@ -123,7 +123,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     const selectedFac = factories.find((f) => f.FactoryID === regFactoryId);
     const assignedFacName =
       regFactoryId === 'ALL'
-        ? 'Toàn quốc (8 Nhà máy)'
+        ? `Toàn quốc (${factories.length} Nhà máy)`
         : selectedFac
         ? `${selectedFac.FactoryName_VN} (${selectedFac.InternalCode})`
         : 'Toàn quốc';
@@ -417,7 +417,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     onChange={(e) => setRegFactoryId(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-blue-500 focus:bg-white transition-colors font-semibold"
                   >
-                    <option value="ALL">Toàn quốc (8 Nhà máy)</option>
+                    <option value="ALL">Toàn quốc ({factories.length} Nhà máy)</option>
                     {factories.map((f) => (
                       <option key={f.FactoryID} value={f.FactoryID}>
                         {f.InternalCode} - {f.FactoryName_VN.replace('Nhà máy ', '')}

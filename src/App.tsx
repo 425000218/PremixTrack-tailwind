@@ -618,6 +618,7 @@ export function App() {
         setLanguage={setLanguage}
         criticalAlertsCount={criticalAlertsCount}
         transferSuggestionsCount={transferSuggestions.length}
+        factoriesCount={factories.length}
         onResetData={handleResetData}
         isOpenMobile={isMobileSidebarOpen}
         onCloseMobile={() => setIsMobileSidebarOpen(false)}
