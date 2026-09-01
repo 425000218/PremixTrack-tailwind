@@ -32,7 +32,7 @@ export const DashboardFactorySlicer: React.FC<DashboardFactorySlicerProps> = ({
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
 
-  const isAllSelected = selectedFactoryIds.includes('ALL') || selectedFactoryIds.length === 0;
+  const isAllSelected = selectedFactoryIds.includes('ALL');
 
   const activeCount = isAllSelected ? factories.length : selectedFactoryIds.length;
 
@@ -59,17 +59,17 @@ export const DashboardFactorySlicer: React.FC<DashboardFactorySlicerProps> = ({
   // Toggle single factory
   const handleToggle = (factoryId: string) => {
     if (isAllSelected) {
-      // If currently all, clicking one isolates that factory
+      // If currently ALL, selecting one means isolating that factory
       onChange([factoryId]);
       return;
     }
 
     if (selectedFactoryIds.includes(factoryId)) {
       const remaining = selectedFactoryIds.filter((id) => id !== factoryId);
-      onChange(remaining.length === 0 ? ['ALL'] : remaining);
+      onChange(remaining);
     } else {
       const updated = [...selectedFactoryIds, factoryId];
-      onChange(updated.length >= factories.length ? ['ALL'] : updated);
+      onChange(updated);
     }
   };
 
@@ -83,7 +83,7 @@ export const DashboardFactorySlicer: React.FC<DashboardFactorySlicerProps> = ({
     }
     const currentSet = new Set(selectedFactoryIds);
     const inverted = factories.filter((f) => !currentSet.has(f.FactoryID)).map((f) => f.FactoryID);
-    onChange(inverted.length === 0 ? ['ALL'] : inverted);
+    onChange(inverted);
   };
 
   const handleSelectPreset = (preset: Dim_Factory[]) => {

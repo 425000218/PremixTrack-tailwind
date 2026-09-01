@@ -69,8 +69,9 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
   // Filter metrics according to global multi-factory selection
   const scopedMetrics = useMemo(() => {
-    if (selectedFactoryIds && selectedFactoryIds.length > 0) {
+    if (selectedFactoryIds !== undefined) {
       if (selectedFactoryIds.includes('ALL')) return metrics;
+      if (selectedFactoryIds.length === 0) return [];
       return metrics.filter(
         (m) =>
           selectedFactoryIds.includes(m.FactoryID) ||

@@ -69,7 +69,7 @@ export const MultiFactorySelect: React.FC<MultiFactorySelectProps> = ({
   // --------------------------------------------------------------------------
   // Helpers & Computed Values
   // --------------------------------------------------------------------------
-  const isAllSelected = selectedFactoryIds.includes('ALL') || selectedFactoryIds.length === 0;
+  const isAllSelected = selectedFactoryIds.includes('ALL');
 
   const activeSelected = useMemo(() => {
     if (isAllSelected) return factories;
@@ -79,7 +79,7 @@ export const MultiFactorySelect: React.FC<MultiFactorySelectProps> = ({
   }, [factories, selectedFactoryIds, isAllSelected]);
 
   // Is temp all selected in drawer?
-  const isTempAllSelected = tempSelectedIds.includes('ALL') || (tempSelectedIds.length >= factories.length && factories.length > 0);
+  const isTempAllSelected = tempSelectedIds.includes('ALL');
   const tempSelectedCount = isTempAllSelected ? factories.length : tempSelectedIds.length;
 
   // Regional breakdown
@@ -166,11 +166,7 @@ export const MultiFactorySelect: React.FC<MultiFactorySelectProps> = ({
       setTempSelectedIds(remaining);
     } else {
       const updated = [...tempSelectedIds, factoryId];
-      if (updated.length >= factories.length) {
-        setTempSelectedIds(['ALL']);
-      } else {
-        setTempSelectedIds(updated);
-      }
+      setTempSelectedIds(updated);
     }
   };
 
@@ -192,23 +188,12 @@ export const MultiFactorySelect: React.FC<MultiFactorySelectProps> = ({
     } else {
       // Select entire group
       const combined = Array.from(new Set([...tempSelectedIds, ...groupIds]));
-      if (combined.length >= factories.length) {
-        setTempSelectedIds(['ALL']);
-      } else {
-        setTempSelectedIds(combined);
-      }
+      setTempSelectedIds(combined);
     }
   };
 
   const handleApply = () => {
-    if (tempSelectedIds.length === 0) {
-      // If user cleared all and applied, default to ALL to avoid empty screen
-      onChange(['ALL']);
-    } else if (tempSelectedIds.length >= factories.length) {
-      onChange(['ALL']);
-    } else {
-      onChange(tempSelectedIds);
-    }
+    onChange(tempSelectedIds);
     setIsOpen(false);
   };
 
