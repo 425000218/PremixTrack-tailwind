@@ -671,6 +671,7 @@ export function App() {
                   setSelectedFactoryId(id);
                   setSelectedFactoryIds(id === 'ALL' ? ['ALL'] : [id]);
                 }}
+                onSelectFactoryIds={setSelectedFactoryIds}
                 onNavigateTab={(tab) => setCurrentTab(tab)}
                 language={language}
               />

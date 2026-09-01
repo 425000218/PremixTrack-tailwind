@@ -30,6 +30,7 @@ import {
   InterFactoryTransferSuggestion,
   Language,
 } from '../types';
+import { DashboardFactorySlicer } from './DashboardFactorySlicer';
 
 interface DashboardOverviewProps {
   metrics: CalculatedMaterialMetric[];
@@ -40,6 +41,7 @@ interface DashboardOverviewProps {
   selectedFactoryId?: string;
   selectedFactoryIds?: string[];
   onSelectFactory?: (id: string) => void;
+  onSelectFactoryIds?: (ids: string[]) => void;
   onNavigateTab: (tab: string) => void;
   language: Language;
 }
@@ -53,6 +55,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   selectedFactoryId = 'ALL',
   selectedFactoryIds,
   onSelectFactory,
+  onSelectFactoryIds,
   onNavigateTab,
   language,
 }) => {
@@ -154,6 +157,20 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
   return (
     <div className="space-y-6 relative pb-12">
+      {/* ── 0. DASHBOARD-LEVEL INLINE FACTORY SLICER (SOLUTION 2) ── */}
+      <DashboardFactorySlicer
+        factories={factories}
+        selectedFactoryIds={selectedFactoryIds || (selectedFactoryId ? [selectedFactoryId] : ['ALL'])}
+        onChange={(ids) => {
+          if (onSelectFactoryIds) {
+            onSelectFactoryIds(ids);
+          }
+          if (onSelectFactory) {
+            onSelectFactory(ids.length === 1 ? ids[0] : (ids.includes('ALL') ? 'ALL' : ids[0]));
+          }
+        }}
+        language={language}
+      />
       
       {/* ── 1. EXECUTIVE MISSION HUD (4 CARDS HARMONIOUS & SUBTLE TINT ON SOH) ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
