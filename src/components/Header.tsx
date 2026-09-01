@@ -19,11 +19,14 @@ import {
 } from 'lucide-react';
 import { Dim_Factory, Language, AppUser } from '../types';
 import { mockUsers } from '../data/mockData';
+import { MultiFactorySelect } from './MultiFactorySelect';
 
 interface HeaderProps {
   factories: Dim_Factory[];
-  selectedFactoryId: string;
-  setSelectedFactoryId: (id: string) => void;
+  selectedFactoryId?: string;
+  setSelectedFactoryId?: (id: string) => void;
+  selectedFactoryIds?: string[];
+  setSelectedFactoryIds?: (ids: string[]) => void;
   criticalAlertsCount: number;
   onOpenImportModal: () => void;
   onNavigateTab: (tab: string) => void;
@@ -41,8 +44,10 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({
   factories,
-  selectedFactoryId,
+  selectedFactoryId = 'ALL',
   setSelectedFactoryId,
+  selectedFactoryIds,
+  setSelectedFactoryIds,
   criticalAlertsCount,
   onOpenImportModal,
   onNavigateTab,
@@ -128,23 +133,21 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Right side: Global Factory Select + Import CTA + User Profile / Login */}
       <div className="flex items-center gap-2.5 md:gap-4">
-        {/* Global Factory Selector */}
-        <div className="hidden sm:flex items-center gap-1.5 bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-xl px-2.5 py-1.5 transition-colors">
-          <Factory className="w-4 h-4 text-blue-600 shrink-0" />
-          <select
-            value={selectedFactoryId}
-            onChange={(e) => setSelectedFactoryId(e.target.value)}
-            className="bg-transparent text-xs font-semibold text-slate-800 focus:outline-none cursor-pointer pr-1"
-          >
-            <option value="ALL">
-              {language === 'vi' ? `🏢 Toàn quốc (${factories.length} Nhà máy)` : `🏢 All ${factories.length} Factories`}
-            </option>
-            {factories.map((f) => (
-              <option key={f.FactoryID} value={f.FactoryID}>
-                {f.InternalCode} - {f.FactoryName_VN.replace('Nhà máy ', '')}
-              </option>
-            ))}
-          </select>
+        {/* Global Multi-Factory Selector */}
+        <div className="hidden sm:flex items-center">
+          <MultiFactorySelect
+            factories={factories}
+            selectedFactoryIds={selectedFactoryIds || (selectedFactoryId ? [selectedFactoryId] : ['ALL'])}
+            onChange={(ids) => {
+              if (setSelectedFactoryIds) {
+                setSelectedFactoryIds(ids);
+              }
+              if (setSelectedFactoryId) {
+                setSelectedFactoryId(ids.length === 1 ? ids[0] : (ids.includes('ALL') ? 'ALL' : ids[0]));
+              }
+            }}
+            language={language}
+          />
         </div>
 
         {/* Critical Alerts Badge */}

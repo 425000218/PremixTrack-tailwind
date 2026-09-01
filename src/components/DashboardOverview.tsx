@@ -37,8 +37,9 @@ interface DashboardOverviewProps {
   materials: Dim_Material[];
   inboundSchedules: Fact_Inbound_Schedule[];
   transferSuggestions: InterFactoryTransferSuggestion[];
-  selectedFactoryId: string;
-  onSelectFactory: (id: string) => void;
+  selectedFactoryId?: string;
+  selectedFactoryIds?: string[];
+  onSelectFactory?: (id: string) => void;
   onNavigateTab: (tab: string) => void;
   language: Language;
 }
@@ -49,7 +50,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   materials,
   inboundSchedules,
   transferSuggestions,
-  selectedFactoryId,
+  selectedFactoryId = 'ALL',
+  selectedFactoryIds,
   onSelectFactory,
   onNavigateTab,
   language,
@@ -62,12 +64,20 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   // Floating Bubbles State: 'NONE' | 'TRANSFERS' | 'AI'
   const [activeBubble, setActiveBubble] = useState<'NONE' | 'TRANSFERS' | 'AI'>('NONE');
 
-  // Filter metrics according to global factory selection
+  // Filter metrics according to global multi-factory selection
   const scopedMetrics = useMemo(() => {
+    if (selectedFactoryIds && selectedFactoryIds.length > 0) {
+      if (selectedFactoryIds.includes('ALL')) return metrics;
+      return metrics.filter(
+        (m) =>
+          selectedFactoryIds.includes(m.FactoryID) ||
+          selectedFactoryIds.includes(m.FactoryCode)
+      );
+    }
     return metrics.filter(
       (m) => selectedFactoryId === 'ALL' || m.FactoryID === selectedFactoryId
     );
-  }, [metrics, selectedFactoryId]);
+  }, [metrics, selectedFactoryId, selectedFactoryIds]);
 
   // High-level KPI Computations
   const stats = useMemo(() => {

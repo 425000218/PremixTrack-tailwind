@@ -125,6 +125,7 @@ export function App() {
   // UI State
   const [currentTab, setCurrentTab] = useState<string>('dashboard');
   const [selectedFactoryId, setSelectedFactoryId] = useState<string>('ALL');
+  const [selectedFactoryIds, setSelectedFactoryIds] = useState<string[]>(['ALL']);
   const [language, setLanguage] = useState<Language>('vi');
   const [isImportModalOpen, setIsImportModalOpen] = useState<boolean>(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState<boolean>(false);
@@ -262,6 +263,10 @@ export function App() {
     localStorage.setItem('premixtrack_user', JSON.stringify(user));
     if (user.assignedFactoryId && user.assignedFactoryId !== 'ALL') {
       setSelectedFactoryId(user.assignedFactoryId);
+      setSelectedFactoryIds([user.assignedFactoryId]);
+    } else {
+      setSelectedFactoryId('ALL');
+      setSelectedFactoryIds(['ALL']);
     }
     showToast(`Xin chào ${user.fullName} (${user.roleNameVN})!`);
   };
@@ -633,6 +638,8 @@ export function App() {
           factories={factories}
           selectedFactoryId={selectedFactoryId}
           setSelectedFactoryId={setSelectedFactoryId}
+          selectedFactoryIds={selectedFactoryIds}
+          setSelectedFactoryIds={setSelectedFactoryIds}
           criticalAlertsCount={criticalAlertsCount}
           onOpenImportModal={() => setIsImportModalOpen(true)}
           onNavigateTab={(tab) => setCurrentTab(tab)}
@@ -659,7 +666,11 @@ export function App() {
                 inboundSchedules={inboundSchedules}
                 transferSuggestions={transferSuggestions}
                 selectedFactoryId={selectedFactoryId}
-                onSelectFactory={(id) => setSelectedFactoryId(id)}
+                selectedFactoryIds={selectedFactoryIds}
+                onSelectFactory={(id) => {
+                  setSelectedFactoryId(id);
+                  setSelectedFactoryIds(id === 'ALL' ? ['ALL'] : [id]);
+                }}
                 onNavigateTab={(tab) => setCurrentTab(tab)}
                 language={language}
               />
