@@ -9,10 +9,7 @@ import {
   AlertCircle,
   Database,
   CheckCircle2,
-  Sparkles,
-  Server,
-  KeyRound,
-  ArrowRight
+  Mail
 } from 'lucide-react';
 import { AppUser } from '../types';
 import { mockUsers, getRolePermissions } from '../data/mockData';
@@ -22,12 +19,16 @@ interface LoginGateProps {
 }
 
 export const LoginGate: React.FC<LoginGateProps> = ({ onLoginSuccess }) => {
+  const [mode, setMode] = useState<'login' | 'register'>('login');
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [dbStatus, setDbStatus] = useState<{ isOnline: boolean; server?: string } | null>(null);
 
   // Check SQL DB Status on mount
@@ -47,6 +48,7 @@ export const LoginGate: React.FC<LoginGateProps> = ({ onLoginSuccess }) => {
 
     setLoading(true);
     setErrorMsg(null);
+    setSuccessMsg(null);
 
     try {
       const res = await fetch('/api/auth/login', {
@@ -81,10 +83,38 @@ export const LoginGate: React.FC<LoginGateProps> = ({ onLoginSuccess }) => {
     }
   };
 
-  const handleQuickDemoSelect = (user: AppUser, defaultPw: string) => {
-    setUsername(user.username);
-    setPassword(defaultPw);
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!fullName.trim() || !email.trim() || !username.trim() || !password) {
+      setErrorMsg('Vui lòng nhập đầy đủ thông tin đăng ký.');
+      return;
+    }
+
+    setLoading(true);
     setErrorMsg(null);
+    setSuccessMsg(null);
+
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fullName, email, username, password })
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        setSuccessMsg(data.message || 'Đăng ký thành công! Vui lòng đăng nhập.');
+        setMode('login');
+        setPassword('');
+      } else {
+        setErrorMsg(data.message || 'Đăng ký thất bại.');
+      }
+    } catch (err: any) {
+      setErrorMsg('Không thể kết nối máy chủ xác thực.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -123,29 +153,73 @@ export const LoginGate: React.FC<LoginGateProps> = ({ onLoginSuccess }) => {
             </div>
           </div>
 
-          {/* Error Message */}
+          {/* Error & Success Message */}
           {errorMsg && (
             <div className="mb-6 p-3.5 bg-rose-500/10 border border-rose-500/30 rounded-2xl text-rose-300 text-xs font-semibold flex items-center gap-2.5 animate-in slide-in-from-top-2">
               <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
               <span>{errorMsg}</span>
             </div>
           )}
+          {successMsg && (
+            <div className="mb-6 p-3.5 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-emerald-300 text-xs font-semibold flex items-center gap-2.5 animate-in slide-in-from-top-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>{successMsg}</span>
+            </div>
+          )}
 
-          {/* Login Form */}
-          <form onSubmit={handleLogin} className="space-y-4">
+          {/* Form */}
+          <form onSubmit={mode === 'login' ? handleLogin : handleRegister} className="space-y-4">
+            {mode === 'register' && (
+              <>
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                    Họ và Tên *
+                  </label>
+                  <div className="relative">
+                    <User className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      required
+                      autoFocus
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      placeholder="Nguyễn Văn A"
+                      className="w-full pl-10 pr-4 py-3 bg-slate-950/60 border border-slate-800 rounded-xl text-white placeholder:text-slate-600 text-xs font-medium focus:border-blue-500 focus:bg-slate-950 focus:outline-none transition-colors"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                    Email *
+                  </label>
+                  <div className="relative">
+                    <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="email@example.com"
+                      className="w-full pl-10 pr-4 py-3 bg-slate-950/60 border border-slate-800 rounded-xl text-white placeholder:text-slate-600 text-xs font-medium focus:border-blue-500 focus:bg-slate-950 focus:outline-none transition-colors"
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+
             <div>
               <label className="block text-xs font-bold text-slate-300 mb-1.5">
-                Tên Đăng Nhập / Email *
+                {mode === 'register' ? 'Tên Đăng Nhập *' : 'Tên Đăng Nhập / Email *'}
               </label>
               <div className="relative">
                 <User className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   required
-                  autoFocus
+                  autoFocus={mode === 'login'}
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="admin, scm_lead, planner_dbd..."
+                  placeholder={mode === 'register' ? "nguyenvana" : "admin, scm_lead, planner_dbd..."}
                   className="w-full pl-10 pr-4 py-3 bg-slate-950/60 border border-slate-800 rounded-xl text-white placeholder:text-slate-600 text-xs font-medium focus:border-blue-500 focus:bg-slate-950 focus:outline-none transition-colors"
                 />
               </div>
@@ -177,17 +251,19 @@ export const LoginGate: React.FC<LoginGateProps> = ({ onLoginSuccess }) => {
               </div>
             </div>
 
-            <div className="flex items-center justify-between text-xs pt-1">
-              <label className="flex items-center gap-2 text-slate-400 cursor-pointer font-medium select-none">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="rounded bg-slate-950 border-slate-800 text-blue-600 focus:ring-0 focus:ring-offset-0"
-                />
-                <span>Ghi nhớ đăng nhập</span>
-              </label>
-            </div>
+            {mode === 'login' && (
+              <div className="flex items-center justify-between text-xs pt-1">
+                <label className="flex items-center gap-2 text-slate-400 cursor-pointer font-medium select-none">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="rounded bg-slate-950 border-slate-800 text-blue-600 focus:ring-0 focus:ring-offset-0"
+                  />
+                  <span>Ghi nhớ đăng nhập</span>
+                </label>
+              </div>
+            )}
 
             <button
               type="submit"
@@ -195,15 +271,30 @@ export const LoginGate: React.FC<LoginGateProps> = ({ onLoginSuccess }) => {
               className="w-full py-3.5 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
             >
               {loading ? (
-                <span>Đang xác thực bảo mật...</span>
+                <span>Đang xử lý...</span>
               ) : (
                 <>
                   <LogIn className="w-4 h-4" />
-                  <span>Đăng Nhập Vào Hệ Thống</span>
+                  <span>{mode === 'login' ? 'Đăng Nhập Vào Hệ Thống' : 'Đăng Ký Tài Khoản'}</span>
                 </>
               )}
             </button>
           </form>
+
+          {/* Mode Toggle */}
+          <div className="mt-6 text-center">
+            <button
+              type="button"
+              onClick={() => {
+                setMode(mode === 'login' ? 'register' : 'login');
+                setErrorMsg(null);
+                setSuccessMsg(null);
+              }}
+              className="text-xs font-medium text-blue-400 hover:text-blue-300 transition-colors"
+            >
+              {mode === 'login' ? 'Đăng ký tài khoản mới' : 'Đã có tài khoản? Đăng nhập'}
+            </button>
+          </div>
 
           {/* Security & Support Notice */}
           <div className="mt-8 pt-6 border-t border-slate-800/80 text-center space-y-2">

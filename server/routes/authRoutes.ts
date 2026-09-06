@@ -9,6 +9,50 @@ const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) throw new Error('JWT_SECRET is required');
 
 // -- USER AUTHENTICATION & LOGIN GATE (dbo.sys_User_Account) ------------------
+router.post('/auth/register', async (req, res) => {
+  try {
+    const { Username, Password, FullName, Email, Phone, Department, Role, FactoryAccess } = req.body;
+    
+    if (!Username || !Password || !FullName || !Email) {
+      return res.status(400).json({ success: false, message: 'Vui lòng điền đầy đủ các trường bắt buộc (Username, Password, Full Name, Email).' });
+    }
+
+    // Check if user already exists
+    const checkResult = await executeQuery(
+      'SELECT UserID FROM dbo.sys_User_Account WHERE LOWER(Username) = LOWER(@Username)',
+      { Username: Username.trim().toLowerCase() }
+    );
+
+    if (checkResult.success && checkResult.data.length > 0) {
+      return res.status(409).json({ success: false, message: 'Tên đăng nhập đã tồn tại trong hệ thống.' });
+    }
+
+    const newId = `USR-${Date.now().toString().slice(-4)}`;
+    const hashedPass = await bcrypt.hash(Password, 10);
+
+    const result = await executeQuery(
+      `INSERT INTO dbo.sys_User_Account (UserID, Username, PasswordHash, FullName, Email, Phone, Department, Role, FactoryAccess, IsActive, CreatedAt, UpdatedAt)
+       VALUES (@UserID, @Username, @PasswordHash, @FullName, @Email, @Phone, @Department, @Role, @FactoryAccess, @IsActive, SYSDATETIME(), SYSDATETIME())`,
+      {
+        UserID: newId,
+        Username: Username.trim().toLowerCase(),
+        PasswordHash: hashedPass,
+        FullName: FullName.trim(),
+        Email: Email.trim(),
+        Phone: Phone || '',
+        Department: Department || '',
+        Role: Role || 'viewer', // Default role pending admin assignment
+        FactoryAccess: typeof FactoryAccess === 'string' ? FactoryAccess : JSON.stringify(FactoryAccess || ['ALL']),
+        IsActive: 0, // NEW USER IS ALWAYS PENDING APPROVAL
+      }
+    );
+
+    res.json({ success: result.success, error: result.error, userId: newId, message: 'Đăng ký thành công! Tài khoản của bạn đang chờ Admin phê duyệt.' });
+  } catch (err: any) {
+    res.status(500).json({ success: false, message: err.message || 'Lỗi hệ thống khi đăng ký.' });
+  }
+});
+
 router.post('/auth/login', async (req, res) => {
   try {
     const { username, password } = req.body;

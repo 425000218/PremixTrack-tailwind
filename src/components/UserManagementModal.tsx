@@ -202,6 +202,36 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
     }
   };
 
+  const handleApproveUser = async (user: DbUser) => {
+    if (!confirm(`Bạn có chắc chắn muốn duyệt tài khoản "${user.Username}" không?`)) return;
+    
+    setLoading(true);
+    try {
+      const payload = {
+        ...user,
+        IsActive: 1
+      };
+      const res = await fetchWithAuth(`/api/users/${user.UserID}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const result = await res.json();
+      if (result.success) {
+        setSuccessMsg(`Đã duyệt tài khoản ${user.Username} thành công!`);
+        await fetchUsers();
+        if (onUserListChanged) onUserListChanged();
+        setTimeout(() => setSuccessMsg(null), 3000);
+      } else {
+        alert(result.error || result.message || 'Lỗi khi duyệt tài khoản');
+      }
+    } catch (err: any) {
+      alert(err.message || 'Lỗi kết nối máy chủ SQL.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const filteredUsers = users.filter(u =>
     u.FullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     u.Username.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -377,14 +407,24 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
                           <CheckCircle2 className="w-3.5 h-3.5" /> Hoạt động
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 text-rose-600 font-bold text-[11px]">
-                          <XCircle className="w-3.5 h-3.5" /> Đã khóa
+                        <span className="inline-flex items-center gap-1 text-amber-600 font-bold text-[11px] bg-amber-50 px-2 py-1 rounded-lg border border-amber-200">
+                          <AlertCircle className="w-3.5 h-3.5" /> Chờ Duyệt
                         </span>
                       )}
                     </td>
 
                     <td className="py-3 px-4 text-right">
                       <div className="flex items-center justify-end gap-1.5">
+                        {!user.IsActive && (
+                          <button
+                            onClick={() => handleApproveUser(user)}
+                            className="px-2 py-1 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg transition-colors cursor-pointer text-[10px] font-bold flex items-center gap-1"
+                            title="Duyệt người dùng"
+                          >
+                            <UserCheck className="w-3.5 h-3.5" />
+                            Duyệt
+                          </button>
+                        )}
                         <button
                           onClick={() => handleOpenEdit(user)}
                           className="p-1.5 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
