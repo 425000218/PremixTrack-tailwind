@@ -7,7 +7,6 @@ import {
   Truck,
   Database,
   Sparkles,
-  RefreshCw,
   Globe,
   X,
   ShieldCheck,
@@ -25,7 +24,6 @@ interface SidebarProps {
   setLanguage: (lang: Language) => void;
   criticalAlertsCount: number;
   factoriesCount?: number;
-  onResetData: () => void;
   isOpenMobile?: boolean;
   onCloseMobile?: () => void;
   isCollapsed?: boolean;
@@ -39,7 +37,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   setLanguage,
   criticalAlertsCount,
   factoriesCount = 22,
-  onResetData,
   isOpenMobile,
   onCloseMobile,
   isCollapsed = false,
@@ -246,33 +243,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
           {/* Quick Actions Row */}
           {!isCollapsed ? (
-            <div className="flex items-center justify-between px-1 text-xs text-slate-400">
-              <button
-                onClick={onResetData}
-                title="Khôi phục dữ liệu mẫu gốc"
-                className="flex items-center gap-1.5 hover:text-slate-200 transition-colors py-1 cursor-pointer"
-              >
-                <RefreshCw className="w-3.5 h-3.5" />
-                <span>Reset Dữ Liệu</span>
-              </button>
-
+            <div className="flex items-center justify-end px-1 text-xs text-slate-400">
               <button
                 onClick={() => setLanguage(language === 'vi' ? 'en' : 'vi')}
-                className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 px-2 py-1 rounded-md border border-slate-700 transition-colors font-medium cursor-pointer"
+                className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 px-2.5 py-1 rounded-md border border-slate-700 transition-colors font-medium cursor-pointer"
               >
-                <Globe className="w-3 h-3 text-blue-400" />
-                <span>{language.toUpperCase()}</span>
+                <Globe className="w-3.5 h-3.5 text-blue-400" />
+                <span>{language === 'vi' ? 'VI (Tiếng Việt)' : 'EN (English)'}</span>
               </button>
             </div>
           ) : (
             <div className="flex flex-col gap-2 w-full items-center">
-              <button
-                onClick={onResetData}
-                title="Khôi phục dữ liệu mẫu gốc"
-                className="p-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
-              >
-                <RefreshCw className="w-4 h-4" />
-              </button>
               <button
                 onClick={() => setLanguage(language === 'vi' ? 'en' : 'vi')}
                 title={`Đổi ngôn ngữ: ${language.toUpperCase()}`}

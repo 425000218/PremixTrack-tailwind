@@ -499,22 +499,6 @@ export function App() {
     showToast(`Đã nhập kho thành công ${receivedQty.toLocaleString()} kg vào tồn kho SOH!`);
   };
 
-  const handleResetData = () => {
-    if (window.confirm('Khôi phục toàn bộ dữ liệu về trạng thái mẫu ban đầu?')) {
-      setFactories(mockFactories);
-      setMaterials(mockMaterials);
-      setSuppliers(mockSuppliers);
-      setForecastDetails(mockForecastDetails);
-      setInventorySOH(mockInventorySOH);
-      setPOHeaders(mockPOHeaders);
-      setPODetails(mockPODetails);
-      setInboundSchedules(mockInboundSchedules);
-      setUsageLogs(mockUsageLogs);
-      setLearnedMappings(mockInitialMappings);
-      showToast('Đã khôi phục dữ liệu mẫu gốc hoàn tất!');
-    }
-  };
-
   // --------------------------------------------------------------------------
   // Master Data Update & Delete Handlers with SQL Server Sync
   // --------------------------------------------------------------------------
@@ -621,7 +605,6 @@ export function App() {
         setLanguage={setLanguage}
         criticalAlertsCount={criticalAlertsCount}
         factoriesCount={factories.length}
-        onResetData={handleResetData}
         isOpenMobile={isMobileSidebarOpen}
         onCloseMobile={() => setIsMobileSidebarOpen(false)}
         isCollapsed={isDesktopSidebarCollapsed}
