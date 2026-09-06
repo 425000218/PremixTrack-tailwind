@@ -5,7 +5,8 @@ import { executeQuery } from '../db/queryHelper';
 import { authenticateJWT, requireAdmin } from '../middleware/authMiddleware';
 
 const router = Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback_super_secret_key_123';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) throw new Error('JWT_SECRET is required');
 
 // -- USER AUTHENTICATION & LOGIN GATE (dbo.sys_User_Account) ------------------
 router.post('/auth/login', async (req, res) => {
@@ -16,7 +17,7 @@ router.post('/auth/login', async (req, res) => {
     }
 
     const result = await executeQuery(
-      'SELECT UserID, Username, PasswordHash, PlainPasswordPreview, FullName, Email, Phone, Department, Role, FactoryAccess, IsActive FROM dbo.sys_User_Account WHERE LOWER(Username) = LOWER(@Username)',
+      'SELECT UserID, Username, PasswordHash, FullName, Email, Phone, Department, Role, FactoryAccess, IsActive FROM dbo.sys_User_Account WHERE LOWER(Username) = LOWER(@Username)',
       { Username: username.trim().toLowerCase() }
     );
 
@@ -33,11 +34,6 @@ router.post('/auth/login', async (req, res) => {
     let isMatch = false;
     if (dbUser.PasswordHash) {
       isMatch = await bcrypt.compare(password, dbUser.PasswordHash);
-    }
-    // Fallback logic for legacy unhashed passwords or admin backdoor during dev
-    if (!isMatch) {
-      isMatch = (dbUser.PlainPasswordPreview && dbUser.PlainPasswordPreview === password) ||
-                (password === 'admin@123' && dbUser.Username === 'admin');
     }
 
     if (!isMatch) {
@@ -98,7 +94,7 @@ router.post('/auth/login', async (req, res) => {
 // -- USER MANAGEMENT & PERMISSIONS APIS (dbo.sys_User_Account) ----------------
 router.get('/users', authenticateJWT, requireAdmin, async (req, res) => {
   const result = await executeQuery(
-    'SELECT UserID, Username, FullName, Email, Phone, Department, Role, PlainPasswordPreview, FactoryAccess, IsActive, CreatedAt, UpdatedAt FROM dbo.sys_User_Account ORDER BY UserID'
+    'SELECT UserID, Username, FullName, Email, Phone, Department, Role, FactoryAccess, IsActive, CreatedAt, UpdatedAt FROM dbo.sys_User_Account ORDER BY UserID'
   );
   if (result.success && result.data.length > 0) {
     return res.json({ success: true, source: 'MSSQL', data: result.data });
@@ -115,13 +111,12 @@ router.post('/users', authenticateJWT, requireAdmin, async (req, res) => {
     const hashedPass = await bcrypt.hash(plainPass, 10);
 
     const result = await executeQuery(
-      `INSERT INTO dbo.sys_User_Account (UserID, Username, PasswordHash, PlainPasswordPreview, FullName, Email, Phone, Department, Role, FactoryAccess, IsActive, CreatedAt, UpdatedAt)
-       VALUES (@UserID, @Username, @PasswordHash, @PlainPasswordPreview, @FullName, @Email, @Phone, @Department, @Role, @FactoryAccess, @IsActive, SYSDATETIME(), SYSDATETIME())`,
+      `INSERT INTO dbo.sys_User_Account (UserID, Username, PasswordHash, FullName, Email, Phone, Department, Role, FactoryAccess, IsActive, CreatedAt, UpdatedAt)
+       VALUES (@UserID, @Username, @PasswordHash, @FullName, @Email, @Phone, @Department, @Role, @FactoryAccess, @IsActive, SYSDATETIME(), SYSDATETIME())`,
       {
         UserID: newId,
         Username: Username.trim().toLowerCase(),
         PasswordHash: hashedPass,
-        PlainPasswordPreview: plainPass,
         FullName: FullName.trim(),
         Email: Email.trim(),
         Phone: Phone || '',
@@ -155,8 +150,7 @@ router.put('/users/:id', authenticateJWT, requireAdmin, async (req, res) => {
     };
 
     if (Password) {
-      updatePasswordSql = ', PlainPasswordPreview = @PlainPasswordPreview, PasswordHash = @PasswordHash';
-      params.PlainPasswordPreview = Password;
+      updatePasswordSql = ', PasswordHash = @PasswordHash';
       params.PasswordHash = await bcrypt.hash(Password, 10);
     }
 

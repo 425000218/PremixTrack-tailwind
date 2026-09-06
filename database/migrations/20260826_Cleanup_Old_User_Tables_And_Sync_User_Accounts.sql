@@ -22,7 +22,6 @@ BEGIN
         UserID                NVARCHAR(50)   NOT NULL,
         Username              NVARCHAR(100)  NOT NULL,
         PasswordHash          NVARCHAR(255)  NOT NULL,
-        PlainPasswordPreview  NVARCHAR(100)  NULL, -- Cho phép Admin xem/sửa mật khẩu trực quan
         FullName              NVARCHAR(200)  NOT NULL,
         Email                 NVARCHAR(200)  NOT NULL,
         Phone                 NVARCHAR(50)   NULL,
@@ -40,9 +39,6 @@ END
 ELSE
 BEGIN
     -- Bổ sung cột nếu thiếu
-    IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(N'dbo.sys_User_Account') AND name = N'PlainPasswordPreview')
-        ALTER TABLE dbo.sys_User_Account ADD PlainPasswordPreview NVARCHAR(100) NULL;
-
     IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(N'dbo.sys_User_Account') AND name = N'Phone')
         ALTER TABLE dbo.sys_User_Account ADD Phone NVARCHAR(50) NULL;
 
@@ -59,15 +55,15 @@ GO
 -- 3. Nạp và đồng bộ 5 tài khoản người dùng theo các vai trò phân quyền
 MERGE INTO dbo.sys_User_Account AS Target
 USING (VALUES
-    (N'USR-001', N'admin', N'$2a$12$eXampleHashedPasswordForAdmin..', N'admin@123', N'Nam Đặng', N'nam.dang@premixtrack.vn', N'0378 047 778', N'Ban Giám Đốc & Quản Trị Hệ Thống', N'admin', N'["ALL"]', 1),
-    (N'USR-002', N'scm_lead', N'$2a$12$eXampleHashedPasswordForSCM..', N'scm@123', N'Lê Hoàng Nam', N'nam.le@premixtrack.vn', N'0903 112 233', N'Phòng Kế Hoạch Chuỗi Cung Ứng & S&OP', N'planner', N'["ALL"]', 1),
-    (N'USR-003', N'planner_dbd', N'$2a$12$eXampleHashedPasswordForPlanner..', N'planner@123', N'Trần Thị Thu Hà', N'ha.tran@premixtrack.vn', N'0988 765 432', N'Bộ Phận Kỹ Thuật & Kế Hoạch Sản Xuất DBD', N'factory_manager', N'["FAC-DBD","FAC-DDN"]', 1),
-    (N'USR-004', N'logistics_lead', N'$2a$12$eXampleHashedPasswordForLogistics..', N'logistics@123', N'Phạm Đức Thắng', N'thang.pham@premixtrack.vn', N'0977 889 900', N'Bộ Phận Logistics Cảng & Kho Vận', N'buyer', N'["ALL"]', 1),
-    (N'USR-005', N'viewer_auditor', N'$2a$12$eXampleHashedPasswordForViewer..', N'viewer@123', N'Đỗ Hoài An', N'an.do@premixtrack.vn', N'0934 556 778', N'Ban Kiểm Soát Nội Bộ & QA', N'viewer', N'["ALL"]', 1)
-) AS Source (UserID, Username, PasswordHash, PlainPasswordPreview, FullName, Email, Phone, Department, Role, FactoryAccess, IsActive)
+    (N'USR-001', N'admin', N'$2a$12$eXampleHashedPasswordForAdmin..', N'Nam Đặng', N'nam.dang@premixtrack.vn', N'0378 047 778', N'Ban Giám Đốc & Quản Trị Hệ Thống', N'admin', N'["ALL"]', 1),
+    (N'USR-002', N'scm_lead', N'$2a$12$eXampleHashedPasswordForSCM..', N'Lê Hoàng Nam', N'nam.le@premixtrack.vn', N'0903 112 233', N'Phòng Kế Hoạch Chuỗi Cung Ứng & S&OP', N'planner', N'["ALL"]', 1),
+    (N'USR-003', N'planner_dbd', N'$2a$12$eXampleHashedPasswordForPlanner..', N'Trần Thị Thu Hà', N'ha.tran@premixtrack.vn', N'0988 765 432', N'Bộ Phận Kỹ Thuật & Kế Hoạch Sản Xuất DBD', N'factory_manager', N'["FAC-DBD","FAC-DDN"]', 1),
+    (N'USR-004', N'logistics_lead', N'$2a$12$eXampleHashedPasswordForLogistics..', N'Phạm Đức Thắng', N'thang.pham@premixtrack.vn', N'0977 889 900', N'Bộ Phận Logistics Cảng & Kho Vận', N'buyer', N'["ALL"]', 1),
+    (N'USR-005', N'viewer_auditor', N'$2a$12$eXampleHashedPasswordForViewer..', N'Đỗ Hoài An', N'an.do@premixtrack.vn', N'0934 556 778', N'Ban Kiểm Soát Nội Bộ & QA', N'viewer', N'["ALL"]', 1)
+) AS Source (UserID, Username, PasswordHash, FullName, Email, Phone, Department, Role, FactoryAccess, IsActive)
 ON Target.UserID = Source.UserID OR Target.Username = Source.Username
 WHEN NOT MATCHED THEN
-    INSERT (UserID, Username, PasswordHash, PlainPasswordPreview, FullName, Email, Phone, Department, Role, FactoryAccess, IsActive, CreatedAt, UpdatedAt)
-    VALUES (Source.UserID, Source.Username, Source.PasswordHash, Source.PlainPasswordPreview, Source.FullName, Source.Email, Source.Phone, Source.Department, Source.Role, Source.FactoryAccess, Source.IsActive, SYSDATETIME(), SYSDATETIME());
+    INSERT (UserID, Username, PasswordHash, FullName, Email, Phone, Department, Role, FactoryAccess, IsActive, CreatedAt, UpdatedAt)
+    VALUES (Source.UserID, Source.Username, Source.PasswordHash, Source.FullName, Source.Email, Source.Phone, Source.Department, Source.Role, Source.FactoryAccess, Source.IsActive, SYSDATETIME(), SYSDATETIME());
 PRINT N'>>> Đã đồng bộ thành công các tài khoản người dùng vào dbo.sys_User_Account';
 GO

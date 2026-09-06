@@ -206,7 +206,6 @@ CREATE TABLE dbo.sys_User_Account (
     UserID                NVARCHAR(50)   NOT NULL,
     Username              NVARCHAR(100)  NOT NULL,
     PasswordHash          NVARCHAR(255)  NOT NULL,
-    PlainPasswordPreview  NVARCHAR(100)  NULL,
     FullName              NVARCHAR(200)  NOT NULL,
     Email                 NVARCHAR(200)  NOT NULL,
     Phone                 NVARCHAR(50)   NULL,

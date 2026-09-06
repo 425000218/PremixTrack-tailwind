@@ -85,7 +85,7 @@ Yêu cầu phân tích:
 Chế độ: ${mode || 'POSITION_SCM_ANALYSIS'}
 Câu hỏi / Yêu cầu cụ thể: ${prompt || 'Hãy phân tích chi tiết Ma trận Vị thế Cung ứng (Position Matrix) ngày 25/08/2026, chỉ rõ các nhà máy đang có nguy cơ cạn hàng khẩn cấp và đề xuất kế hoạch điều phối nội bộ cũng như xả tồn kho hiệu quả nhất.'}`;
 
-  const candidateModels = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+  const candidateModels = ['gemini-2.5-flash', 'gemini-2.0-flash'];
   let lastErr: any = null;
 
   for (const m of candidateModels) {
