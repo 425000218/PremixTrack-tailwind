@@ -12,7 +12,6 @@ import {
   Fact_PO_Detail,
   Fact_Inbound_Schedule,
   Fact_Production_Usage,
-  Formula_BOM,
   Sys_Import_Mapping,
   Fact_Position_Snapshot,
 } from '../types';
@@ -28,7 +27,6 @@ import {
   mockPODetails,
   mockInboundSchedules,
   mockUsageLogs,
-  mockFormulas,
   mockInitialMappings,
   mockPositionSnapshots,
 } from '../data/mockData';
@@ -40,7 +38,6 @@ export interface BootstrapData {
   materials: Dim_Material[];
   suppliers: Dim_Supplier[];
   substitutions: Dim_Material_Substitution[];
-  formulas: Formula_BOM[];
   mappings: Sys_Import_Mapping[];
   forecastVersions: ForecastRunVersion[];
   forecastDetails: Fact_Forecast_Detail[];
@@ -72,7 +69,6 @@ export async function loadAllBootstrapData(): Promise<BootstrapData> {
         materials: hasRealMaterials ? d.materials : mockMaterials,
         suppliers: hasRealMaterials && d.suppliers.length > 0 ? d.suppliers : mockSuppliers,
         substitutions: hasRealMaterials && d.substitutions.length > 0 ? d.substitutions : [],
-        formulas: hasRealMaterials && d.formulas.length > 0 ? d.formulas : mockFormulas,
         mappings: hasRealMaterials && d.mappings.length > 0 ? d.mappings : mockInitialMappings,
         forecastVersions: Array.isArray(d.forecastVersions) && d.forecastVersions.length > 0 ? d.forecastVersions : initialForecastVersions,
         forecastDetails: Array.isArray(d.forecastDetails) && d.forecastDetails.length > 0 ? d.forecastDetails : mockForecastDetails,
@@ -96,7 +92,6 @@ export async function loadAllBootstrapData(): Promise<BootstrapData> {
     materials: mockMaterials,
     suppliers: mockSuppliers,
     substitutions: [],
-    formulas: mockFormulas,
     mappings: mockInitialMappings,
     forecastVersions: initialForecastVersions,
     forecastDetails: mockForecastDetails,

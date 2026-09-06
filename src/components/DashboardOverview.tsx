@@ -27,7 +27,6 @@ import {
   Dim_Factory,
   Dim_Material,
   Fact_Inbound_Schedule,
-  InterFactoryTransferSuggestion,
   Language,
 } from '../types';
 import { DashboardFactorySlicer } from './DashboardFactorySlicer';
@@ -37,7 +36,6 @@ interface DashboardOverviewProps {
   factories: Dim_Factory[];
   materials: Dim_Material[];
   inboundSchedules: Fact_Inbound_Schedule[];
-  transferSuggestions: InterFactoryTransferSuggestion[];
   selectedFactoryId?: string;
   selectedFactoryIds?: string[];
   onSelectFactory?: (id: string) => void;
@@ -51,7 +49,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   factories,
   materials,
   inboundSchedules,
-  transferSuggestions,
   selectedFactoryId = 'ALL',
   selectedFactoryIds,
   onSelectFactory,
@@ -285,7 +282,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           </div>
         </div>
 
-        {/* HUD Card 4: Inter-Factory Transfer & Fleet */}
+        {/* HUD Card 4: Inbound Logistics & Fleet */}
         <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs flex flex-col justify-between group hover:border-slate-300 transition-all">
           <div className="flex items-start justify-between">
             <div>
@@ -295,9 +292,9 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               </span>
               <div className="mt-2 flex items-baseline gap-2">
                 <span className="text-3xl font-black tracking-tight font-mono tabular-nums text-slate-900">
-                  {transferSuggestions.length}
+                  {stats.activeTrucksCount}
                 </span>
-                <span className="text-xs font-semibold text-slate-500">Tuyến Đề Xuất</span>
+                <span className="text-xs font-semibold text-slate-500">Chuyến Xe Đến</span>
               </div>
             </div>
             <span className="p-2 rounded-xl bg-amber-50 text-amber-600 border border-amber-100">
@@ -307,13 +304,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
           <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
             <span className="text-slate-500 font-mono">
-              Inbound: <strong className="text-slate-800">{stats.activeTrucksCount} xe tải</strong>
+              Đang giao: <strong className="text-slate-800">{inboundSchedules.filter(s => s.Status === 'In_Transit' || s.Status === 'Scheduled').length} chuyến</strong>
             </span>
             <button
-              onClick={() => onNavigateTab('transfers')}
+              onClick={() => onNavigateTab('logistics')}
               className="text-blue-600 font-bold hover:underline flex items-center gap-0.5 cursor-pointer"
             >
-              Lộ trình <ArrowUpRight className="w-3.5 h-3.5" />
+              Lịch giao hàng <ArrowUpRight className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
@@ -545,90 +542,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         </div>
       </div>
 
-      {/* ── 3. FLOATING BUBBLES DOCK (BÊN PHẢI MÀN HÌNH - TỰ ĐỘNG ẨN KHI CÓ MODAL/POPUP/DRAWER) ── */}
+      {/* ── 3. FLOATING AI BUBBLE (BÊN PHẢI MÀN HÌNH - TỰ ĐỘNG ẨN KHI CÓ MODAL/POPUP/DRAWER) ── */}
       {!isModalOpen && (
         <div className="fixed bottom-5 right-5 z-20 flex flex-col items-end gap-2.5 pointer-events-none transition-all duration-200">
           
-          {/* Floating Bubble Popover: ĐỀ XUẤT ĐIỀU PHỐI */}
-          {activeBubble === 'TRANSFERS' && (
-            <div className="pointer-events-auto w-80 sm:w-96 bg-white/95 backdrop-blur-xl rounded-2xl border border-slate-200 shadow-2xl p-5 mb-2 animate-in fade-in slide-in-from-bottom-5 duration-200 space-y-3">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                <div className="flex items-center gap-2">
-                  <span className="p-1.5 bg-amber-100 text-amber-700 rounded-lg">
-                    <Zap className="w-4 h-4" />
-                  </span>
-                  <div>
-                    <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wide">
-                      Đề Xuất Điều Phối Nội Bộ
-                    </h4>
-                    <span className="text-[10px] text-slate-400 font-mono">
-                      {transferSuggestions.length} Tuyến Đề Xuất
-                    </span>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setActiveBubble('NONE')}
-                  className="p-1 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 cursor-pointer"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-
-              <div className="max-h-64 overflow-y-auto space-y-2.5 pr-1">
-                {transferSuggestions.slice(0, 5).map((sug, i) => (
-                  <div
-                    key={i}
-                    className="p-2.5 bg-slate-50 rounded-xl border border-slate-100 hover:border-slate-200 transition-colors text-xs flex items-center justify-between gap-2"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <div className="font-mono font-bold text-slate-900 flex items-center gap-1.5 text-xs">
-                        <span className="bg-white px-1.5 py-0.5 rounded border border-slate-200">{sug.SourceFactoryCode}</span>
-                        <span className="text-slate-400">→</span>
-                        <span className="bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded border border-blue-100">{sug.TargetFactoryCode}</span>
-                      </div>
-                      <div className="text-[11px] text-slate-700 font-semibold truncate mt-1">
-                        {sug.MaterialName}
-                      </div>
-                      <div className="text-[10px] text-slate-400 font-mono mt-0.5">
-                        Khối lượng: <strong className="text-slate-800">{Number(sug.RecommendedTransferKg).toLocaleString()} kg</strong>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={() => {
-                        setActiveBubble('NONE');
-                        onNavigateTab('transfers');
-                      }}
-                      className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded-lg text-[10px] shadow-xs transition-colors shrink-0 cursor-pointer"
-                    >
-                      XỬ LÝ
-                    </button>
-                  </div>
-                ))}
-
-                {transferSuggestions.length === 0 && (
-                  <p className="text-xs text-slate-400 italic text-center py-6">
-                    Hiện chưa có đề xuất điều chuyển nào cần xử lý.
-                  </p>
-                )}
-              </div>
-
-              <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
-                <span className="text-[11px] text-slate-500">Tự động cân bằng tồn kho</span>
-                <button
-                  onClick={() => {
-                    setActiveBubble('NONE');
-                    onNavigateTab('transfers');
-                  }}
-                  className="text-blue-600 font-bold hover:underline flex items-center gap-0.5 cursor-pointer text-xs"
-                >
-                  <span>Mở Toàn Bộ Tuyến</span>
-                  <ChevronRight className="w-3 h-3" />
-                </button>
-              </div>
-            </div>
-          )}
-
           {/* Floating Bubble Popover: TRỢ LÝ AI CHUỖI CUNG ỨNG */}
           {activeBubble === 'AI' && (
             <div className="pointer-events-auto w-80 sm:w-96 bg-white/95 backdrop-blur-xl rounded-2xl border border-slate-200 shadow-2xl p-5 mb-2 animate-in fade-in slide-in-from-bottom-5 duration-200 space-y-3">
@@ -655,7 +572,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               </div>
 
               <p className="text-xs text-slate-600 leading-relaxed">
-                Trợ lý AI sẵn sàng phân tích nhanh các điểm nghẽn chuỗi cung ứng, dự báo nhu cầu nguyên liệu và đề xuất phương án điều chuyển tối ưu chi phí.
+                Trợ lý AI sẵn sàng phân tích nhanh các điểm nghẽn chuỗi cung ứng, dự báo nhu cầu nguyên liệu và đề xuất phương án điều phối tối ưu chi phí.
               </p>
 
               <button
@@ -671,29 +588,12 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             </div>
           )}
 
-          {/* Ultra-Compact Floating Action Bubbles (Bottom Right) */}
-          <div className="pointer-events-auto flex items-center gap-1 bg-slate-900/90 backdrop-blur-xl p-1 rounded-full border border-slate-800 shadow-xl">
-            
-            {/* Mini Bubble 1: Đề Xuất Điều Phối */}
-            <button
-              onClick={() => setActiveBubble(prev => prev === 'TRANSFERS' ? 'NONE' : 'TRANSFERS')}
-              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
-                activeBubble === 'TRANSFERS'
-                  ? 'bg-amber-500 text-slate-950 shadow-md'
-                  : 'text-amber-400 hover:bg-slate-800'
-              }`}
-              title={`Xem ${transferSuggestions.length} đề xuất điều chuyển`}
-            >
-              <Zap className="w-3.5 h-3.5 fill-current" />
-              <span className="text-[11px] font-mono">{transferSuggestions.length}</span>
-            </button>
-
-            <div className="w-px h-3.5 bg-slate-700/80" />
-
-            {/* Mini Bubble 2: Trợ Lý AI */}
+          {/* Ultra-Compact Floating Action Bubble (Bottom Right) */}
+          <div className="pointer-events-auto flex items-center bg-slate-900/90 backdrop-blur-xl p-1 rounded-full border border-slate-800 shadow-xl">
+            {/* Mini Bubble: Trợ Lý AI */}
             <button
               onClick={() => setActiveBubble(prev => prev === 'AI' ? 'NONE' : 'AI')}
-              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
                 activeBubble === 'AI'
                   ? 'bg-blue-600 text-white shadow-md'
                   : 'text-blue-400 hover:bg-slate-800'
@@ -701,9 +601,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               title="Mở Trợ lý AI Advisor"
             >
               <Sparkles className="w-3.5 h-3.5" />
-              <span className="text-[11px]">AI</span>
+              <span className="text-[11px]">Trợ Lý AI</span>
             </button>
-
           </div>
 
         </div>

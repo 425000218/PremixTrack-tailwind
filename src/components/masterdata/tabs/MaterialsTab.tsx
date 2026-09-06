@@ -28,7 +28,6 @@ import {
   Fact_Forecast_Detail,
   Fact_Production_Usage,
   Fact_PO_Detail,
-  Formula_BOM,
   SubstitutionType,
 } from '../../../types';
 import {
@@ -720,7 +719,6 @@ export interface MaterialsTabProps {
   forecastDetails?: Fact_Forecast_Detail[];
   usageLogs?: Fact_Production_Usage[];
   poDetails?: Fact_PO_Detail[];
-  formulas?: Formula_BOM[];
   onUpdateMaterials: (updated: Dim_Material[]) => void;
   onDeleteMaterial?: (materialId: string) => void;
   onUpdateSubstitutions?: (updated: Dim_Material_Substitution[]) => void;
@@ -735,7 +733,6 @@ export const MaterialsTab: React.FC<MaterialsTabProps> = ({
   forecastDetails,
   usageLogs,
   poDetails,
-  formulas,
   onUpdateMaterials,
   onDeleteMaterial,
   onUpdateSubstitutions,
@@ -759,9 +756,6 @@ export const MaterialsTab: React.FC<MaterialsTabProps> = ({
     const sohCount = (inventorySOH || []).filter((s) => matchMat(s.MaterialID)).length;
     const fcCount = (forecastDetails || []).filter((f) => matchMat(f.MaterialID)).length;
     const usageCount = (usageLogs || []).filter((u) => matchMat(u.MaterialID)).length;
-    const bomCount = (formulas || []).filter((b) =>
-      (b.Items || []).some((item) => matchMat(item.MaterialID))
-    ).length;
     const poCount = (poDetails || []).filter((p) => matchMat(p.MaterialID)).length;
     const subCount = (substitutions || []).filter(
       (s) => s.OriginalMaterialCode === matCode || s.SubstituteMaterialCode === matCode
@@ -770,7 +764,6 @@ export const MaterialsTab: React.FC<MaterialsTabProps> = ({
     const reasons: string[] = [];
     if (sohCount > 0) reasons.push(`${sohCount} bản ghi Tồn kho thực tế (SOH) tại các nhà máy`);
     if (fcCount > 0) reasons.push(`${fcCount} dòng Dự báo nhu cầu kế hoạch (Forecast)`);
-    if (bomCount > 0) reasons.push(`${bomCount} Công thức sản xuất (Formula BOM) đang sử dụng`);
     if (usageCount > 0) reasons.push(`${usageCount} nhật ký Tiêu hao sản xuất (Usage Logs)`);
     if (poCount > 0) reasons.push(`${poCount} Đơn đặt hàng mua (PO Details)`);
     if (subCount > 0)

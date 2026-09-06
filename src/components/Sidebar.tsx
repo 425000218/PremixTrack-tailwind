@@ -24,7 +24,6 @@ interface SidebarProps {
   language: Language;
   setLanguage: (lang: Language) => void;
   criticalAlertsCount: number;
-  transferSuggestionsCount: number;
   factoriesCount?: number;
   onResetData: () => void;
   isOpenMobile?: boolean;
@@ -39,7 +38,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   language,
   setLanguage,
   criticalAlertsCount,
-  transferSuggestionsCount,
   factoriesCount = 22,
   onResetData,
   isOpenMobile,
@@ -57,18 +55,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       badgeColor: 'bg-red-500 text-white',
     },
     {
-      id: 'forecast',
-      label_VN: 'Dự Báo Forecast (RD)',
-      label_EN: 'RD Forecast Matrix',
-      icon: TrendingUp,
-    },
-    {
-      id: 'matrix',
-      label_VN: 'Tồn Kho & Chỉ Số DOI',
-      label_EN: 'Stock & DOI Matrix',
-      icon: Layers,
-    },
-    {
       id: 'position-matrix',
       label_VN: 'Vị Thế Cung Ứng (Position)',
       label_EN: 'Supply Position Matrix',
@@ -77,18 +63,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
       badgeColor: 'bg-emerald-500 text-slate-950 font-bold',
     },
     {
-      id: 'transfers',
-      label_VN: 'Điều Chuyển Nội Bộ',
-      label_EN: 'Inter-Factory Transfer',
-      icon: ArrowLeftRight,
-      badge: transferSuggestionsCount > 0 ? transferSuggestionsCount : undefined,
-      badgeColor: 'bg-amber-500 text-slate-950 font-bold',
+      id: 'matrix',
+      label_VN: 'Tồn Kho & Chỉ Số DOI',
+      label_EN: 'Stock & DOI Matrix',
+      icon: Layers,
     },
     {
-      id: 'formula',
-      label_VN: 'Công Thức & Mô Phỏng MRP',
-      label_EN: 'Premix Formula & MRP',
-      icon: Package,
+      id: 'forecast',
+      label_VN: 'Dự Báo Forecast (RD)',
+      label_EN: 'RD Forecast Matrix',
+      icon: TrendingUp,
     },
     {
       id: 'logistics',

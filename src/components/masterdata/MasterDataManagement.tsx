@@ -24,7 +24,6 @@ export const MasterDataManagement: React.FC<MasterDataManagementProps> = ({
   factories,
   materials,
   suppliers,
-  formulas = [],
   substitutions = [],
   learnedMappings,
   inventorySOH = [],
@@ -137,7 +136,6 @@ export const MasterDataManagement: React.FC<MasterDataManagementProps> = ({
           forecastDetails={forecastDetails}
           usageLogs={usageLogs}
           poDetails={poDetails}
-          formulas={formulas}
           onUpdateMaterials={onUpdateMaterials}
           onDeleteMaterial={onDeleteMaterial}
           onUpdateSubstitutions={onUpdateSubstitutions}

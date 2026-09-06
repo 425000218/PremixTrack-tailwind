@@ -5,7 +5,6 @@ import {
   Dim_Material,
   Dim_Material_Substitution,
   Dim_PIC,
-  Formula_BOM,
 } from '../types';
 
 export const initialRegions: Dim_Region[] = [
@@ -1241,90 +1240,7 @@ export const initialMaterials: Dim_Material[] = [
 ];
 
 
-export const initialFormulas: Formula_BOM[] = [
-  {
-    FormulaID: 'BOM-PIGLET-4%',
-    FormulaCode: 'PRM-PIG-401',
-    FormulaName: 'Premix Heo Con Siêu Đậm Đặc 4% (Piglet Starter Premix)',
-    TargetSpecies: 'Heo con (Piglet)',
-    PremixInclusionRateInFeed: 4.0, // 40kg premix per 1000kg finished feed
-    StandardBatchSizeKg: 1000,
-    EffectiveDate: '2026-07-01',
-    Status: 'Active',
-    Items: [
-      { MaterialID: 'MAT-02', QtyKgPerTonPremix: 280, InclusionPercent: 28.0 }, // L-Lysine
-      { MaterialID: 'MAT-01', QtyKgPerTonPremix: 150, InclusionPercent: 15.0 }, // DL-Methionine
-      { MaterialID: 'MAT-03', QtyKgPerTonPremix: 110, InclusionPercent: 11.0 }, // L-Threonine
-      { MaterialID: 'MAT-13', QtyKgPerTonPremix: 25, InclusionPercent: 2.5 },  // L-Tryptophan
-      { MaterialID: 'MAT-04', QtyKgPerTonPremix: 80, InclusionPercent: 8.0 },  // Choline Chloride
-      { MaterialID: 'MAT-06', QtyKgPerTonPremix: 35, InclusionPercent: 3.5 },  // Vitamin AD3E New
-      { MaterialID: 'MAT-07', QtyKgPerTonPremix: 20, InclusionPercent: 2.0 },  // Vitamin C
-      { MaterialID: 'MAT-08', QtyKgPerTonPremix: 15, InclusionPercent: 1.5 },  // Phytase
-      { MaterialID: 'MAT-10', QtyKgPerTonPremix: 65, InclusionPercent: 6.5 },  // Zinc Oxide 75%
-      { MaterialID: 'MAT-12', QtyKgPerTonPremix: 40, InclusionPercent: 4.0 },  // Toxin Binder
-      { MaterialID: 'MAT-15', QtyKgPerTonPremix: 180, InclusionPercent: 18.0 }, // Carrier CaCO3
-    ]
-  },
-  {
-    FormulaID: 'BOM-BROILER-2.5%',
-    FormulaCode: 'PRM-BRO-251',
-    FormulaName: 'Premix Gà Thịt Xuất Chuồng 2.5% (Broiler Finisher Premix)',
-    TargetSpecies: 'Gà thịt (Broiler)',
-    PremixInclusionRateInFeed: 2.5, // 25kg premix per 1000kg finished feed
-    StandardBatchSizeKg: 1000,
-    EffectiveDate: '2026-06-15',
-    Status: 'Active',
-    Items: [
-      { MaterialID: 'MAT-01', QtyKgPerTonPremix: 310, InclusionPercent: 31.0 }, // DL-Methionine
-      { MaterialID: 'MAT-02', QtyKgPerTonPremix: 240, InclusionPercent: 24.0 }, // L-Lysine
-      { MaterialID: 'MAT-03', QtyKgPerTonPremix: 95, InclusionPercent: 9.5 },   // L-Threonine
-      { MaterialID: 'MAT-04', QtyKgPerTonPremix: 110, InclusionPercent: 11.0 }, // Choline Chloride
-      { MaterialID: 'MAT-06', QtyKgPerTonPremix: 25, InclusionPercent: 2.5 },  // Vitamin AD3E
-      { MaterialID: 'MAT-08', QtyKgPerTonPremix: 20, InclusionPercent: 2.0 },  // Phytase
-      { MaterialID: 'MAT-11', QtyKgPerTonPremix: 15, InclusionPercent: 1.5 },  // Copper Sulfate
-      { MaterialID: 'MAT-14', QtyKgPerTonPremix: 5, InclusionPercent: 0.5 },   // Organic Selenium
-      { MaterialID: 'MAT-15', QtyKgPerTonPremix: 180, InclusionPercent: 18.0 }, // Carrier
-    ]
-  },
-  {
-    FormulaID: 'BOM-SWINE-1%',
-    FormulaCode: 'PRM-SWN-101',
-    FormulaName: 'Premix Heo Thịt Tăng Trọng 1% (Swine Grower Premix)',
-    TargetSpecies: 'Heo thịt (Swine)',
-    PremixInclusionRateInFeed: 1.0, // 10kg premix per 1000kg finished feed
-    StandardBatchSizeKg: 1000,
-    EffectiveDate: '2026-07-20',
-    Status: 'Active',
-    Items: [
-      { MaterialID: 'MAT-02', QtyKgPerTonPremix: 380, InclusionPercent: 38.0 }, // L-Lysine
-      { MaterialID: 'MAT-03', QtyKgPerTonPremix: 140, InclusionPercent: 14.0 }, // L-Threonine
-      { MaterialID: 'MAT-01', QtyKgPerTonPremix: 80, InclusionPercent: 8.0 },   // DL-Methionine
-      { MaterialID: 'MAT-04', QtyKgPerTonPremix: 90, InclusionPercent: 9.0 },   // Choline Chloride
-      { MaterialID: 'MAT-06', QtyKgPerTonPremix: 20, InclusionPercent: 2.0 },  // Vitamin AD3E
-      { MaterialID: 'MAT-08', QtyKgPerTonPremix: 20, InclusionPercent: 2.0 },  // Phytase
-      { MaterialID: 'MAT-15', QtyKgPerTonPremix: 270, InclusionPercent: 27.0 }, // Carrier
-    ]
-  },
-  {
-    FormulaID: 'BOM-AQUA-0.5%',
-    FormulaCode: 'PRM-AQU-051',
-    FormulaName: 'Premix Cá Tra & Rô Phi Kháng Bệnh 0.5% (Aquaculture Premix)',
-    TargetSpecies: 'Cá tra (Pangasius)',
-    PremixInclusionRateInFeed: 0.5,
-    StandardBatchSizeKg: 1000,
-    EffectiveDate: '2026-08-01',
-    Status: 'Active',
-    Items: [
-      { MaterialID: 'MAT-07', QtyKgPerTonPremix: 250, InclusionPercent: 25.0 }, // Vitamin C 35%
-      { MaterialID: 'MAT-04', QtyKgPerTonPremix: 180, InclusionPercent: 18.0 }, // Choline Chloride
-      { MaterialID: 'MAT-01', QtyKgPerTonPremix: 120, InclusionPercent: 12.0 }, // DL-Methionine
-      { MaterialID: 'MAT-12', QtyKgPerTonPremix: 90, InclusionPercent: 9.0 },   // Toxin Binder
-      { MaterialID: 'MAT-14', QtyKgPerTonPremix: 10, InclusionPercent: 1.0 },   // Organic Selenium
-      { MaterialID: 'MAT-06', QtyKgPerTonPremix: 30, InclusionPercent: 3.0 },   // Vitamin AD3E
-      { MaterialID: 'MAT-15', QtyKgPerTonPremix: 320, InclusionPercent: 32.0 }, // Carrier
-    ]
-  }
-];
+
 
 // Aliases for convenient importing
 
@@ -1433,5 +1349,4 @@ export const mockMaterials = initialMaterials;
 export const mockSuppliers = initialSuppliers;
 export const mockPICs = initialPICs;
 export const mockRegions = initialRegions;
-export const mockFormulas = initialFormulas;
 export const mockSubstitutions = initialSubstitutions;

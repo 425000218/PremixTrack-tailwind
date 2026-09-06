@@ -20,7 +20,6 @@ import {
   Fact_Inbound_Schedule,
   Fact_PurchaseOrder,
   Fact_PO_Detail,
-  Formula_BOM,
 } from '../../types';
 import { extractMappedRowData } from '../../utils/excelParser';
 
@@ -37,7 +36,6 @@ export interface MasterDataManagementProps {
   factories: Dim_Factory[];
   materials: Dim_Material[];
   suppliers: Dim_Supplier[];
-  formulas?: Formula_BOM[];
   substitutions?: Dim_Material_Substitution[];
   learnedMappings: Sys_Import_Mapping[];
   inventorySOH?: Fact_Inventory_SOH[];

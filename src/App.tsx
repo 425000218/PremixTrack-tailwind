@@ -9,8 +9,6 @@ import { UserManagementModal } from './components/UserManagementModal';
 import { LoginGate } from './components/LoginGate';
 import { DashboardOverview } from './components/DashboardOverview';
 import { InventoryMatrix } from './components/InventoryMatrix';
-import { FormulaCalculator } from './components/FormulaCalculator';
-import { InterFactoryTransfers } from './components/InterFactoryTransfers';
 import { InboundLogistics } from './components/InboundLogistics';
 import { MasterDataManagement } from './components/MasterDataManagement';
 import { ForecastManagement } from './components/ForecastManagement';
@@ -29,7 +27,6 @@ import {
   mockPODetails,
   mockInboundSchedules,
   mockUsageLogs,
-  mockFormulas,
   mockInitialMappings,
   getRolePermissions,
 } from './data/mockData';
@@ -54,7 +51,6 @@ import {
 
 import {
   calculateAllMetrics,
-  generateTransferSuggestions,
 } from './utils/calculationEngine';
 
 import {
@@ -70,7 +66,6 @@ import {
   Fact_PO_Detail,
   Fact_Inbound_Schedule,
   Fact_Production_Usage,
-  Formula_BOM,
   Sys_Import_Mapping,
   AppUser,
   UserRole,
@@ -82,7 +77,6 @@ export function App() {
   const [factories, setFactories] = useState<Dim_Factory[]>(mockFactories);
   const [materials, setMaterials] = useState<Dim_Material[]>(mockMaterials);
   const [suppliers, setSuppliers] = useState<Dim_Supplier[]>(mockSuppliers);
-  const [formulas, setFormulas] = useState<Formula_BOM[]>(mockFormulas);
   const [substitutions, setSubstitutions] = useState<Dim_Material_Substitution[]>([]);
   const [learnedMappings, setLearnedMappings] = useState<Sys_Import_Mapping[]>(mockInitialMappings);
 
@@ -165,7 +159,6 @@ export function App() {
         if (bootstrap.materials.length > 0) setMaterials(bootstrap.materials);
         if (bootstrap.suppliers.length > 0) setSuppliers(bootstrap.suppliers);
         if (bootstrap.substitutions.length > 0) setSubstitutions(bootstrap.substitutions);
-        if (bootstrap.formulas.length > 0) setFormulas(bootstrap.formulas);
         if (bootstrap.mappings.length > 0) setLearnedMappings(bootstrap.mappings);
 
         if (bootstrap.forecastVersions.length > 0) setForecastVersions(bootstrap.forecastVersions);
@@ -304,11 +297,6 @@ export function App() {
       substitutions
     );
   }, [factories, materials, inventorySOH, forecastDetails, poDetails, usageLogs, substitutions]);
-
-  // Inter-Factory Transfer Suggestions computation
-  const transferSuggestions = useMemo(() => {
-    return generateTransferSuggestions(calculatedMetrics, factories, materials);
-  }, [calculatedMetrics, factories, materials]);
 
   // Critical Alerts Count
   const criticalAlertsCount = useMemo(() => {
@@ -516,7 +504,6 @@ export function App() {
       setFactories(mockFactories);
       setMaterials(mockMaterials);
       setSuppliers(mockSuppliers);
-      setFormulas(mockFormulas);
       setForecastDetails(mockForecastDetails);
       setInventorySOH(mockInventorySOH);
       setPOHeaders(mockPOHeaders);
@@ -633,7 +620,6 @@ export function App() {
         language={language}
         setLanguage={setLanguage}
         criticalAlertsCount={criticalAlertsCount}
-        transferSuggestionsCount={transferSuggestions.length}
         factoriesCount={factories.length}
         onResetData={handleResetData}
         isOpenMobile={isMobileSidebarOpen}
@@ -675,7 +661,6 @@ export function App() {
                 factories={factories}
                 materials={materials}
                 inboundSchedules={inboundSchedules}
-                transferSuggestions={transferSuggestions}
                 selectedFactoryId={selectedFactoryId}
                 selectedFactoryIds={selectedFactoryIds}
                 onSelectFactory={(id) => {
@@ -718,27 +703,6 @@ export function App() {
               />
             )}
 
-            {currentTab === 'transfers' && (
-              <InterFactoryTransfers
-                suggestions={transferSuggestions}
-                factories={factories}
-                materials={materials}
-                language={language}
-              />
-            )}
-
-            {currentTab === 'formula' && (
-              <FormulaCalculator
-                formulas={formulas}
-                factories={factories}
-                materials={materials}
-                inventorySOH={inventorySOH}
-                poDetails={poDetails}
-                language={language}
-                onNavigateTab={(tab) => setCurrentTab(tab)}
-              />
-            )}
-
             {currentTab === 'logistics' && (
               <InboundLogistics
                 inboundSchedules={inboundSchedules}
@@ -760,7 +724,6 @@ export function App() {
                 factories={factories}
                 materials={materials}
                 suppliers={suppliers}
-                formulas={formulas}
                 substitutions={substitutions}
                 learnedMappings={learnedMappings}
                 inventorySOH={inventorySOH}

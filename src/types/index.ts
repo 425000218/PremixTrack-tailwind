@@ -324,24 +324,6 @@ export interface Sys_Import_Mapping {
   CreatedAt: string;
 }
 
-export interface Formula_BOM_Item {
-  MaterialID: string;
-  QtyKgPerTonPremix: number; // kg of raw material per 1000kg of premix
-  InclusionPercent: number; // % in premix
-}
-
-export interface Formula_BOM {
-  FormulaID: string;
-  FormulaCode: string;
-  FormulaName: string;
-  TargetSpecies: string; // Heo con, Heo vỗ béo, Gà thịt, Tôm, Cá tra
-  PremixInclusionRateInFeed: number; // e.g. 4% premix per ton finished feed
-  StandardBatchSizeKg: number;
-  Items: Formula_BOM_Item[];
-  EffectiveDate: string;
-  Status: 'Active' | 'Draft' | 'Archived';
-}
-
 export type AlertSeverity = 'CRITICAL' | 'WARNING' | 'BALANCED' | 'OVERSTOCK' | 'STOP_USAGE_WARNING' | 'SUBSTITUTED';
 
 export interface CalculatedMaterialMetric {
@@ -375,27 +357,6 @@ export interface CalculatedMaterialMetric {
   VirtualAvailableQty?: number;  // SOH + sum(SubstituteSOH / Ratio)
   VirtualDOI?: number;           // VirtualAvailableQty / DailyUsage
   Status: MaterialStatus;
-}
-
-export interface InterFactoryTransferSuggestion {
-  id: string;
-  MaterialID: string;
-  MaterialCode: string;
-  MaterialName: string;
-  SourceFactoryID: string;
-  SourceFactoryCode: string;
-  SourceDOI: number;
-  SourceSurplusKg: number;
-  TargetFactoryID: string;
-  TargetFactoryCode: string;
-  TargetDOI: number;
-  TargetDeficitKg: number;
-  RecommendedTransferKg: number;
-  EstimatedDistanceKm: number;
-  EstimatedTransitHours: number;
-  Urgency: 'URGENT' | 'HIGH' | 'MEDIUM';
-  Reason: string;
-  Status: 'Pending' | 'Approved' | 'Dispatched';
 }
 
 export interface ValidationErrorItem {
