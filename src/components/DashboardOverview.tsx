@@ -19,8 +19,10 @@ import {
   Zap,
   X,
   Bot,
-  MessageSquareText,
   SlidersHorizontal,
+  BarChart3,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import {
   CalculatedMaterialMetric,
@@ -30,6 +32,20 @@ import {
   Language,
 } from '../types';
 import { DashboardFactorySlicer } from './DashboardFactorySlicer';
+
+const CATEGORY_NAMES: Record<string, { vi: string; en: string; color: string }> = {
+  Carriers_Minerals: { vi: 'Chất Mang & Khoáng', en: 'Carriers & Minerals', color: '#3b82f6' },
+  Amino_Acids: { vi: 'Axit Amin (Amino)', en: 'Amino Acids', color: '#10b981' },
+  Vitamins: { vi: 'Vitamin & Vi Lượng', en: 'Vitamins & Micro', color: '#f59e0b' },
+  Enzymes: { vi: 'Enzyme & Men Vi Sinh', en: 'Enzymes & Probiotics', color: '#8b5cf6' },
+  Trace_Minerals: { vi: 'Khoáng Vi Lượng', en: 'Trace Minerals', color: '#ec4899' },
+  Toxin_Binders: { vi: 'Hút Độc Tố', en: 'Toxin Binders', color: '#06b6d4' },
+  Acidifiers: { vi: 'Axit Hóa', en: 'Acidifiers', color: '#14b8a6' },
+  Medicinals: { vi: 'Dược Liệu & Bổ Trợ', en: 'Medicinals', color: '#f97316' },
+  Grain: { vi: 'Ngũ Cốc', en: 'Grains', color: '#eab308' },
+  Protein: { vi: 'Đạm & Bột Thịt', en: 'Proteins', color: '#6366f1' },
+  Other: { vi: 'Khác', en: 'Other', color: '#64748b' }
+};
 
 interface DashboardOverviewProps {
   metrics: CalculatedMaterialMetric[];
@@ -60,6 +76,11 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [sortField, setSortField] = useState<'DOI' | 'SOH' | 'NAME' | 'FACTORY'>('DOI');
   const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('ASC');
+
+  // Toggle Visual Analytics Charts Section & Active tab
+  const [showVisualCharts, setShowVisualCharts] = useState<boolean>(true);
+  const [activeChartTab, setActiveChartTab] = useState<'OVERVIEW' | 'CATEGORY' | 'FACTORY_RISK' | 'CRITICAL_SKUS'>('OVERVIEW');
+  const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
 
   // Floating Bubbles State: 'NONE' | 'TRANSFERS' | 'AI'
   const [activeBubble, setActiveBubble] = useState<'NONE' | 'TRANSFERS' | 'AI'>('NONE');
@@ -127,6 +148,99 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       criticalItems: critical,
     };
   }, [scopedMetrics, inboundSchedules]);
+
+  // Visual Chart 1: SOH Category Breakdown
+  const categoryStats = useMemo(() => {
+    const map = new Map<string, { totalSOH: number; count: number; criticalCount: number }>();
+    let totalAllSOH = 0;
+
+    scopedMetrics.forEach((m) => {
+      const cat = m.Category || 'Other';
+      const current = map.get(cat) || { totalSOH: 0, count: 0, criticalCount: 0 };
+      const sohKg = m.SOHQty || 0;
+      current.totalSOH += sohKg;
+      current.count += 1;
+      if (m.Severity === 'CRITICAL') {
+        current.criticalCount += 1;
+      }
+      totalAllSOH += sohKg;
+      map.set(cat, current);
+    });
+
+    const items = Array.from(map.entries()).map(([catKey, data]) => {
+      const meta = CATEGORY_NAMES[catKey] || CATEGORY_NAMES.Other;
+      const tons = Math.round(data.totalSOH / 1000);
+      const percentage = totalAllSOH > 0 ? (data.totalSOH / totalAllSOH) * 100 : 0;
+      return {
+        key: catKey,
+        label: language === 'vi' ? meta.vi : meta.en,
+        tons,
+        count: data.count,
+        criticalCount: data.criticalCount,
+        percentage,
+        color: meta.color,
+      };
+    });
+
+    items.sort((a, b) => b.tons - a.tons);
+    return { items, totalAllTons: Math.round(totalAllSOH / 1000) };
+  }, [scopedMetrics, language]);
+
+  // Visual Chart 2: Factory Health & Risk Breakdown
+  const factoryRiskStats = useMemo(() => {
+    const map = new Map<string, {
+      factoryId: string;
+      factoryCode: string;
+      factoryName: string;
+      critical: number;
+      warning: number;
+      balanced: number;
+      overstock: number;
+      totalSKUs: number;
+      totalSOHKg: number;
+    }>();
+
+    scopedMetrics.forEach((m) => {
+      const fId = m.FactoryID || m.FactoryCode || 'UNKNOWN';
+      const cur = map.get(fId) || {
+        factoryId: fId,
+        factoryCode: m.FactoryCode || fId,
+        factoryName: m.FactoryName || fId,
+        critical: 0,
+        warning: 0,
+        balanced: 0,
+        overstock: 0,
+        totalSKUs: 0,
+        totalSOHKg: 0,
+      };
+
+      cur.totalSKUs += 1;
+      cur.totalSOHKg += (m.SOHQty || 0);
+
+      if (m.Severity === 'CRITICAL') cur.critical += 1;
+      else if (m.Severity === 'WARNING') cur.warning += 1;
+      else if (m.Severity === 'BALANCED') cur.balanced += 1;
+      else cur.overstock += 1;
+
+      map.set(fId, cur);
+    });
+
+    return Array.from(map.values())
+      .sort((a, b) => {
+        if (b.critical !== a.critical) return b.critical - a.critical;
+        if (b.warning !== a.warning) return b.warning - a.warning;
+        return b.totalSOHKg - a.totalSOHKg;
+      })
+      .slice(0, 12);
+  }, [scopedMetrics]);
+
+  // Visual Chart 3: Earliest Stockout SKUs
+  const criticalSKUs = useMemo(() => {
+    return [...scopedMetrics]
+      .filter((m) => m.DailyUsage > 0)
+      .sort((a, b) => (a.DOI_Total || 0) - (b.DOI_Total || 0))
+      .slice(0, 8);
+  }, [scopedMetrics]);
 
   // Filtered and Sorted Table Data
   const filteredMetrics = useMemo(() => {
@@ -317,7 +431,329 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
       </div>
 
-      {/* ── 2. FULL-WIDTH OPERATIONAL DATA MATRIX (100% WIDTH) ── */}
+      {/* ── 2. VISUAL ANALYTICS & CHARTS SECTION (COLLAPSIBLE / ẨN HIỆN LINH HOẠT) ── */}
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => setShowVisualCharts((prev) => !prev)}
+            className="flex items-center gap-2 text-xs font-bold text-slate-700 hover:text-blue-600 bg-white hover:bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200/80 shadow-2xs transition-all cursor-pointer group"
+          >
+            <BarChart3 className="w-4 h-4 text-blue-600 group-hover:scale-110 transition-transform" />
+            <span>
+              {language === 'vi' 
+                ? (showVisualCharts ? 'Thu Gọn Biểu Đồ Trực Quan' : 'Mở Rộng Biểu Đồ Trực Quan (Analytics)')
+                : (showVisualCharts ? 'Collapse Visual Charts' : 'Expand Visual Charts (Analytics)')
+              }
+            </span>
+            {showVisualCharts ? (
+              <ChevronUp className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-600" />
+            ) : (
+              <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-600" />
+            )}
+          </button>
+
+          <span className="text-[11px] text-slate-400 font-mono hidden sm:inline-block">
+            {showVisualCharts 
+              ? (language === 'vi' ? 'Hiển thị phân bổ SOH, Sức khỏe Nhà máy & SKUs rủi ro' : 'Showing SOH distribution, Factory health & Risk SKUs')
+              : (language === 'vi' ? 'Đã ẩn để tối ưu không gian bảng số liệu' : 'Hidden to maximize table workspace')
+            }
+          </span>
+        </div>
+
+        {showVisualCharts && (
+          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden transition-all duration-300">
+            {/* Header Bar */}
+            <div className="px-5 py-3.5 bg-slate-50/70 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold">
+                  <BarChart3 className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-slate-800 flex items-center gap-2">
+                    <span>{language === 'vi' ? 'Biểu Đồ Trực Quan & Phân Tích Chuỗi Cung Ứng' : 'Visual Analytics & Supply Chain Insights'}</span>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200/60 flex items-center gap-1">
+                      <Sparkles className="w-2.5 h-2.5" /> Interactive
+                    </span>
+                  </h4>
+                  <p className="text-[11px] text-slate-500">
+                    {language === 'vi' ? 'Tổng hợp phân bổ danh mục, mức độ an toàn theo nhà máy và thời gian cạn kho' : 'Aggregated category distribution, factory safety health, and stockout timeline'}
+                  </p>
+                </div>
+              </div>
+
+              {/* View Switcher Tabs */}
+              <div className="flex items-center bg-slate-200/60 p-1 rounded-xl text-xs font-semibold text-slate-600">
+                <button
+                  onClick={() => setActiveChartTab('OVERVIEW')}
+                  className={`px-3 py-1 rounded-lg transition-all ${
+                    activeChartTab === 'OVERVIEW'
+                      ? 'bg-white text-slate-900 shadow-2xs font-bold'
+                      : 'hover:text-slate-900 text-slate-600'
+                  }`}
+                >
+                  {language === 'vi' ? 'Tổng Hợp' : 'All Insights'}
+                </button>
+                <button
+                  onClick={() => setActiveChartTab('CATEGORY')}
+                  className={`px-3 py-1 rounded-lg transition-all ${
+                    activeChartTab === 'CATEGORY'
+                      ? 'bg-white text-slate-900 shadow-2xs font-bold'
+                      : 'hover:text-slate-900 text-slate-600'
+                  }`}
+                >
+                  {language === 'vi' ? 'Phân Bổ Nhóm NL' : 'Categories'}
+                </button>
+                <button
+                  onClick={() => setActiveChartTab('FACTORY_RISK')}
+                  className={`px-3 py-1 rounded-lg transition-all ${
+                    activeChartTab === 'FACTORY_RISK'
+                      ? 'bg-white text-slate-900 shadow-2xs font-bold'
+                      : 'hover:text-slate-900 text-slate-600'
+                  }`}
+                >
+                  {language === 'vi' ? 'Sức Khỏe Nhà Máy' : 'Factory Health'}
+                </button>
+                <button
+                  onClick={() => setActiveChartTab('CRITICAL_SKUS')}
+                  className={`px-3 py-1 rounded-lg transition-all ${
+                    activeChartTab === 'CRITICAL_SKUS'
+                      ? 'bg-white text-slate-900 shadow-2xs font-bold'
+                      : 'hover:text-slate-900 text-slate-600'
+                  }`}
+                >
+                  {language === 'vi' ? 'SKUs Cận Ngưỡng' : 'Worst Off-DOI'}
+                </button>
+              </div>
+            </div>
+
+            {/* Content Area */}
+            <div className="p-5">
+              {/* VIEW 1: CATEGORY & CRITICAL SKUS */}
+              {(activeChartTab === 'OVERVIEW' || activeChartTab === 'CATEGORY') && (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start mb-6">
+                  
+                  {/* Left Box: SOH Category Volume Breakdown */}
+                  <div className="lg:col-span-6 bg-slate-50/50 rounded-xl p-4 border border-slate-100">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <Layers className="w-4 h-4 text-blue-600" />
+                        <span className="text-xs font-bold text-slate-800 uppercase tracking-wide">
+                          {language === 'vi' ? 'Tỷ Trọng Tồn Kho SOH Theo Nhóm' : 'SOH Share by Category'}
+                        </span>
+                      </div>
+                      <span className="text-xs font-mono font-bold text-slate-600">
+                        {categoryStats.totalAllTons.toLocaleString()} Tấn (100%)
+                      </span>
+                    </div>
+
+                    {/* Visual Multi-Segment Bar */}
+                    <div className="w-full h-4 bg-slate-200 rounded-full overflow-hidden flex gap-0.5 p-0.5 shadow-inner">
+                      {categoryStats.items.map((cat) => (
+                        <div
+                          key={cat.key}
+                          style={{
+                            width: `${Math.max(cat.percentage, 1)}%`,
+                            backgroundColor: cat.color,
+                          }}
+                          onMouseEnter={() => setHoveredCategory(cat.key)}
+                          onMouseLeave={() => setHoveredCategory(null)}
+                          title={`${cat.label}: ${cat.tons.toLocaleString()} Tấn (${cat.percentage.toFixed(1)}%)`}
+                          className="h-full rounded-xs transition-transform hover:scale-y-125 cursor-pointer first:rounded-l-full last:rounded-r-full"
+                        />
+                      ))}
+                    </div>
+
+                    {/* Category Detail List */}
+                    <div className="mt-4 space-y-2 max-h-56 overflow-y-auto pr-1">
+                      {categoryStats.items.map((cat) => (
+                        <div
+                          key={cat.key}
+                          onMouseEnter={() => setHoveredCategory(cat.key)}
+                          onMouseLeave={() => setHoveredCategory(null)}
+                          className={`flex items-center justify-between p-2 rounded-lg text-xs transition-colors cursor-default ${
+                            hoveredCategory === cat.key ? 'bg-blue-50/80 border border-blue-200/60' : 'hover:bg-slate-100/60'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <span
+                              className="w-2.5 h-2.5 rounded-full shrink-0"
+                              style={{ backgroundColor: cat.color }}
+                            />
+                            <span className="font-semibold text-slate-800 truncate">{cat.label}</span>
+                            <span className="text-[10px] text-slate-400 font-mono">({cat.count} SKUs)</span>
+                          </div>
+
+                          <div className="flex items-center gap-3 shrink-0">
+                            {cat.criticalCount > 0 && (
+                              <span
+                                onClick={() => setFilterSeverity('CRITICAL')}
+                                className="px-1.5 py-0.5 rounded bg-rose-100 text-rose-700 text-[10px] font-bold cursor-pointer hover:bg-rose-200 transition-colors"
+                                title="Lọc SKUs thiếu hụt khẩn cấp trong bảng"
+                              >
+                                {cat.criticalCount} Thiếu
+                              </span>
+                            )}
+                            <div className="text-right">
+                              <span className="font-bold text-slate-900 font-mono">{cat.tons.toLocaleString()} Tấn</span>
+                              <span className="text-[10px] text-slate-500 font-mono ml-1.5">({cat.percentage.toFixed(1)}%)</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Right Box: Top Critical Stockout Horizon */}
+                  <div className="lg:col-span-6 bg-slate-50/50 rounded-xl p-4 border border-slate-100">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle className="w-4 h-4 text-rose-600" />
+                        <span className="text-xs font-bold text-slate-800 uppercase tracking-wide">
+                          {language === 'vi' ? 'Top Nguyên Liệu Nguy Cơ Cạn Kho Sớm Nhất' : 'Earliest Stockout Timeline (Lowest DOI)'}
+                        </span>
+                      </div>
+                      <span className="text-[11px] font-bold text-rose-600 font-mono bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
+                        {criticalSKUs.length} Cần Cung Ứng
+                      </span>
+                    </div>
+
+                    {/* Progress bars for worst DOI */}
+                    <div className="space-y-2.5 max-h-60 overflow-y-auto pr-1">
+                      {criticalSKUs.length === 0 ? (
+                        <div className="p-6 text-center text-xs text-slate-400">
+                          {language === 'vi' ? 'Tất cả nguyên liệu đều nằm trong ngưỡng an toàn cao.' : 'All materials are within safe operational limits.'}
+                        </div>
+                      ) : (
+                        criticalSKUs.map((m) => {
+                          const doi = m.DOI_Total || 0;
+                          const isSuperCritical = doi < 7;
+                          const barWidth = Math.min(100, Math.max(5, (doi / 28) * 100));
+
+                          return (
+                            <div key={`${m.FactoryID}-${m.MaterialID}`} className="p-2 bg-white rounded-lg border border-slate-200/80 shadow-2xs hover:border-slate-300 transition-all">
+                              <div className="flex items-center justify-between text-xs mb-1">
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <span className="font-mono font-bold text-slate-800 text-[11px]">{m.MaterialCode}</span>
+                                  <span className="font-medium text-slate-700 truncate max-w-[180px]" title={m.MaterialName_VN}>
+                                    {m.MaterialName_VN}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1.5 shrink-0">
+                                  <span className="text-[10px] font-mono font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
+                                    {m.FactoryCode}
+                                  </span>
+                                  <span className={`font-mono font-bold text-xs ${isSuperCritical ? 'text-rose-600' : 'text-amber-600'}`}>
+                                    {doi.toFixed(1)} ngày
+                                  </span>
+                                </div>
+                              </div>
+
+                              <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden flex items-center">
+                                <div
+                                  style={{ width: `${barWidth}%` }}
+                                  className={`h-full rounded-full transition-all ${
+                                    isSuperCritical ? 'bg-rose-500' : 'bg-amber-500'
+                                  }`}
+                                />
+                              </div>
+
+                              <div className="flex items-center justify-between text-[10px] text-slate-500 mt-1 font-mono">
+                                <span>SOH: {Math.round(m.SOHQty / 1000)}T + PO: {Math.round(m.OpenPOQty / 1000)}T</span>
+                                <span className="text-slate-400">Dự kiến cạn: <strong className="text-slate-700">{m.StockoutDate || 'N/A'}</strong></span>
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+
+                </div>
+              )}
+
+              {/* VIEW 2: FACTORY RISK MATRIX */}
+              {(activeChartTab === 'OVERVIEW' || activeChartTab === 'FACTORY_RISK') && (
+                <div className="bg-slate-50/50 rounded-xl p-4 border border-slate-100">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Activity className="w-4 h-4 text-emerald-600" />
+                      <span className="text-xs font-bold text-slate-800 uppercase tracking-wide">
+                        {language === 'vi' ? 'Bản Đồ An Toàn Tồn Kho Theo Từng Nhà Máy (Factory DOI Health)' : 'Factory Safety Health Status'}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3 text-[11px] text-slate-500">
+                      <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-rose-500"></span> &lt; 7 ngày (Khẩn cấp)</span>
+                      <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-500"></span> 7-14 ngày (Cảnh báo)</span>
+                      <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500"></span> &gt; 14 ngày (An toàn)</span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                    {factoryRiskStats.map((f) => {
+                      const total = f.totalSKUs || 1;
+                      const criticalPct = (f.critical / total) * 100;
+                      const warningPct = (f.warning / total) * 100;
+                      const balancedPct = (f.balanced / total) * 100;
+                      const overstockPct = (f.overstock / total) * 100;
+
+                      return (
+                        <div
+                          key={f.factoryId}
+                          onClick={() => {
+                            if (onSelectFactory) onSelectFactory(f.factoryId);
+                          }}
+                          className="p-3 bg-white rounded-xl border border-slate-200/90 shadow-2xs hover:border-blue-400 hover:shadow-xs transition-all cursor-pointer group"
+                        >
+                          <div className="flex items-center justify-between mb-1.5">
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-mono font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
+                                {f.factoryCode}
+                              </span>
+                              <span className="text-[11px] text-slate-500 truncate max-w-[110px]" title={f.factoryName}>
+                                {f.factoryName}
+                              </span>
+                            </div>
+                            <span className="text-[10px] font-mono text-slate-400">
+                              {Math.round(f.totalSOHKg / 1000)} Tấn
+                            </span>
+                          </div>
+
+                          <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden flex shadow-inner">
+                            {f.critical > 0 && (
+                              <div style={{ width: `${criticalPct}%` }} className="bg-rose-500 h-full" title={`Khẩn cấp: ${f.critical} SKUs`} />
+                            )}
+                            {f.warning > 0 && (
+                              <div style={{ width: `${warningPct}%` }} className="bg-amber-400 h-full" title={`Cảnh báo: ${f.warning} SKUs`} />
+                            )}
+                            {f.balanced > 0 && (
+                              <div style={{ width: `${balancedPct}%` }} className="bg-emerald-500 h-full" title={`An toàn: ${f.balanced} SKUs`} />
+                            )}
+                            {f.overstock > 0 && (
+                              <div style={{ width: `${overstockPct}%` }} className="bg-blue-400 h-full" title={`Dư thừa: ${f.overstock} SKUs`} />
+                            )}
+                          </div>
+
+                          <div className="flex items-center justify-between mt-2 text-[10px] font-mono">
+                            <span className={f.critical > 0 ? 'text-rose-600 font-bold' : 'text-slate-400'}>
+                              {f.critical > 0 ? `${f.critical} thiếu hụt` : '0 nguy cơ'}
+                            </span>
+                            <span className="text-slate-500 font-medium">
+                              {f.totalSKUs} SKUs
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ── 3. FULL-WIDTH OPERATIONAL DATA MATRIX (100% WIDTH) ── */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-xs flex flex-col overflow-hidden w-full">
         
         {/* Header Action Bar with Clean Title Alignment */}

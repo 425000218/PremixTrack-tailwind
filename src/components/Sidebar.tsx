@@ -100,8 +100,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       label_VN: 'Vị Thế Cung Ứng (Position)',
       label_EN: 'Supply Position Matrix',
       icon: ShieldCheck,
-      badge: 'D365 Live',
-      badgeColor: 'bg-emerald-500 text-slate-950 font-bold',
     },
     {
       id: 'matrix',
@@ -275,22 +273,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* Bottom Sync Info & Quick Settings */}
         <div className={`p-3 border-t border-slate-800 space-y-2 transition-all ${isCollapsed ? 'flex flex-col items-center' : ''}`}>
           {!isCollapsed ? (
-            <div className="p-3 bg-slate-800/90 rounded-xl border border-slate-700/50">
-              <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
-                <span>Last Sync: D365 FO</span>
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <div className="px-3 py-2 bg-slate-800/60 rounded-xl border border-slate-700/40 flex items-center justify-between text-xs">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                <span className="text-slate-300 font-medium">{factoriesCount} Nhà máy</span>
               </div>
-              <p className="text-xs font-semibold text-blue-400 uppercase tracking-wide">
-                Today, 09:42 AM
-              </p>
-              <p className="text-[10px] text-slate-500 mt-0.5">{factoriesCount} Nhà máy trực tuyến</p>
+              <span className="text-[11px] text-slate-500 font-mono">09:42 AM</span>
             </div>
           ) : (
             <div
-              className="w-10 h-10 bg-slate-800/90 rounded-xl border border-slate-700/50 flex items-center justify-center cursor-pointer"
-              title={`D365 FO Sync: Today, 09:42 AM (${factoriesCount} Nhà máy trực tuyến)`}
+              className="w-10 h-10 bg-slate-800/60 rounded-xl border border-slate-700/40 flex items-center justify-center cursor-pointer"
+              title={`${factoriesCount} Nhà máy kết nối (Cập nhật 09:42 AM)`}
             >
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
             </div>
           )}
 
