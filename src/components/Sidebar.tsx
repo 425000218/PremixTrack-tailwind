@@ -147,9 +147,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
         style={{
           width: isCollapsed ? 80 : sidebarWidth,
         }}
-        className={`fixed lg:static top-0 bottom-0 left-0 z-50 bg-slate-900 text-slate-300 flex flex-col border-r border-slate-800 ${
+        className={`fixed lg:relative top-0 bottom-0 left-0 z-50 bg-slate-900 text-slate-300 flex flex-col border-r border-slate-800 ${
           isResizing ? 'select-none' : 'transition-[width] duration-200 ease-in-out'
-        } shrink-0 relative ${
+        } shrink-0 ${
           isOpenMobile ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
