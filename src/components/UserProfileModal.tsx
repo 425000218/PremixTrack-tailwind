@@ -108,6 +108,10 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setPasswordError(null);
+    if (!currentPassword) {
+      setPasswordError('Vui lòng nhập mật khẩu hiện tại.');
+      return;
+    }
     if (!newPassword || newPassword.length < 4) {
       setPasswordError('Mật khẩu mới phải có ít nhất 4 ký tự.');
       return;
@@ -117,29 +121,20 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
       return;
     }
 
-    // Sync Password to MS SQL Server
+    // Dùng endpoint tự đổi mật khẩu (không cần Admin)
     try {
-      const res = await fetchWithAuth(`/api/users/${user.id}`, {
-        method: 'PUT',
+      const res = await fetchWithAuth('/api/auth/change-password', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          Password: newPassword,
-          FullName: user.fullName,
-          Email: user.email,
-          Phone: user.phone,
-          Department: user.department,
-          Role: user.role.toLowerCase(),
-          FactoryAccess: JSON.stringify(user.assignedFactoryId === 'ALL' ? ['ALL'] : [user.assignedFactoryId]),
-          IsActive: 1
-        })
+        body: JSON.stringify({ currentPassword, newPassword }),
       });
       const data = await res.json();
       if (!data.success) {
-        setPasswordError(data.error || 'Không thể lưu mật khẩu vào SQL Server.');
+        setPasswordError(data.error || 'Không thể lưu mật khẩu. Vui lòng thử lại.');
         return;
       }
     } catch (err: any) {
-      setPasswordError(err.message || 'Lỗi kết nối máy chủ SQL.');
+      setPasswordError(err.message || 'Lỗi kết nối máy chủ.');
       return;
     }
 

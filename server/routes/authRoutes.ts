@@ -221,4 +221,45 @@ router.delete('/users/:id', authenticateJWT, requireAdmin, async (req, res) => {
   }
 });
 
+// -- SELF-SERVE: Đổi mật khẩu bản thân (bất kỳ user đã đăng nhập) ---------------
+router.post('/auth/change-password', authenticateJWT, async (req, res) => {
+  try {
+    const reqUser = (req as any).user;
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ success: false, error: 'Vui lòng cung cấp mật khẩu hiện tại và mật khẩu mới.' });
+    }
+    if (newPassword.length < 4) {
+      return res.status(400).json({ success: false, error: 'Mật khẩu mới phải có ít nhất 4 ký tự.' });
+    }
+
+    // Lấy hash mật khẩu hiện tại từ database
+    const userResult = await executeQuery(
+      'SELECT UserID, PasswordHash FROM dbo.sys_User_Account WHERE UserID = @UserID',
+      { UserID: reqUser.id }
+    );
+
+    if (!userResult.success || userResult.data.length === 0) {
+      return res.status(404).json({ success: false, error: 'Không tìm thấy tài khoản.' });
+    }
+
+    const storedHash = userResult.data[0].PasswordHash;
+    const isMatch = await bcrypt.compare(currentPassword, storedHash);
+    if (!isMatch) {
+      return res.status(401).json({ success: false, error: 'Mật khẩu hiện tại không đúng.' });
+    }
+
+    const newHash = await bcrypt.hash(newPassword, 10);
+    const updateResult = await executeQuery(
+      'UPDATE dbo.sys_User_Account SET PasswordHash = @PasswordHash, UpdatedAt = SYSDATETIME() WHERE UserID = @UserID',
+      { PasswordHash: newHash, UserID: reqUser.id }
+    );
+
+    res.json({ success: updateResult.success, error: updateResult.error });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 export default router;
