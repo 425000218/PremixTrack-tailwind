@@ -282,35 +282,35 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           </div>
         </div>
 
-        {/* HUD Card 4: Inbound Logistics & Fleet */}
+        {/* HUD Card 4: S&OP Position & Safety Coverage */}
         <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs flex flex-col justify-between group hover:border-slate-300 transition-all">
           <div className="flex items-start justify-between">
             <div>
               <span className="text-[11px] font-mono uppercase tracking-wider text-slate-500 font-semibold flex items-center gap-1.5">
-                <Truck className="w-3.5 h-3.5 text-amber-600" />
-                {language === 'vi' ? 'Điều Phối Vận Tải' : 'Fleet & Dispatch'}
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                {language === 'vi' ? 'Vị Thế Cung Ứng' : 'S&OP Coverage'}
               </span>
               <div className="mt-2 flex items-baseline gap-2">
                 <span className="text-3xl font-black tracking-tight font-mono tabular-nums text-slate-900">
-                  {stats.activeTrucksCount}
+                  {stats.balancedCount}
                 </span>
-                <span className="text-xs font-semibold text-slate-500">Chuyến Xe Đến</span>
+                <span className="text-xs font-semibold text-slate-500">Mã Đạt Chuẩn</span>
               </div>
             </div>
-            <span className="p-2 rounded-xl bg-amber-50 text-amber-600 border border-amber-100">
-              <ArrowLeftRight className="w-4 h-4" />
+            <span className="p-2 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100">
+              <Activity className="w-4 h-4" />
             </span>
           </div>
 
           <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
             <span className="text-slate-500 font-mono">
-              Đang giao: <strong className="text-slate-800">{inboundSchedules.filter(s => s.Status === 'In_Transit' || s.Status === 'Scheduled').length} chuyến</strong>
+              An toàn: <strong className="text-emerald-700 font-bold">{scopedMetrics.length > 0 ? Math.round((stats.balancedCount / scopedMetrics.length) * 100) : 100}%</strong>
             </span>
             <button
-              onClick={() => onNavigateTab('logistics')}
+              onClick={() => onNavigateTab('position-matrix')}
               className="text-blue-600 font-bold hover:underline flex items-center gap-0.5 cursor-pointer"
             >
-              Lịch giao hàng <ArrowUpRight className="w-3.5 h-3.5" />
+              Ma trận vị thế <ArrowUpRight className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>

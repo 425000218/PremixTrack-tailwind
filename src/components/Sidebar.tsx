@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   TrendingUp,
   Layers,
@@ -42,6 +42,50 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isCollapsed = false,
   onToggleCollapse,
 }) => {
+  // Draggable Resizable Sidebar Width (Min: 200px, Max: 460px, Default: 256px)
+  const [sidebarWidth, setSidebarWidth] = useState<number>(() => {
+    const saved = localStorage.getItem('premixtrack_sidebar_width');
+    const parsed = saved ? parseInt(saved, 10) : 256;
+    return isNaN(parsed) || parsed < 200 || parsed > 460 ? 256 : parsed;
+  });
+
+  const [isResizing, setIsResizing] = useState<boolean>(false);
+  const isResizingRef = useRef<boolean>(false);
+
+  const startResizing = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+    isResizingRef.current = true;
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  }, []);
+
+  const stopResizing = useCallback(() => {
+    if (isResizingRef.current) {
+      setIsResizing(false);
+      isResizingRef.current = false;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    }
+  }, []);
+
+  const resize = useCallback((e: MouseEvent) => {
+    if (isResizingRef.current) {
+      const newWidth = Math.min(Math.max(e.clientX, 200), 460);
+      setSidebarWidth(newWidth);
+      localStorage.setItem('premixtrack_sidebar_width', String(newWidth));
+    }
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('mousemove', resize);
+    window.addEventListener('mouseup', stopResizing);
+    return () => {
+      window.removeEventListener('mousemove', resize);
+      window.removeEventListener('mouseup', stopResizing);
+    };
+  }, [resize, stopResizing]);
+
   const navItems = [
     {
       id: 'dashboard',
@@ -70,12 +114,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       label_VN: 'Dự Báo Forecast (RD)',
       label_EN: 'RD Forecast Matrix',
       icon: TrendingUp,
-    },
-    {
-      id: 'logistics',
-      label_VN: 'Inbound PO & Logistics',
-      label_EN: 'Inbound Logistics',
-      icon: Truck,
     },
     {
       id: 'masterdata',
@@ -108,10 +146,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
       )}
 
       <aside
-        className={`fixed lg:static top-0 bottom-0 left-0 z-50 bg-slate-900 text-slate-300 flex flex-col border-r border-slate-800 transition-all duration-300 ease-in-out shrink-0 ${
-          isCollapsed ? 'w-20' : 'w-64'
-        } ${isOpenMobile ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
+        style={{
+          width: isCollapsed ? 80 : sidebarWidth,
+        }}
+        className={`fixed lg:static top-0 bottom-0 left-0 z-50 bg-slate-900 text-slate-300 flex flex-col border-r border-slate-800 ${
+          isResizing ? 'select-none' : 'transition-[width] duration-200 ease-in-out'
+        } shrink-0 relative ${
+          isOpenMobile ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        }`}
       >
+        {/* Resizer Handle Bar (Desktop only, when not collapsed) */}
+        {!isCollapsed && (
+          <div
+            onMouseDown={startResizing}
+            className={`hidden lg:block absolute top-0 bottom-0 right-0 w-1.5 cursor-col-resize z-50 transition-colors ${
+              isResizing ? 'bg-blue-500 w-2' : 'hover:bg-blue-500/50 hover:w-2'
+            }`}
+            title="Kéo sang trái / phải để điều chỉnh độ rộng Sidebar"
+          />
+        )}
         {/* Brand Header */}
         <div
           className={`h-16 flex items-center border-b border-slate-800 transition-all duration-300 ${

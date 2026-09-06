@@ -906,18 +906,18 @@ export const PositionMatrixView: React.FC<PositionMatrixViewProps> = ({
                   <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between">
                     <div className="flex items-center gap-2 text-emerald-300">
                       <ArrowRightLeft className="w-4 h-4 text-emerald-400" />
-                      <span>Có đề xuất điều chuyển tối ưu cự ly giữa các nhà máy.</span>
+                      <span>Xem ma trận tồn kho chi tiết và ngày dùng DOI.</span>
                     </div>
                     {onNavigateTab && (
                       <button
                         type="button"
                         onClick={() => {
                           setIsAiModalOpen(false);
-                          onNavigateTab('transfers');
+                          onNavigateTab('matrix');
                         }}
                         className="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-all shadow"
                       >
-                        Tạo Lệnh Điều Xe Ngay ➔
+                        Xem Ma Trận Tồn Kho ➔
                       </button>
                     )}
                   </div>

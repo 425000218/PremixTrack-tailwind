@@ -498,11 +498,11 @@ export const InventoryMatrix: React.FC<InventoryMatrixProps> = ({
               <button
                 onClick={() => {
                   setSelectedCell(null);
-                  onNavigateTab('transfers');
+                  onNavigateTab('position-matrix');
                 }}
                 className="text-xs text-blue-600 hover:underline font-bold"
               >
-                Kiểm tra điều chuyển nội bộ →
+                Xem Vị Thế Cung Ứng Tổng Thể (S&OP) →
               </button>
 
               <button

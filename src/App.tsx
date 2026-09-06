@@ -9,7 +9,6 @@ import { UserManagementModal } from './components/UserManagementModal';
 import { LoginGate } from './components/LoginGate';
 import { DashboardOverview } from './components/DashboardOverview';
 import { InventoryMatrix } from './components/InventoryMatrix';
-import { InboundLogistics } from './components/InboundLogistics';
 import { MasterDataManagement } from './components/MasterDataManagement';
 import { ForecastManagement } from './components/ForecastManagement';
 import { PositionMatrixView } from './components/PositionMatrixView';
@@ -448,57 +447,6 @@ export function App() {
     newMappings.forEach((m) => saveMappingToDb(m));
   };
 
-  const handleReceiveShipment = (scheduleId: string, receivedQty: number) => {
-    if (currentUser && !currentUser.permissions.canReceiveShipment) {
-      alert(`Tài khoản "${currentUser.roleNameVN}" không có quyền tiếp nhận và nhập kho hàng Inbound.`);
-      return;
-    }
-
-    const targetSchedule = inboundSchedules.find((s) => s.ScheduleID === scheduleId);
-    if (!targetSchedule) return;
-
-    // Update schedule status
-    setInboundSchedules((prev) =>
-      prev.map((s) => (s.ScheduleID === scheduleId ? { ...s, Status: 'Unloaded' } : s))
-    );
-
-    // Find PO detail and update remain quantity
-    const targetPODetail = poDetails.find((p) => p.PODetailID === targetSchedule.PODetailID);
-    if (targetPODetail) {
-      setPODetails((prev) =>
-        prev.map((p) => {
-          if (p.PODetailID === targetPODetail.PODetailID) {
-            const nextReceived = p.ReceivedQty + receivedQty;
-            return {
-              ...p,
-              ReceivedQty: nextReceived,
-              RemainQty: Math.max(0, p.OrderQty - nextReceived),
-            };
-          }
-          return p;
-        })
-      );
-
-      // Add to SOH
-      const newSOH: Fact_Inventory_SOH = {
-        SOH_ID: `SOH-REC-${Date.now()}`,
-        FactoryID: targetPODetail.FactoryID,
-        MaterialID: targetPODetail.MaterialID,
-        MaterialCode: targetPODetail.MaterialCode || '2579',
-        BatchNumber: `LOT-REC-${Date.now().toString().substr(7)}`,
-        Quantity: receivedQty,
-        UpdateDate: new Date().toISOString().split('T')[0],
-        SnapshotDate: new Date().toISOString().split('T')[0],
-        ExpiryDate: '2028-06-30',
-        WarehouseLocation: 'Kho Nhập Vừa Nhận',
-      };
-      setInventorySOH((prev) => [newSOH, ...prev]);
-      syncInventorySOHToDb([newSOH]);
-    }
-
-    showToast(`Đã nhập kho thành công ${receivedQty.toLocaleString()} kg vào tồn kho SOH!`);
-  };
-
   // --------------------------------------------------------------------------
   // Master Data Update & Delete Handlers with SQL Server Sync
   // --------------------------------------------------------------------------
@@ -683,19 +631,6 @@ export function App() {
               <PositionMatrixView
                 language={language}
                 onNavigateTab={(tab) => setCurrentTab(tab)}
-              />
-            )}
-
-            {currentTab === 'logistics' && (
-              <InboundLogistics
-                inboundSchedules={inboundSchedules}
-                poHeaders={poHeaders}
-                poDetails={poDetails}
-                factories={factories}
-                materials={materials}
-                suppliers={suppliers}
-                onReceiveShipment={handleReceiveShipment}
-                language={language}
               />
             )}
 
