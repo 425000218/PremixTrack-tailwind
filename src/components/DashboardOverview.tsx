@@ -165,7 +165,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     <div className="p-4 md:p-6 lg:p-8 space-y-6 max-w-[1600px] mx-auto animate-fade-in">
       
       {/* HEADER & SLICER */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col gap-4">
+
         <div>
           <h1 className="text-xl font-bold text-slate-900">
             {language === 'vi' ? 'Bảng Điều Khiển S&OP' : 'S&OP Dashboard'}
@@ -174,7 +175,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             {language === 'vi' ? 'Tổng quan Vị thế cung ứng & Rủi ro vật tư' : 'Supply Position & Risk Overview'}
           </p>
         </div>
-        <div className="shrink-0">
+        <div className="w-full overflow-x-auto pb-2">
           <DashboardFactorySlicer
             factories={factories}
             selectedFactoryId={selectedFactoryId}
