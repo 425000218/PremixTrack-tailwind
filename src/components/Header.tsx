@@ -95,7 +95,7 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header className="h-16 bg-white border-b border-slate-200 px-4 md:px-6 flex items-center justify-between shrink-0 z-30 shadow-xs relative">
       {/* Left side: Sidebar Toggle (Mobile & Desktop) + Title + Status */}
-      <div className="flex items-center gap-2 md:gap-3">
+      <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
         {/* Mobile Hamburger Toggle */}
         <button
           onClick={onToggleMobileSidebar}
@@ -120,8 +120,8 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
         )}
 
-        <div className="flex items-center gap-3">
-          <h2 className="text-base md:text-lg font-bold text-slate-900 tracking-tight">
+        <div className="flex items-center gap-3 min-w-0">
+          <h2 className="text-base md:text-lg font-bold text-slate-900 tracking-tight truncate max-w-[150px] sm:max-w-none">
             {language === 'vi' ? 'Trung Tâm Điều Phối Cung Ứng' : 'Supply Coordination Hub'}
           </h2>
           <span className="hidden sm:inline-flex items-center gap-1.5 bg-green-100 text-green-700 text-[11px] font-bold px-2.5 py-0.5 rounded-full">
@@ -132,7 +132,7 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Right side: Global Factory Select + Import CTA + User Profile / Login */}
-      <div className="flex items-center gap-2.5 md:gap-4">
+      <div className="flex items-center gap-2.5 md:gap-4 shrink-0">
         {/* Global Multi-Factory Selector */}
         <div className="hidden sm:flex items-center">
           <MultiFactorySelect
