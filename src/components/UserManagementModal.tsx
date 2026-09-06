@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchWithAuth } from '../utils/apiClient';
+import { fetchWithAuth, getAuthToken } from '../utils/apiClient';
 import {
   X,
   UserPlus,
@@ -22,8 +22,8 @@ import {
   Sparkles,
   AlertCircle
 } from 'lucide-react';
-import { AppUser, Dim_Factory, UserRole } from '../types';
-import { getRolePermissions } from '../data/mockData';
+import { UserRole, AppUser, Dim_Factory } from '../types';
+import { getRolePermissions, mockUsers } from '../data/mockData';
 
 interface DbUser {
   UserID: string;
@@ -76,10 +76,29 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-// Fetch Users from MS SQL Server
+  // Fetch Users from MS SQL Server
   const fetchUsers = async () => {
     setLoading(true);
     try {
+      const token = getAuthToken();
+      if (!token) {
+        setUsers(mockUsers.map(u => ({
+          UserID: u.id,
+          Username: u.username,
+          FullName: u.fullName,
+          Email: u.email,
+          Phone: u.phone,
+          Department: u.department,
+          Role: u.role,
+          FactoryAccess: JSON.stringify([u.assignedFactoryId]),
+          IsActive: 1,
+          CreatedAt: u.lastLogin || new Date().toISOString(),
+          UpdatedAt: new Date().toISOString()
+        })));
+        setLoading(false);
+        return;
+      }
+
       const res = await fetchWithAuth('/api/users');
       const data = await res.json();
       if (data.success && data.data) {
@@ -153,6 +172,28 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
 
     try {
       const isNew = !users.some(u => u.UserID === editingUser.UserID);
+      const token = getAuthToken();
+      if (!token) {
+        // MOCK MODE: Simulate success when offline / AI Studio
+        setSuccessMsg(isNew ? 'Đã thêm người dùng mới (Mock Mode)' : 'Đã cập nhật (Mock Mode)');
+        setIsEditing(false);
+        // Optimistically update the UI list
+        if (isNew) {
+          setUsers(prev => [...prev, {
+            ...payload,
+            UserID: `USR-MOCK-${Date.now().toString().slice(-4)}`,
+            CreatedAt: new Date().toISOString(),
+            UpdatedAt: new Date().toISOString()
+          } as any]);
+        } else {
+          setUsers(prev => prev.map(u => u.UserID === payload.UserID ? { ...u, ...payload } as any : u));
+        }
+        if (onUserListChanged) onUserListChanged();
+        setTimeout(() => setSuccessMsg(null), 3000);
+        setLoading(false);
+        return;
+      }
+
       const url = isNew ? '/api/users' : `/api/users/${editingUser.UserID}`;
       const method = isNew ? 'POST' : 'PUT';
 
@@ -187,6 +228,15 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
     if (!confirm(`Bạn có chắc chắn muốn xóa tài khoản "${username}" không?`)) return;
 
     try {
+      const token = getAuthToken();
+      if (!token) {
+        setSuccessMsg(`Đã xóa tài khoản ${username} (Mock Mode).`);
+        setUsers(prev => prev.filter(u => u.UserID !== userId));
+        if (onUserListChanged) onUserListChanged();
+        setTimeout(() => setSuccessMsg(null), 3000);
+        return;
+      }
+
       const res = await fetchWithAuth(`/api/users/${userId}`, { method: 'DELETE' });
       const result = await res.json();
       if (result.success) {
@@ -211,6 +261,16 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
         ...user,
         IsActive: 1
       };
+
+      const token = getAuthToken();
+      if (!token) {
+        setSuccessMsg(`Đã duyệt tài khoản ${user.Username} (Mock Mode)!`);
+        setUsers(prev => prev.map(u => u.UserID === user.UserID ? { ...u, IsActive: 1 } as any : u));
+        if (onUserListChanged) onUserListChanged();
+        setTimeout(() => setSuccessMsg(null), 3000);
+        return;
+      }
+
       const res = await fetchWithAuth(`/api/users/${user.UserID}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
