@@ -269,43 +269,47 @@ export const Header: React.FC<HeaderProps> = ({
                     </button>
                   )}
 
-                  <button
-                    onClick={() => setIsSwitchRoleOpen(!isSwitchRoleOpen)}
-                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition-colors font-semibold cursor-pointer text-left"
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <Sparkles className="w-4 h-4 text-amber-500" />
-                      <span>Đổi Tài Khoản Demo (RBAC)</span>
-                    </div>
-                    <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${isSwitchRoleOpen ? 'rotate-180' : ''}`} />
-                  </button>
+                  {(currentUser.role === 'System_Admin' || currentUser.username === 'admin') && (
+                    <>
+                      <button
+                        onClick={() => setIsSwitchRoleOpen(!isSwitchRoleOpen)}
+                        className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition-colors font-semibold cursor-pointer text-left"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <Sparkles className="w-4 h-4 text-amber-500" />
+                          <span>Đổi Tài Khoản Demo (RBAC)</span>
+                        </div>
+                        <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${isSwitchRoleOpen ? 'rotate-180' : ''}`} />
+                      </button>
 
-                  {/* Role Switcher Submenu */}
-                  {isSwitchRoleOpen && (
-                    <div className="p-1.5 bg-slate-50 rounded-xl space-y-1 my-1 border border-slate-100">
-                      {mockUsers.map((u) => {
-                        const isCurrent = u.id === currentUser.id;
-                        return (
-                          <button
-                            key={u.id}
-                            onClick={() => {
-                              onQuickSwitchUser(u);
-                              setIsDropdownOpen(false);
-                              setIsSwitchRoleOpen(false);
-                            }}
-                            className={`w-full text-left p-1.5 rounded-lg flex items-center justify-between transition-colors cursor-pointer text-[11px] ${
-                              isCurrent ? 'bg-blue-100/70 text-blue-900 font-bold' : 'hover:bg-white text-slate-700'
-                            }`}
-                          >
-                            <div className="flex items-center gap-2">
-                              <span className={`w-2 h-2 rounded-full ${u.avatarBg}`}></span>
-                              <span>{u.fullName}</span>
-                            </div>
-                            <span className="text-[10px] text-slate-500 font-mono">({u.role})</span>
-                          </button>
-                        );
-                      })}
-                    </div>
+                      {/* Role Switcher Submenu */}
+                      {isSwitchRoleOpen && (
+                        <div className="p-1.5 bg-slate-50 rounded-xl space-y-1 my-1 border border-slate-100">
+                          {mockUsers.map((u) => {
+                            const isCurrent = u.id === currentUser.id;
+                            return (
+                              <button
+                                key={u.id}
+                                onClick={() => {
+                                  onQuickSwitchUser(u);
+                                  setIsDropdownOpen(false);
+                                  setIsSwitchRoleOpen(false);
+                                }}
+                                className={`w-full text-left p-1.5 rounded-lg flex items-center justify-between transition-colors cursor-pointer text-[11px] ${
+                                  isCurrent ? 'bg-blue-100/70 text-blue-900 font-bold' : 'hover:bg-white text-slate-700'
+                                }`}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <span className={`w-2 h-2 rounded-full ${u.avatarBg}`}></span>
+                                  <span>{u.fullName}</span>
+                                </div>
+                                <span className="text-[10px] text-slate-500 font-mono">({u.role})</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
 
