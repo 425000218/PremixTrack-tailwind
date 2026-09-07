@@ -7,7 +7,6 @@ import {
   EyeOff,
   LogIn,
   AlertCircle,
-  Database,
   CheckCircle2,
   Mail
 } from 'lucide-react';
@@ -143,15 +142,6 @@ export const LoginGate: React.FC<LoginGateProps> = ({ onLoginSuccess }) => {
             <p className="text-xs text-slate-400 mt-1 font-medium">
               Cổng Điều Phối & Dự Báo Nguyên Liệu Premix & TACN
             </p>
-
-            {/* Server Status Badge */}
-            <div className="mt-3 flex items-center justify-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-slate-800/80 border border-slate-700 text-slate-300">
-                <Database className="w-3 h-3 text-emerald-400" />
-                <span>MS SQL Server 2022</span>
-                <span className={`w-1.5 h-1.5 rounded-full ${dbStatus?.isOnline ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`}></span>
-              </span>
-            </div>
           </div>
 
           {/* Error & Success Message */}
@@ -297,16 +287,6 @@ export const LoginGate: React.FC<LoginGateProps> = ({ onLoginSuccess }) => {
             </button>
           </div>
 
-          {/* Security & Support Notice */}
-          <div className="mt-8 pt-6 border-t border-slate-800/80 text-center space-y-2">
-            <div className="inline-flex items-center gap-1.5 text-[11px] text-slate-400 font-medium">
-              <Lock className="w-3.5 h-3.5 text-blue-400" />
-              <span>Kết nối bảo mật mã hóa đầu cuối (E2E Encrypted)</span>
-            </div>
-            <p className="text-[10px] text-slate-400 leading-relaxed">
-              Cổng thông tin nội bộ D365 FO & Quản lý chuỗi cung ứng. Mọi hành vi truy cập trái phép đều được ghi vết <code className="text-slate-400 font-mono">dbo.sys_Audit_Log</code>.
-            </p>
-          </div>
         </div>
       </div>
     </div>
