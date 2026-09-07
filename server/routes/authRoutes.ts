@@ -1,12 +1,25 @@
 import { Router } from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
+import rateLimit from 'express-rate-limit';
 import { executeQuery } from '../db/queryHelper';
 import { authenticateJWT, requireAdmin } from '../middleware/authMiddleware';
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) throw new Error('JWT_SECRET is required');
+
+// -- BRUTE-FORCE PROTECTION (Rate Limiting) -----------------------------------
+const loginLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000, // 5 phút
+  max: 5, // Tối đa 5 lần thử trong 5 phút từ 1 IP
+  message: {
+    success: false,
+    message: 'Bạn đã thử đăng nhập quá 5 lần. Vui lòng đợi 5 phút trước khi thử lại.'
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // -- USER AUTHENTICATION & LOGIN GATE (dbo.sys_User_Account) ------------------
 router.post('/auth/register', async (req, res) => {
@@ -53,7 +66,7 @@ router.post('/auth/register', async (req, res) => {
   }
 });
 
-router.post('/auth/login', async (req, res) => {
+router.post('/auth/login', loginLimiter, async (req, res) => {
   try {
     const { username, password } = req.body;
     if (!username || !password) {
@@ -129,10 +142,23 @@ router.post('/auth/login', async (req, res) => {
       lastLogin: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) + ' hôm nay',
     };
 
+    // Set HttpOnly Secure Cookie
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60 * 1000, // 24 giờ
+    });
+
     res.json({ success: true, source: 'MSSQL', user: userPayload });
   } catch (err: any) {
     res.status(500).json({ success: false, message: err.message || 'Lỗi hệ thống xác thực.' });
   }
+});
+
+router.post('/auth/logout', (req, res) => {
+  res.clearCookie('token');
+  res.json({ success: true, message: 'Đã đăng xuất an toàn.' });
 });
 
 // -- USER MANAGEMENT & PERMISSIONS APIS (dbo.sys_User_Account) ----------------

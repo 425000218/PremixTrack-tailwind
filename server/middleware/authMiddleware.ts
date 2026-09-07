@@ -9,11 +9,18 @@ export interface AuthRequest extends Request {
 }
 
 export const authenticateJWT = (req: AuthRequest, res: Response, next: NextFunction) => {
-  const authHeader = req.headers.authorization;
+  // 1. Check HttpOnly cookie first (Highest Security)
+  let token = req.cookies?.token;
 
-  if (authHeader) {
-    const token = authHeader.split(' ')[1];
+  // 2. Fallback to Authorization Bearer header (Backward Compatibility)
+  if (!token && req.headers.authorization) {
+    const parts = req.headers.authorization.split(' ');
+    if (parts.length === 2 && parts[0] === 'Bearer') {
+      token = parts[1];
+    }
+  }
 
+  if (token) {
     jwt.verify(token, JWT_SECRET, (err, user) => {
       if (err) {
         return res.status(403).json({ success: false, message: 'Token đã hết hạn hoặc không hợp lệ.' });

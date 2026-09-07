@@ -264,6 +264,7 @@ export function App() {
   };
 
   const handleLogout = () => {
+    fetchWithAuth('/api/auth/logout', { method: 'POST' }).catch(() => {});
     setCurrentUser(null);
     localStorage.removeItem('premixtrack_user');
     showToast('Đã đăng xuất khỏi hệ thống.');

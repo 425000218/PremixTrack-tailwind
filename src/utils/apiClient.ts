@@ -15,5 +15,5 @@ export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
   if (token) {
     headers.set('Authorization', `Bearer ${token}`);
   }
-  return fetch(url, { ...options, headers });
+  return fetch(url, { ...options, headers, credentials: 'include' });
 };

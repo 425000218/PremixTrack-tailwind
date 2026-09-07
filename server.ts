@@ -1,4 +1,5 @@
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import path from 'path';
 import dotenv from 'dotenv';
 import { createServer as createViteServer } from 'vite';
@@ -10,6 +11,7 @@ async function startServer() {
   const app = express();
   const PORT = process.env.PORT || 3000;
 
+  app.use(cookieParser());
   app.use(express.json({ limit: '50mb' }));
   app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
