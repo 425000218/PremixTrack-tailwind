@@ -71,14 +71,24 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
 
-  // Filter metrics based on selected factory (already done by parent) and category
+  // Filter metrics based on selected factory and category
   const filteredMetrics = useMemo(() => {
     let list = metrics;
+
+    // Filter by selected factories
+    const activeIds = selectedFactoryIds || (selectedFactoryId ? [selectedFactoryId] : ['ALL']);
+    if (activeIds.length > 0 && !activeIds.includes('ALL')) {
+      list = list.filter(m =>
+        activeIds.includes(m.FactoryID) ||
+        activeIds.includes(m.FactoryCode)
+      );
+    }
+
     if (selectedCategory !== 'ALL') {
       list = list.filter(m => m.Category === selectedCategory);
     }
     return list;
-  }, [metrics, selectedCategory]);
+  }, [metrics, selectedCategory, selectedFactoryIds, selectedFactoryId]);
 
   // Aggregate KPI Data
   const { totalSOH, totalPO, criticalCount, totalDailyUsage } = useMemo(() => {
@@ -181,8 +191,11 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             selectedFactoryId={selectedFactoryId}
             selectedFactoryIds={selectedFactoryIds || [selectedFactoryId]}
             onChange={(ids) => {
-              if (onSelectFactoryIds) onSelectFactoryIds(ids);
-              if (onSelectFactory) onSelectFactory(ids.length === 1 ? ids[0] : (ids.includes('ALL') ? 'ALL' : ids[0]));
+              if (onSelectFactoryIds) {
+                onSelectFactoryIds(ids);
+              } else if (onSelectFactory) {
+                onSelectFactory(ids.length === 1 ? ids[0] : (ids.includes('ALL') ? 'ALL' : (ids[0] || 'ALL')));
+              }
             }}
             language={language}
           />

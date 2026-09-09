@@ -62,11 +62,14 @@ export const DashboardFactorySlicer: React.FC<DashboardFactorySlicerProps> = ({
     return selectedFactoryIds.includes(f.FactoryID) || selectedFactoryIds.includes(f.InternalCode);
   };
 
-  // Toggle single factory
+  // Toggle single factory (Multi-Select friendly)
   const handleToggle = (factory: Dim_Factory) => {
     if (isAllSelected) {
-      // If currently ALL, selecting one means isolating that factory
-      onChange([factory.FactoryID]);
+      // If currently all selected, unchecking one means selecting all EXCEPT this one
+      const allExceptOne = factories
+        .filter((f) => f.FactoryID !== factory.FactoryID && f.InternalCode !== factory.InternalCode)
+        .map((f) => f.FactoryID);
+      onChange(allExceptOne);
       return;
     }
 
@@ -78,7 +81,12 @@ export const DashboardFactorySlicer: React.FC<DashboardFactorySlicerProps> = ({
       );
       onChange(remaining);
     } else {
-      onChange([...selectedFactoryIds, factory.FactoryID]);
+      const next = [...selectedFactoryIds, factory.FactoryID];
+      if (next.length >= factories.length) {
+        onChange(['ALL']);
+      } else {
+        onChange(next);
+      }
     }
   };
 
@@ -91,8 +99,10 @@ export const DashboardFactorySlicer: React.FC<DashboardFactorySlicerProps> = ({
       return;
     }
     const currentSet = new Set(selectedFactoryIds);
-    const inverted = factories.filter((f) => !currentSet.has(f.FactoryID)).map((f) => f.FactoryID);
-    onChange(inverted);
+    const inverted = factories
+      .filter((f) => !currentSet.has(f.FactoryID) && !currentSet.has(f.InternalCode))
+      .map((f) => f.FactoryID);
+    onChange(inverted.length >= factories.length ? ['ALL'] : inverted);
   };
 
   const handleSelectPreset = (preset: Dim_Factory[]) => {
