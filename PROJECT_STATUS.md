@@ -69,6 +69,12 @@ Các mục dưới đây đã được kiểm thử, nghiệm thu và deploy ổ
   - `authMiddleware.ts` ưu tiên đọc token từ Cookie, có fallback dự phòng đọc header `Bearer` để tương thích ngược 100%.
   - Thêm route `POST /api/auth/logout` tự động xóa sạch Cookie khi người dùng bấm Đăng xuất.
   - Frontend (`apiClient.ts` & `LoginGate.tsx`) tự động gửi cookie bằng `credentials: 'include'`.
+- [x] **[DONE] Chuyển Đổi 100% Dữ Liệu Thực Từ MS SQL Server (Gỡ Bỏ Mock Data):**
+  - Toàn bộ State ở `App.tsx` khởi tạo từ mảng rỗng `[]`, nạp trực tiếp qua `/api/bootstrap/all` từ database MSSQL.
+  - Gỡ bỏ hoàn toàn fallback `mockUsers` ở màn hình đăng nhập `LoginGate.tsx`. Mọi tài khoản bắt buộc xác thực từ `dbo.sys_User_Account`.
+- [x] **[DONE] Bảo Mật Mã Nguồn SQL Trên Git (.gitignore *.sql):**
+  - Đã thêm `*.sql`, `database/*.sql`, `database/**/*.sql` vào `.gitignore`.
+  - Toàn bộ các file `.sql` đã được gỡ bỏ theo dõi (untrack) khỏi GitHub để bảo mật tuyệt đối cấu trúc dữ liệu và tài khoản.
 
 ---
 

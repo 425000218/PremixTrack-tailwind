@@ -5,24 +5,18 @@
 set -e
 
 echo "=================================================================="
-echo "🚀 [1/4] Đang cập nhật mã nguồn mới nhất từ GitHub..."
+echo "🚀 [1/3] Đang cập nhật mã nguồn mới nhất từ GitHub..."
 echo "=================================================================="
 git pull
 
 echo "=================================================================="
-echo "📦 [2/4] Đang đóng gói Docker & Khởi chạy Container (Multi-stage)..."
+echo "📦 [2/3] Đang đóng gói Docker & Khởi chạy Container..."
 echo "=================================================================="
 docker compose down || true
 docker compose up -d --build --remove-orphans
 
 echo "=================================================================="
-echo "📡 [3/4] Đang chạy tự động cập nhật Migration Database (LXC 102)..."
-echo "=================================================================="
-# Tùy chọn: Chạy migration nếu có bản vá mới
-docker compose exec -T premixtrack-app npm run db:migrate || echo "⚠️ Migration đã chạy hoặc bỏ qua"
-
-echo "=================================================================="
-echo "🔍 [4/4] Kiểm tra trạng thái hoạt động..."
+echo "🔍 [3/3] Kiểm tra trạng thái hoạt động..."
 echo "=================================================================="
 sleep 3
 docker compose ps

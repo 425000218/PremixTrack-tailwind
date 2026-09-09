@@ -16,21 +16,6 @@ import {
   Fact_Position_Snapshot,
 } from '../types';
 
-import {
-  mockFactories,
-  mockMaterials,
-  mockSuppliers,
-  mockForecastDetails,
-  initialForecastVersions,
-  mockInventorySOH,
-  mockPOHeaders,
-  mockPODetails,
-  mockInboundSchedules,
-  mockUsageLogs,
-  mockInitialMappings,
-  mockPositionSnapshots,
-} from '../data/mockData';
-
 export interface BootstrapData {
   isOnline: boolean;
   source: 'MSSQL' | 'FALLBACK_LOCAL';
@@ -50,7 +35,7 @@ export interface BootstrapData {
 }
 
 /**
- * Bulk-load all operational and master data from SQL Server with graceful fallback
+ * Bulk-load all operational and master data directly from MS SQL Server (100% Real Data)
  */
 export async function loadAllBootstrapData(): Promise<BootstrapData> {
   try {
@@ -60,47 +45,46 @@ export async function loadAllBootstrapData(): Promise<BootstrapData> {
 
     if (json.success && json.data) {
       const d = json.data;
-      const hasRealMaterials = Array.isArray(d.materials) && d.materials.length > 0;
 
       return {
-        isOnline: json.source === 'MSSQL' && hasRealMaterials,
+        isOnline: json.source === 'MSSQL',
         source: json.source,
-        factories: hasRealMaterials ? d.factories : mockFactories,
-        materials: hasRealMaterials ? d.materials : mockMaterials,
-        suppliers: hasRealMaterials && d.suppliers.length > 0 ? d.suppliers : mockSuppliers,
-        substitutions: hasRealMaterials && d.substitutions.length > 0 ? d.substitutions : [],
-        mappings: hasRealMaterials && d.mappings.length > 0 ? d.mappings : mockInitialMappings,
-        forecastVersions: Array.isArray(d.forecastVersions) && d.forecastVersions.length > 0 ? d.forecastVersions : initialForecastVersions,
-        forecastDetails: Array.isArray(d.forecastDetails) && d.forecastDetails.length > 0 ? d.forecastDetails : mockForecastDetails,
-        inventorySOH: Array.isArray(d.inventorySOH) && d.inventorySOH.length > 0 ? d.inventorySOH : mockInventorySOH,
-        usageLogs: Array.isArray(d.usageLogs) && d.usageLogs.length > 0 ? d.usageLogs : mockUsageLogs,
-        inboundSchedules: Array.isArray(d.inboundSchedules) && d.inboundSchedules.length > 0 ? d.inboundSchedules : mockInboundSchedules,
-        poHeaders: Array.isArray(d.poHeaders) && d.poHeaders.length > 0 ? d.poHeaders : mockPOHeaders,
-        poDetails: Array.isArray(d.poDetails) && d.poDetails.length > 0 ? d.poDetails : mockPODetails,
-        positions: Array.isArray(d.positions) && d.positions.length > 0 ? d.positions : mockPositionSnapshots,
+        factories: Array.isArray(d.factories) ? d.factories : [],
+        materials: Array.isArray(d.materials) ? d.materials : [],
+        suppliers: Array.isArray(d.suppliers) ? d.suppliers : [],
+        substitutions: Array.isArray(d.substitutions) ? d.substitutions : [],
+        mappings: Array.isArray(d.mappings) ? d.mappings : [],
+        forecastVersions: Array.isArray(d.forecastVersions) ? d.forecastVersions : [],
+        forecastDetails: Array.isArray(d.forecastDetails) ? d.forecastDetails : [],
+        inventorySOH: Array.isArray(d.inventorySOH) ? d.inventorySOH : [],
+        usageLogs: Array.isArray(d.usageLogs) ? d.usageLogs : [],
+        inboundSchedules: Array.isArray(d.inboundSchedules) ? d.inboundSchedules : [],
+        poHeaders: Array.isArray(d.poHeaders) ? d.poHeaders : [],
+        poDetails: Array.isArray(d.poDetails) ? d.poDetails : [],
+        positions: Array.isArray(d.positions) ? d.positions : [],
       };
     }
   } catch (err) {
-    console.warn('⚠️ Không thể tải dữ liệu từ SQL Server, chuyển sang chế độ dự phòng:', err);
+    console.warn('⚠️ Không thể tải dữ liệu từ SQL Server:', err);
   }
 
-  // Graceful fallback
+  // Database offline - no mock data fallback
   return {
     isOnline: false,
-    source: 'FALLBACK_LOCAL',
-    factories: mockFactories,
-    materials: mockMaterials,
-    suppliers: mockSuppliers,
+    source: 'MSSQL',
+    factories: [],
+    materials: [],
+    suppliers: [],
     substitutions: [],
-    mappings: mockInitialMappings,
-    forecastVersions: initialForecastVersions,
-    forecastDetails: mockForecastDetails,
-    inventorySOH: mockInventorySOH,
-    usageLogs: mockUsageLogs,
-    inboundSchedules: mockInboundSchedules,
-    poHeaders: mockPOHeaders,
-    poDetails: mockPODetails,
-    positions: mockPositionSnapshots,
+    mappings: [],
+    forecastVersions: [],
+    forecastDetails: [],
+    inventorySOH: [],
+    usageLogs: [],
+    inboundSchedules: [],
+    poHeaders: [],
+    poDetails: [],
+    positions: [],
   };
 }
 

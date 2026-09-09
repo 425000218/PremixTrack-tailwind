@@ -15,18 +15,6 @@ import { PositionMatrixView } from './components/PositionMatrixView';
 import { AiSupplyChainAdvisor } from './components/AiSupplyChainAdvisor';
 
 import {
-  mockFactories,
-  mockMaterials,
-  mockSuppliers,
-  mockForecastDetails,
-  initialForecastVersions,
-  initialForecastCompareData,
-  mockInventorySOH,
-  mockPOHeaders,
-  mockPODetails,
-  mockInboundSchedules,
-  mockUsageLogs,
-  mockInitialMappings,
   getRolePermissions,
 } from './data/mockData';
 
@@ -72,26 +60,26 @@ import {
 } from './types';
 
 export function App() {
-  // Master Data State
-  const [factories, setFactories] = useState<Dim_Factory[]>(mockFactories);
-  const [materials, setMaterials] = useState<Dim_Material[]>(mockMaterials);
-  const [suppliers, setSuppliers] = useState<Dim_Supplier[]>(mockSuppliers);
+  // Master Data State (100% Real Data from MS SQL Server)
+  const [factories, setFactories] = useState<Dim_Factory[]>([]);
+  const [materials, setMaterials] = useState<Dim_Material[]>([]);
+  const [suppliers, setSuppliers] = useState<Dim_Supplier[]>([]);
   const [substitutions, setSubstitutions] = useState<Dim_Material_Substitution[]>([]);
-  const [learnedMappings, setLearnedMappings] = useState<Sys_Import_Mapping[]>(mockInitialMappings);
+  const [learnedMappings, setLearnedMappings] = useState<Sys_Import_Mapping[]>([]);
 
   // Operational Fact Data & Forecast Run Versions State
-  const [forecastVersions, setForecastVersions] = useState<ForecastRunVersion[]>(initialForecastVersions);
-  const [forecastCompareData, setForecastCompareData] = useState<ForecastCompareRow[]>(initialForecastCompareData);
-  const [forecastDetails, setForecastDetails] = useState<Fact_Forecast_Detail[]>(mockForecastDetails);
-  const [inventorySOH, setInventorySOH] = useState<Fact_Inventory_SOH[]>(mockInventorySOH);
-  const [poHeaders, setPOHeaders] = useState<Fact_PurchaseOrder[]>(mockPOHeaders);
-  const [poDetails, setPODetails] = useState<Fact_PO_Detail[]>(mockPODetails);
-  const [inboundSchedules, setInboundSchedules] = useState<Fact_Inbound_Schedule[]>(mockInboundSchedules);
-  const [usageLogs, setUsageLogs] = useState<Fact_Production_Usage[]>(mockUsageLogs);
+  const [forecastVersions, setForecastVersions] = useState<ForecastRunVersion[]>([]);
+  const [forecastCompareData, setForecastCompareData] = useState<ForecastCompareRow[]>([]);
+  const [forecastDetails, setForecastDetails] = useState<Fact_Forecast_Detail[]>([]);
+  const [inventorySOH, setInventorySOH] = useState<Fact_Inventory_SOH[]>([]);
+  const [poHeaders, setPOHeaders] = useState<Fact_PurchaseOrder[]>([]);
+  const [poDetails, setPODetails] = useState<Fact_PO_Detail[]>([]);
+  const [inboundSchedules, setInboundSchedules] = useState<Fact_Inbound_Schedule[]>([]);
+  const [usageLogs, setUsageLogs] = useState<Fact_Production_Usage[]>([]);
 
   // Data Loading & Connection Status State
   const [isDataLoaded, setIsDataLoaded] = useState<boolean>(false);
-  const [dbSource, setDbSource] = useState<'MSSQL' | 'FALLBACK_LOCAL'>('FALLBACK_LOCAL');
+  const [dbSource, setDbSource] = useState<'MSSQL' | 'FALLBACK_LOCAL'>('MSSQL');
 
   // User Authentication & RBAC State (Requires Login Gate)
   const [currentUser, setCurrentUser] = useState<AppUser | null>(() => {

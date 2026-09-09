@@ -11,7 +11,7 @@ import {
   Mail
 } from 'lucide-react';
 import { AppUser } from '../types';
-import { mockUsers, getRolePermissions } from '../data/mockData';
+import { getRolePermissions } from '../data/mockData';
 
 interface LoginGateProps {
   onLoginSuccess: (user: AppUser) => void;
@@ -69,15 +69,7 @@ export const LoginGate: React.FC<LoginGateProps> = ({ onLoginSuccess }) => {
         setErrorMsg(data.message || 'Tên đăng nhập hoặc mật khẩu không chính xác.');
       }
     } catch (err: any) {
-      // Fallback for offline testing
-      const matched = mockUsers.find(
-        u => (u.username.toLowerCase() === username.toLowerCase() || u.email.toLowerCase() === username.toLowerCase())
-      );
-      if (matched) {
-        onLoginSuccess(matched);
-      } else {
-        setErrorMsg('Không thể kết nối máy chủ xác thực.');
-      }
+      setErrorMsg('Không thể kết nối máy chủ xác thực MS SQL Server.');
     } finally {
       setLoading(false);
     }
