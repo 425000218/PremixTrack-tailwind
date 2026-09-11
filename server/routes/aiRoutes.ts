@@ -4,8 +4,8 @@ import { analyzeSupplyChainWithAI, generateFallbackAnalysis } from '../services/
 
 const router = Router();
 
-// AI Advisor Endpoint with Thinking Mode & Model Fallbacks
-router.post('/ai/advisor', async (req, res) => {
+// AI Advisor Endpoint with Thinking Mode & Model Fallbacks (supports both /ai/advisor and /ai/chat)
+router.post(['/ai/advisor', '/ai/chat'], async (req, res) => {
   try {
     const { prompt, contextData, mode, snapshotDate = '2026-08-25' } = req.body;
 

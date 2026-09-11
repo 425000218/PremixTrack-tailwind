@@ -277,6 +277,32 @@ const openApiSpec = {
         }
       }
     },
+    "/ai/advisor": {
+      post: {
+        tags: ["AI Supply Chain Advisor"],
+        summary: "Cố vấn AI phân tích rủi ro chuỗi cung ứng & khuyến nghị điều chuyển",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  prompt: { type: "string", example: "Phân tích nguy cơ cạn hàng Premix Vitamin A tại nhà máy Bình Dương trong 14 ngày tới." },
+                  contextData: { type: "object", description: "Dữ liệu SOH và Forecast kèm theo" },
+                  mode: { type: "string", example: "thinking" },
+                  snapshotDate: { type: "string", example: "2026-08-25" }
+                },
+                required: ["prompt"]
+              }
+            }
+          }
+        },
+        responses: {
+          "200": { description: "Phản hồi phân tích chuyên sâu từ AI" }
+        }
+      }
+    },
     "/ai/chat": {
       post: {
         tags: ["AI Supply Chain Advisor"],
