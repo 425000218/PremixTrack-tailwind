@@ -8,6 +8,7 @@ import positionRoutes from './positionRoutes';
 import authRoutes from './authRoutes';
 import aiRoutes from './aiRoutes';
 import bootstrapRoutes from './bootstrapRoutes';
+import importRoutes from './importRoutes';
 
 const router = Router();
 
@@ -20,5 +21,6 @@ router.use(orderRoutes);
 router.use(positionRoutes);
 router.use(authRoutes);
 router.use(aiRoutes);
+router.use(importRoutes);
 
 export default router;

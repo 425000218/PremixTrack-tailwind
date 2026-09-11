@@ -14,7 +14,9 @@ import {
   Sparkles,
   Info,
   Check,
-  Calendar
+  Calendar,
+  FolderArchive,
+  ExternalLink
 } from 'lucide-react';
 import {
   Dim_Factory,
@@ -29,6 +31,7 @@ import {
   systemFieldsByType,
   generateSampleExcel
 } from '../utils/excelParser';
+import { saveRawImportFileToBackend } from '../services/dataService';
 
 interface ExcelImportModalProps {
   isOpen: boolean;
@@ -59,6 +62,8 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
   const [snapshotDate, setSnapshotDate] = useState<string>('2026-08-25');
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [fileName, setFileName] = useState<string>('');
+  const [rawFile, setRawFile] = useState<File | null>(null);
+  const [fileBase64, setFileBase64] = useState<string>('');
   const [fileHeaders, setFileHeaders] = useState<string[]>([]);
   const [rawExcelRows, setRawExcelRows] = useState<any[]>([]);
   const [columnMapping, setColumnMapping] = useState<Record<string, string>>({});
@@ -99,7 +104,17 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
 
   const processFile = (file: File) => {
     setFileName(file.name);
+    setRawFile(file);
     setIsProcessing(true);
+
+    // Read Base64 for raw archival storage
+    const b64Reader = new FileReader();
+    b64Reader.onload = () => {
+      const result = b64Reader.result as string;
+      const base64Data = result.split(',')[1] || '';
+      setFileBase64(base64Data);
+    };
+    b64Reader.readAsDataURL(file);
 
     const reader = new FileReader();
     reader.onload = (evt) => {
@@ -226,6 +241,25 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
     );
     onCommitImport(importType, validRows, snapshotDate);
 
+    // Save Raw Excel File to Host Storage (/opt/DataImport_premixtrack) and Log to MSSQL
+    if (fileBase64 && fileName) {
+      saveRawImportFileToBackend({
+        fileName,
+        fileBase64,
+        importType,
+        snapshotDate,
+        totalRows: validationResult.parsedData.length,
+        validRows: validRows.length,
+        errorRows: validationResult.errorRowsCount,
+        uploadedBy: 'admin',
+        notes: `Imported ${validRows.length}/${validationResult.parsedData.length} rows for Cut-off ${snapshotDate}`
+      }).then((ok) => {
+        if (ok) {
+          console.log(`✅ File raw "${fileName}" đã được tự động lưu trữ tại /opt/DataImport_premixtrack/${snapshotDate}/ và ghi log vào SQL Server.`);
+        }
+      });
+    }
+
     confetti({
       particleCount: 80,
       spread: 70,
@@ -238,6 +272,8 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
   const resetModal = () => {
     setStep(1);
     setFileName('');
+    setRawFile(null);
+    setFileBase64('');
     setFileHeaders([]);
     setRawExcelRows([]);
     setColumnMapping({});
@@ -269,15 +305,29 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
             </div>
           </div>
 
-          <button
-            onClick={() => {
-              resetModal();
-              onClose();
-            }}
-            className="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <a
+              href="https://file101.dangbacnam.site/files/opt/DataImport_premixtrack/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-bold transition-all shadow-xs cursor-pointer"
+              title="Mở kho lưu trữ file raw trên máy chủ LXC 101"
+            >
+              <FolderArchive className="w-3.5 h-3.5 text-indigo-600" />
+              <span>Kho File Raw</span>
+              <ExternalLink className="w-3 h-3 text-indigo-400" />
+            </a>
+
+            <button
+              onClick={() => {
+                resetModal();
+                onClose();
+              }}
+              className="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Step Indicator */}

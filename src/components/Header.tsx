@@ -16,6 +16,8 @@ import {
   ArrowRight,
   PanelLeftClose,
   PanelLeftOpen,
+  FolderArchive,
+  ExternalLink,
 } from 'lucide-react';
 import { Dim_Factory, Language, AppUser } from '../types';
 import { MultiFactorySelect } from './MultiFactorySelect';
@@ -256,16 +258,33 @@ export const Header: React.FC<HeaderProps> = ({
                   </button>
 
                   {(currentUser.role === 'System_Admin' || currentUser.username === 'admin') && (
-                    <button
-                      onClick={() => {
-                        setIsDropdownOpen(false);
-                        onOpenUserManagement?.();
-                      }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-700 bg-rose-50/70 hover:bg-rose-100/80 transition-colors font-bold cursor-pointer text-left"
-                    >
-                      <Shield className="w-4 h-4 text-rose-600" />
-                      <span>Quản Trị Users & Mật Khẩu (Admin)</span>
-                    </button>
+                    <>
+                      <button
+                        onClick={() => {
+                          setIsDropdownOpen(false);
+                          onOpenUserManagement?.();
+                        }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-700 bg-rose-50/70 hover:bg-rose-100/80 transition-colors font-bold cursor-pointer text-left"
+                      >
+                        <Shield className="w-4 h-4 text-rose-600" />
+                        <span>Quản Trị Users & Mật Khẩu (Admin)</span>
+                      </button>
+
+                      <a
+                        href="https://file101.dangbacnam.site/files/opt/DataImport_premixtrack/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => setIsDropdownOpen(false)}
+                        className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-indigo-700 bg-indigo-50/70 hover:bg-indigo-100/80 transition-colors font-bold cursor-pointer text-left"
+                        title="Mở kho lưu trữ file Excel raw trên LXC 101"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <FolderArchive className="w-4 h-4 text-indigo-600" />
+                          <span>Kho Dữ Liệu Raw (FileBrowser)</span>
+                        </div>
+                        <ExternalLink className="w-3.5 h-3.5 text-indigo-400" />
+                      </a>
+                    </>
                   )}
                 </div>
 

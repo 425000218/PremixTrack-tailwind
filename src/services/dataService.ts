@@ -297,3 +297,44 @@ export async function triggerPositionCalculation(
     return false;
   }
 }
+
+// ----------------------------------------------------------------------------
+// Save Raw Excel File & Audit Log
+// ----------------------------------------------------------------------------
+export interface SaveRawImportPayload {
+  fileName: string;
+  fileBase64: string;
+  importType: string;
+  snapshotDate: string;
+  totalRows: number;
+  validRows: number;
+  errorRows: number;
+  uploadedBy: string;
+  notes?: string;
+}
+
+export async function saveRawImportFileToBackend(payload: SaveRawImportPayload): Promise<boolean> {
+  try {
+    const res = await fetchWithAuth('/api/import/save-raw', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    return data.success;
+  } catch (err) {
+    console.error('Failed to save raw import file:', err);
+    return false;
+  }
+}
+
+export async function getImportHistoryFromDb(): Promise<any[]> {
+  try {
+    const res = await fetchWithAuth('/api/import/history');
+    const data = await res.json();
+    return data.success ? data.data : [];
+  } catch (err) {
+    console.error('Failed to fetch import history:', err);
+    return [];
+  }
+}
