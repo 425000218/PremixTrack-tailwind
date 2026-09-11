@@ -13,6 +13,7 @@ import { MasterDataManagement } from './components/MasterDataManagement';
 import { ForecastManagement } from './components/ForecastManagement';
 import { PositionMatrixView } from './components/PositionMatrixView';
 import { AiSupplyChainAdvisor } from './components/AiSupplyChainAdvisor';
+import { useAuth } from './context/AuthContext';
 
 import {
   getRolePermissions,
@@ -81,22 +82,8 @@ export function App() {
   const [isDataLoaded, setIsDataLoaded] = useState<boolean>(false);
   const [dbSource, setDbSource] = useState<'MSSQL' | 'FALLBACK_LOCAL'>('MSSQL');
 
-  // User Authentication & RBAC State (Requires Login Gate)
-  const [currentUser, setCurrentUser] = useState<AppUser | null>(() => {
-    const saved = localStorage.getItem('premixtrack_user');
-    if (saved) {
-      try {
-        const u = JSON.parse(saved);
-        if (u && !u.permissions) {
-          u.permissions = getRolePermissions(u.role, u.assignedFactoryId);
-        }
-        return u;
-      } catch {
-        return null;
-      }
-    }
-    return null; // By default require login gate for security!
-  });
+  // User Authentication & RBAC via central AuthContext
+  const { currentUser, login, logout, updateUser, refreshUserProfile } = useAuth();
 
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
@@ -170,77 +157,11 @@ export function App() {
     };
   }, []);
 
-  // Live Refresh current user profile from MS SQL Server (dbo.sys_User_Account)
-  const refreshUserProfileFromDb = () => {
-    const saved = localStorage.getItem('premixtrack_user');
-    let userToFind = currentUser;
-    if (!userToFind && saved) {
-      try {
-        userToFind = JSON.parse(saved);
-      } catch {
-        // ignore
-      }
-    }
-    if (!userToFind?.id && !userToFind?.username) return;
 
-    fetchWithAuth('/api/users')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success && Array.isArray(data.data)) {
-          const dbUser = data.data.find(
-            (u: any) =>
-              (userToFind?.id && u.UserID === userToFind.id) ||
-              (userToFind?.username && u.Username.toLowerCase() === userToFind.username.toLowerCase())
-          );
-          if (dbUser) {
-            const roleMap: Record<string, { role: UserRole; roleNameVN: string; avatarBg: string }> = {
-              admin: { role: 'System_Admin', roleNameVN: 'Quản Trị Viên Hệ Thống', avatarBg: 'bg-rose-600' },
-              planner: { role: 'Supply_Chain_Manager', roleNameVN: 'Trưởng Phòng Chuỗi Cung Ứng (S&OP)', avatarBg: 'bg-blue-600' },
-              factory_manager: { role: 'Factory_Planner', roleNameVN: 'Kỹ Sư Điều Phối Nhà Máy', avatarBg: 'bg-amber-600' },
-              buyer: { role: 'Logistics_Officer', roleNameVN: 'Trưởng Bộ Phận Inbound & Mua Hàng', avatarBg: 'bg-emerald-600' },
-              viewer: { role: 'Viewer', roleNameVN: 'Kiểm Toán Viên & Xem Báo Cáo', avatarBg: 'bg-slate-600' },
-            };
-            const mapped = roleMap[dbUser.Role?.toLowerCase()] || roleMap.viewer;
-            let factoryAccessArray: string[] = ['ALL'];
-            try {
-              factoryAccessArray = typeof dbUser.FactoryAccess === 'string' ? JSON.parse(dbUser.FactoryAccess) : (dbUser.FactoryAccess || ['ALL']);
-            } catch {
-              factoryAccessArray = ['ALL'];
-            }
-            const assignedFactoryId = factoryAccessArray.includes('ALL') ? 'ALL' : factoryAccessArray[0];
-            const assignedFactoryName = factoryAccessArray.includes('ALL') ? 'Toàn quốc (22 Cơ sở)' : `Nhà máy ${assignedFactoryId.replace('FAC-', '')}`;
 
-            const refreshed: AppUser = {
-              ...userToFind!,
-              id: dbUser.UserID,
-              username: dbUser.Username,
-              fullName: dbUser.FullName,
-              email: dbUser.Email,
-              phone: dbUser.Phone || '',
-              department: dbUser.Department || '',
-              role: mapped.role,
-              roleNameVN: mapped.roleNameVN,
-              avatarBg: mapped.avatarBg,
-              assignedFactoryId,
-              assignedFactoryName,
-              permissions: getRolePermissions(mapped.role, assignedFactoryId),
-            };
-            setCurrentUser(refreshed);
-            localStorage.setItem('premixtrack_user', JSON.stringify(refreshed));
-          }
-        }
-      })
-      .catch((err) => console.warn('Could not sync user profile from DB:', err));
-  };
-
-  useEffect(() => {
-    refreshUserProfileFromDb();
-  }, []);
-
-  // Auth Handler Functions
+  // Auth Handler Functions via central AuthContext
   const handleLoginSuccess = (user: AppUser) => {
-    setCurrentUser(user);
-    localStorage.setItem('premixtrack_user', JSON.stringify(user));
+    login(user);
     if (user.assignedFactoryId && user.assignedFactoryId !== 'ALL') {
       setSelectedFactoryId(user.assignedFactoryId);
       setSelectedFactoryIds([user.assignedFactoryId]);
@@ -252,15 +173,12 @@ export function App() {
   };
 
   const handleLogout = () => {
-    fetchWithAuth('/api/auth/logout', { method: 'POST' }).catch(() => {});
-    setCurrentUser(null);
-    localStorage.removeItem('premixtrack_user');
+    logout();
     showToast('Đã đăng xuất khỏi hệ thống.');
   };
 
   const handleUpdateUser = (updated: AppUser) => {
-    setCurrentUser(updated);
-    localStorage.setItem('premixtrack_user', JSON.stringify(updated));
+    updateUser(updated);
     showToast('Đã cập nhật thông tin hồ sơ cá nhân!');
   };
 
