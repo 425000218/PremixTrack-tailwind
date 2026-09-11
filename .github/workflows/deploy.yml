@@ -1,0 +1,30 @@
+name: PremixTrack CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Build and Deploy Application
+    runs-on: self-hosted
+
+    steps:
+      - name: 🚀 Step 1 - Checkout Code
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Step 2 - Create Environment & Deploy
+        env:
+          ENV_FILE: ${{ secrets.ENV_FILE }}
+        run: |
+          printf "%s\n" "$ENV_FILE" > .env
+          docker compose down || true
+          docker compose up -d --build --remove-orphans
+
+      - name: 🩺 Step 3 - Verify Application Health
+        run: |
+          sleep 5
+          docker compose ps
+          curl -f http://localhost:3000/api/health || exit 1
+          echo "✅ Health check passed: Service is healthy!"
