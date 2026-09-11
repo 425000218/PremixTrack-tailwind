@@ -13,6 +13,7 @@ import { MasterDataManagement } from './components/MasterDataManagement';
 import { ForecastManagement } from './components/ForecastManagement';
 import { PositionMatrixView } from './components/PositionMatrixView';
 import { AiSupplyChainAdvisor } from './components/AiSupplyChainAdvisor';
+import { NotFoundPage } from './components/NotFoundPage';
 import { useAuth } from './context/AuthContext';
 
 import {
@@ -86,8 +87,41 @@ export function App() {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState<boolean>(false);
   const [isUserManagementOpen, setIsUserManagementOpen] = useState<boolean>(false);
 
-  // UI State
-  const [currentTab, setCurrentTab] = useState<string>('dashboard');
+  // Valid Known Tab Slugs
+  const validTabs = ['dashboard', 'position-matrix', 'matrix', 'forecast', 'masterdata', 'ai-advisor'];
+
+  // UI State: Detect if user entered an unknown path in browser URL bar
+  const getInitialRouteState = () => {
+    const path = window.location.pathname.replace(/^\/+|\/+$/g, ''); // strip leading/trailing slashes
+    if (!path || path === '') {
+      return { tab: 'dashboard', notFoundPath: null };
+    }
+    if (validTabs.includes(path)) {
+      return { tab: path, notFoundPath: null };
+    }
+    return { tab: '404', notFoundPath: window.location.pathname };
+  };
+
+  const [routeState, setRouteState] = useState(getInitialRouteState);
+  const currentTab = routeState.tab;
+
+  const setCurrentTab = (newTab: string) => {
+    if (newTab === 'dashboard') {
+      window.history.pushState({}, '', '/');
+    } else if (validTabs.includes(newTab)) {
+      window.history.pushState({}, '', `/${newTab}`);
+    }
+    setRouteState({ tab: newTab, notFoundPath: null });
+  };
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setRouteState(getInitialRouteState());
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   const [selectedFactoryId, setSelectedFactoryId] = useState<string>('ALL');
   const [selectedFactoryIds, setSelectedFactoryIds] = useState<string[]>(['ALL']);
   const [language, setLanguage] = useState<Language>('vi');
@@ -572,6 +606,13 @@ export function App() {
                 factories={factories}
                 materials={materials}
                 language={language}
+              />
+            )}
+
+            {currentTab === '404' && (
+              <NotFoundPage
+                attemptedPath={routeState.notFoundPath || undefined}
+                onGoHome={() => setCurrentTab('dashboard')}
               />
             )}
           </div>

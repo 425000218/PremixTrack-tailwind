@@ -1,22 +1,27 @@
-import express from 'express';
+﻿import express from 'express';
 import cookieParser from 'cookie-parser';
 import path from 'path';
 import dotenv from 'dotenv';
 import { createServer as createViteServer } from 'vite';
 import apiRoutes from './server/routes/index';
+import swaggerRoutes from './server/routes/swaggerRoutes';
 
 dotenv.config();
 
 async function startServer() {
   const app = express();
-  const PORT = process.env.PORT || 3000;
+  const PORT = Number(process.env.PORT) || 3000;
 
   app.use(cookieParser());
   app.use(express.json({ limit: '50mb' }));
   app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-  // Mount Modular API Routers
+  // Mount API Routers
   app.use('/api', apiRoutes);
+
+  // Mount Swagger UI (Hỗ trợ cả 2 link: /swagger và /api/swagger)
+  app.use(swaggerRoutes);
+  app.use('/api', swaggerRoutes);
 
   // Vite development vs production static serve
   if (process.env.NODE_ENV !== 'production') {
@@ -33,8 +38,9 @@ async function startServer() {
     });
   }
 
-  app.listen(Number(PORT), '0.0.0.0', () => {
-    console.log(`🚀 PremixTrack Server running on http://0.0.0.0:${PORT}`);
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 [PremixTrack] Server is running on http://0.0.0.0:${PORT}`);
+    console.log(`📖 [PremixTrack] Swagger API Explorer: http://0.0.0.0:${PORT}/swagger`);
   });
 }
 
