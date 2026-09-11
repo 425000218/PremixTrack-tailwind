@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { AppUser, UserRole } from '../types';
-import { getRolePermissions } from '../data/mockData';
+import { getRolePermissions } from '../utils/rbacRules';
 import { fetchWithAuth } from '../utils/apiClient';
 
 interface AuthContextType {

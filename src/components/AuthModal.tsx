@@ -17,7 +17,7 @@ import {
   EyeOff
 } from 'lucide-react';
 import { AppUser, UserRole, Dim_Factory } from '../types';
-import { mockUsers, getRolePermissions } from '../data/mockData';
+import { getRolePermissions } from '../utils/rbacRules';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -56,112 +56,81 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   if (!isOpen) return null;
 
-  // Handle standard login
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  // Handle standard login via real API
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError(null);
 
-    const cleanInput = loginUsername.trim().toLowerCase();
-    if (!cleanInput) {
-      setLoginError('Vui lòng nhập tên đăng nhập hoặc email.');
+    const cleanInput = loginUsername.trim();
+    if (!cleanInput || !loginPassword) {
+      setLoginError('Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.');
       return;
     }
 
-    // Match with mock users
-    const matched = mockUsers.find(
-      (u) =>
-        u.username.toLowerCase() === cleanInput ||
-        u.email.toLowerCase() === cleanInput
-    );
-
-    if (matched) {
-      onLoginSuccess(matched);
-      onClose();
-    } else {
-      // Fallback create custom user on-the-fly if not found
-      const customUser: AppUser = {
-        id: `USR-${Date.now().toString().substr(6, 6)}`,
-        username: cleanInput,
-        email: cleanInput.includes('@') ? cleanInput : `${cleanInput}@premixtrack.vn`,
-        fullName: loginUsername.trim(),
-        role: 'Supply_Chain_Manager',
-        roleNameVN: 'Trưởng Phòng Chuỗi Cung Ứng (S&OP)',
-        department: 'Phòng Điều Phối Vận Hành',
-        phone: '0901 234 567',
-        avatarBg: 'bg-blue-600',
-        assignedFactoryId: 'ALL',
-        assignedFactoryName: 'Toàn quốc (8 Nhà máy)',
-        permissions: getRolePermissions('Supply_Chain_Manager', 'ALL'),
-        lastLogin: 'Vừa xong',
-      };
-      onLoginSuccess(customUser);
-      onClose();
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: cleanInput, password: loginPassword }),
+        credentials: 'include',
+      });
+      const data = await res.json();
+      if (data.success && data.user) {
+        const fullUser: AppUser = {
+          ...data.user,
+          permissions: getRolePermissions(data.user.role, data.user.assignedFactoryId),
+        };
+        onLoginSuccess(fullUser);
+        onClose();
+      } else {
+        setLoginError(data.message || 'Tên đăng nhập hoặc mật khẩu không chính xác.');
+      }
+    } catch (err) {
+      setLoginError('Không thể kết nối máy chủ xác thực MS SQL Server.');
     }
   };
 
-  // Handle quick 1-click demo login
-  const handleQuickLogin = (demoUser: AppUser) => {
-    onLoginSuccess(demoUser);
-    onClose();
-  };
 
   // Handle registration
-  const handleRegisterSubmit = (e: React.FormEvent) => {
+  // Handle registration via real API
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setRegError(null);
 
-    if (!regFullName.trim() || !regUsername.trim() || !regEmail.trim()) {
-      setRegError('Vui lòng điền đầy đủ họ tên, tên đăng nhập và email.');
+    if (!regFullName.trim() || !regUsername.trim() || !regEmail.trim() || !regPassword) {
+      setRegError('Vui lòng điền đầy đủ họ tên, tên đăng nhập, email và mật khẩu.');
       return;
     }
 
-    if (regPassword && regPassword !== regConfirmPassword) {
+    if (regPassword !== regConfirmPassword) {
       setRegError('Mật khẩu xác nhận không khớp.');
       return;
     }
 
-    const selectedFac = factories.find((f) => f.FactoryID === regFactoryId);
-    const assignedFacName =
-      regFactoryId === 'ALL'
-        ? `Toàn quốc (${factories.length} Nhà máy)`
-        : selectedFac
-        ? `${selectedFac.FactoryName_VN} (${selectedFac.InternalCode})`
-        : 'Toàn quốc';
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName: regFullName.trim(),
+          email: regEmail.trim().toLowerCase(),
+          username: regUsername.trim().toLowerCase(),
+          password: regPassword,
+        }),
+      });
 
-    const roleNameMap: Record<UserRole, string> = {
-      System_Admin: 'Quản Trị Viên Hệ Thống',
-      Supply_Chain_Manager: 'Trưởng Phòng Chuỗi Cung Ứng (S&OP)',
-      Factory_Planner: 'Điều Phối Viên Nhà Máy',
-      Logistics_Officer: 'Thủ Kho & Tiếp Nhận Inbound',
-      Viewer: 'Kiểm Toán & Xem Báo Cáo',
-    };
-
-    const avatarColorMap: Record<UserRole, string> = {
-      System_Admin: 'bg-rose-600',
-      Supply_Chain_Manager: 'bg-blue-600',
-      Factory_Planner: 'bg-amber-600',
-      Logistics_Officer: 'bg-emerald-600',
-      Viewer: 'bg-slate-600',
-    };
-
-    const newUser: AppUser = {
-      id: `USR-${Date.now().toString().substr(6, 6)}`,
-      username: regUsername.trim().toLowerCase(),
-      email: regEmail.trim().toLowerCase(),
-      fullName: regFullName.trim(),
-      role: regRole,
-      roleNameVN: roleNameMap[regRole],
-      department: regDepartment.trim(),
-      phone: regPhone.trim() || '0909 000 111',
-      avatarBg: avatarColorMap[regRole],
-      assignedFactoryId: regFactoryId,
-      assignedFactoryName: assignedFacName,
-      permissions: getRolePermissions(regRole, regFactoryId),
-      lastLogin: 'Vừa đăng ký',
-    };
-
-    onLoginSuccess(newUser);
-    onClose();
+      const data = await res.json();
+      if (res.ok && data.success) {
+        alert(data.message || 'Đăng ký thành công! Vui lòng đăng nhập bằng tài khoản vừa tạo.');
+        setMode('login');
+        setLoginUsername(regUsername.trim().toLowerCase());
+        setLoginPassword('');
+      } else {
+        setRegError(data.message || 'Đăng ký thất bại.');
+      }
+    } catch (err) {
+      setRegError('Không thể kết nối máy chủ xác thực.');
+    }
   };
 
   return (
@@ -287,49 +256,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   <span>Đăng Nhập Vào Hệ Thống</span>
                 </button>
               </form>
-
-              {/* 1-Click Demo Accounts Section */}
-              <div className="pt-3 border-t border-slate-100 space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-slate-500 uppercase tracking-wider text-[10px] flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                    <span>Đăng Nhập 1-Click Thử Nghiệm Phân Quyền (Demo Roles):</span>
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 gap-2">
-                  {mockUsers.map((user) => (
-                    <button
-                      key={user.id}
-                      type="button"
-                      onClick={() => handleQuickLogin(user)}
-                      className="p-2.5 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50/40 bg-white text-left transition-all cursor-pointer flex items-center justify-between group"
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <div
-                          className={`w-7 h-7 rounded-lg ${user.avatarBg} text-white flex items-center justify-center font-bold text-xs shadow-xs`}
-                        >
-                          {user.fullName.charAt(0)}
-                        </div>
-                        <div>
-                          <div className="font-bold text-slate-900 group-hover:text-blue-700 flex items-center gap-1.5">
-                            <span>{user.fullName}</span>
-                            <span className="text-[10px] text-slate-400 font-mono">(@{user.username})</span>
-                          </div>
-                          <div className="text-[10px] text-slate-500">
-                            {user.roleNameVN} • {user.assignedFactoryName}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-1 text-[11px] font-bold text-blue-600 group-hover:translate-x-0.5 transition-transform">
-                        <span>Chọn</span>
-                        <ArrowRight className="w-3 h-3" />
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
             </div>
           )}
 

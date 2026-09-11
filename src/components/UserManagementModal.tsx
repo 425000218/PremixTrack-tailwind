@@ -23,7 +23,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { UserRole, AppUser, Dim_Factory } from '../types';
-import { getRolePermissions, mockUsers } from '../data/mockData';
+import { getRolePermissions } from '../utils/rbacRules';
 
 interface DbUser {
   UserID: string;
@@ -80,32 +80,16 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const token = getAuthToken();
-      if (!token) {
-        setUsers(mockUsers.map(u => ({
-          UserID: u.id,
-          Username: u.username,
-          FullName: u.fullName,
-          Email: u.email,
-          Phone: u.phone,
-          Department: u.department,
-          Role: u.role,
-          FactoryAccess: JSON.stringify([u.assignedFactoryId]),
-          IsActive: 1,
-          CreatedAt: u.lastLogin || new Date().toISOString(),
-          UpdatedAt: new Date().toISOString()
-        })));
-        setLoading(false);
-        return;
-      }
-
       const res = await fetchWithAuth('/api/users');
       const data = await res.json();
-      if (data.success && data.data) {
+      if (data.success && Array.isArray(data.data)) {
         setUsers(data.data);
+      } else {
+        setUsers([]);
       }
     } catch (err) {
       console.error('Error loading users:', err);
+      setUsers([]);
     } finally {
       setLoading(false);
     }

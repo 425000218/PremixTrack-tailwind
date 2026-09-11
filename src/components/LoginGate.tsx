@@ -11,7 +11,7 @@ import {
   Mail
 } from 'lucide-react';
 import { AppUser } from '../types';
-import { getRolePermissions } from '../data/mockData';
+import { getRolePermissions } from '../utils/rbacRules';
 
 interface LoginGateProps {
   onLoginSuccess: (user: AppUser) => void;

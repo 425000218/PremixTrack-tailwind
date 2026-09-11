@@ -21,7 +21,6 @@ import {
   Box
 } from 'lucide-react';
 import { Fact_Position_Snapshot, PositionHeaderMode, Language } from '../types';
-import { mockPositionSnapshots } from '../data/mockData';
 import { fetchWithAuth } from '../utils/apiClient';
 
 interface PositionMatrixViewProps {
@@ -33,7 +32,7 @@ export const PositionMatrixView: React.FC<PositionMatrixViewProps> = ({
   language = 'vi',
   onNavigateTab,
 }) => {
-  const [positions, setPositions] = useState<Fact_Position_Snapshot[]>(mockPositionSnapshots);
+  const [positions, setPositions] = useState<Fact_Position_Snapshot[]>([]);
   const [summary, setSummary] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(false);
   
@@ -72,16 +71,15 @@ export const PositionMatrixView: React.FC<PositionMatrixViewProps> = ({
       });
       const res = await fetchWithAuth(`/api/position/matrix?${queryParams.toString()}`);
       const result = await res.json();
-      if (result.success && Array.isArray(result.data) && result.data.length > 0) {
+      if (result.success && Array.isArray(result.data)) {
         setPositions(result.data);
-        setSummary(result.summary);
+        setSummary(result.summary || null);
       } else {
-        // Fallback to local mock data
-        setPositions(mockPositionSnapshots);
+        setPositions([]);
       }
     } catch (err) {
-      console.warn('Cannot fetch from /api/position/matrix, using fallback data:', err);
-      setPositions(mockPositionSnapshots);
+      console.warn('Cannot fetch from /api/position/matrix:', err);
+      setPositions([]);
     } finally {
       setLoading(false);
     }

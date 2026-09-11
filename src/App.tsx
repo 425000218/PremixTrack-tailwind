@@ -16,10 +16,6 @@ import { AiSupplyChainAdvisor } from './components/AiSupplyChainAdvisor';
 import { useAuth } from './context/AuthContext';
 
 import {
-  getRolePermissions,
-} from './data/mockData';
-
-import {
   loadAllBootstrapData,
   saveMaterialToDb,
   deleteMaterialFromDb,
