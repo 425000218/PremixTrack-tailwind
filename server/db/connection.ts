@@ -59,10 +59,6 @@ export function isDbOnline(): boolean {
 export function getDbStatus() {
   return {
     isOnline: isConnected,
-    server: dbConfig.server,
-    database: dbConfig.database,
-    user: dbConfig.user,
-    lastError,
   };
 }
 

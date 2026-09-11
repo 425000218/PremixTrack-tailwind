@@ -6,9 +6,6 @@ const router = Router();
 router.get('/health', (req, res) => {
   res.json({
     status: 'ok',
-    service: 'PremixTrack Enterprise API',
-    timestamp: new Date().toISOString(),
-    hasGeminiKey: !!process.env.GEMINI_API_KEY,
   });
 });
 
@@ -17,7 +14,7 @@ router.get('/db/status', async (req, res) => {
     await getDbPool();
     res.json(getDbStatus());
   } catch (err: any) {
-    res.status(500).json({ success: false, connected: false, error: err.message });
+    res.status(500).json({ isOnline: false });
   }
 });
 
