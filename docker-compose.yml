@@ -3,7 +3,7 @@
 # Kiến trúc Proxmox NUC 6 CAY: LXC100 (Gateway) -> LXC101 (App) -> LXC102 (MSSQL)
 # ==============================================================================
 
-version: '3.8'
+name: premixtrack
 
 services:
   premixtrack-app:
@@ -26,6 +26,8 @@ services:
       - DB_USER=sa
       - DB_NAME=PremixTrackDB
       - DB_ENCRYPT=false
+    volumes:
+      - /opt/DataImport_premixtrack:/app/storage_data
     # Giới hạn tài nguyên để LXC101 (2GB RAM) hoạt động mượt mà và an toàn
     deploy:
       resources:

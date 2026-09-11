@@ -19,6 +19,9 @@ jobs:
           ENV_FILE: ${{ secrets.ENV_FILE }}
         run: |
           printf "%s\n" "$ENV_FILE" > .env
+          mkdir -p /opt/DataImport_premixtrack
+          docker stop premixtrack-app || true
+          docker rm -f premixtrack-app || true
           docker compose down || true
           docker compose up -d --build --remove-orphans
 
